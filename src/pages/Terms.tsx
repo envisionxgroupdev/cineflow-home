@@ -34,7 +34,7 @@ const Terms = () => (
         <p>Reservamo-nos o direito de modificar estes termos a qualquer momento. As alterações entram em vigor imediatamente após a publicação no site.</p>
 
         <h2 className="text-xl font-semibold text-foreground">7. Contato</h2>
-        <p>Para dúvidas sobre estes termos, entre em contato: <span className="text-primary">contato@cineflow.com</span></p>
+        <p>Para dúvidas sobre estes termos, entre em contato: <span className="text-primary">contato@cineflow.top</span></p>
       </div>
     </div>
     <Footer />
