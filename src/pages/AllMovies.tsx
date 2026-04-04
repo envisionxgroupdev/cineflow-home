@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { MovieCard } from '@/components/MovieCard';
@@ -8,7 +8,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { Loader2, Search, Film } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { GenreFilter } from '@/components/GenreFilter';
+import { PaginationControl } from '@/components/PaginationControl';
 import type { Movie } from '@/types/database';
+
+const PER_PAGE = 25;
 
 const AllMovies = () => {
   const { isAdmin } = useAuth();
@@ -17,6 +20,7 @@ const AllMovies = () => {
   const [search, setSearch] = useState('');
   const [editItem, setEditItem] = useState<Movie | null>(null);
   const [genre, setGenre] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
 
   useEffect(() => { loadMovies(); }, []);
 
@@ -26,11 +30,22 @@ const AllMovies = () => {
     setLoading(false);
   };
 
-  const filtered = movies.filter(m => {
+  const filtered = useMemo(() => movies.filter(m => {
     const matchSearch = m.title.toLowerCase().includes(search.toLowerCase());
     const matchGenre = !genre || (m.genre || '').split(',').map(g => g.trim()).includes(genre);
     return matchSearch && matchGenre;
-  });
+  }), [movies, search, genre]);
+
+  const totalPages = Math.ceil(filtered.length / PER_PAGE);
+  const paged = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+
+  // Reset page when filters change
+  useEffect(() => { setPage(1); }, [search, genre]);
+
+  const handlePageChange = (p: number) => {
+    setPage(p);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -56,20 +71,23 @@ const AllMovies = () => {
           {loading ? (
             <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 text-primary animate-spin" /></div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              {filtered.map((movie, i) => (
-                <motion.div key={movie.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03, duration: 0.4 }}>
-                  <MovieCard
-                    id={movie.id} title={movie.title} year={movie.year || ''} rating={movie.rating}
-                    imageUrl={movie.image_url || '/placeholder.svg'} genre={movie.genre || ''} type="movie"
-                    isAdmin={isAdmin} onEdit={isAdmin ? () => setEditItem(movie) : undefined}
-                  />
-                </motion.div>
-              ))}
-              {filtered.length === 0 && (
-                <div className="col-span-full text-center py-12 text-muted-foreground">Nenhum filme encontrado.</div>
-              )}
-            </div>
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                {paged.map((movie, i) => (
+                  <motion.div key={movie.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03, duration: 0.4 }}>
+                    <MovieCard
+                      id={movie.id} title={movie.title} year={movie.year || ''} rating={movie.rating}
+                      imageUrl={movie.image_url || '/placeholder.svg'} genre={movie.genre || ''} type="movie"
+                      isAdmin={isAdmin} onEdit={isAdmin ? () => setEditItem(movie) : undefined}
+                    />
+                  </motion.div>
+                ))}
+                {filtered.length === 0 && (
+                  <div className="col-span-full text-center py-12 text-muted-foreground">Nenhum filme encontrado.</div>
+                )}
+              </div>
+              <PaginationControl currentPage={page} totalPages={totalPages} onPageChange={handlePageChange} />
+            </>
           )}
         </div>
       </div>
