@@ -26,7 +26,11 @@ const AllMovies = () => {
     setLoading(false);
   };
 
-  const filtered = movies.filter(m => m.title.toLowerCase().includes(search.toLowerCase()));
+  const filtered = movies.filter(m => {
+    const matchSearch = m.title.toLowerCase().includes(search.toLowerCase());
+    const matchGenre = !genre || (m.genre || '').split(',').map(g => g.trim()).includes(genre);
+    return matchSearch && matchGenre;
+  });
 
   return (
     <div className="min-h-screen bg-background">
