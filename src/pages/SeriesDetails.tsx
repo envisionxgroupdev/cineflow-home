@@ -18,7 +18,8 @@ import type { Series } from '@/types/database';
 type PlayerSource = 'warezcdn' | 'embedmovies';
 
 const SeriesDetails = () => {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
+  const seriesId = slug ? parseContentUrl(slug) : '';
   const { isAdmin } = useAuth();
   const [series, setSeries] = useState<Series | null>(null);
   const [details, setDetails] = useState<TmdbSeriesDetails | null>(null);
