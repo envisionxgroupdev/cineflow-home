@@ -34,7 +34,7 @@ const Privacy = () => (
         <p>Você tem o direito de acessar, corrigir ou excluir suas informações pessoais a qualquer momento. Para exercer esses direitos, entre em contato conosco.</p>
 
         <h2 className="text-xl font-semibold text-foreground">7. Contato</h2>
-        <p>Para questões sobre privacidade: <span className="text-primary">privacidade@cineflow.com</span></p>
+        <p>Para questões sobre privacidade: <span className="text-primary">privacidade@cineflow.top</span></p>
       </div>
     </div>
     <Footer />
