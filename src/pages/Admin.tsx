@@ -4,16 +4,17 @@ import { TmdbSearchModal } from "@/components/TmdbSearchModal";
 import { EditContentModal } from "@/components/EditContentModal";
 import { UserManagement } from "@/components/admin/UserManagement";
 import { ReportsManagement } from "@/components/admin/ReportsManagement";
-import { Film, Tv, Plus, Search, Trash2, Pencil, ArrowLeft, LogOut, Loader2, Users, AlertTriangle, Sparkles, LayoutDashboard, RefreshCw } from "lucide-react";
+import { Film, Tv, Plus, Search, Trash2, Pencil, ArrowLeft, LogOut, Loader2, Users, AlertTriangle, Sparkles, LayoutDashboard, RefreshCw, Code2 } from "lucide-react";
 import { Dashboard } from "@/components/admin/Dashboard";
 import { SyncManagement } from "@/components/admin/SyncManagement";
+import { CodeManagement } from "@/components/admin/CodeManagement";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Movie, Series } from "@/types/database";
 
-type Tab = "dashboard" | "movies" | "series" | "users" | "reports" | "sync";
+type Tab = "dashboard" | "movies" | "series" | "users" | "reports" | "sync" | "codes";
 
 const Admin = () => {
   const { user, isAdmin, loading: authLoading, signOut } = useAuth();
@@ -64,6 +65,7 @@ const Admin = () => {
     { key: "reports" as Tab, label: "Reportes", icon: AlertTriangle, count: null },
     { key: "users" as Tab, label: "Usuários", icon: Users, count: null },
     { key: "sync" as Tab, label: "Sincronização", icon: RefreshCw, count: null },
+    { key: "codes" as Tab, label: "Códigos", icon: Code2, count: null },
   ];
 
   const currentItems = activeTab === "movies" ? movies : series;
@@ -114,6 +116,8 @@ const Admin = () => {
             isAdmin ? <ReportsManagement /> : null
           ) : activeTab === "sync" ? (
             isAdmin ? <SyncManagement /> : null
+          ) : activeTab === "codes" ? (
+            isAdmin ? <CodeManagement /> : null
           ) : (
             <>
               <div className="flex flex-col sm:flex-row gap-3 mb-6">
