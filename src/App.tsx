@@ -11,6 +11,10 @@ import MovieDetails from "./pages/MovieDetails.tsx";
 import SeriesDetails from "./pages/SeriesDetails.tsx";
 import AllMovies from "./pages/AllMovies.tsx";
 import AllSeries from "./pages/AllSeries.tsx";
+import DMCA from "./pages/DMCA.tsx";
+import Terms from "./pages/Terms.tsx";
+import Privacy from "./pages/Privacy.tsx";
+import About from "./pages/About.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -30,6 +34,10 @@ const App = () => (
             <Route path="/serie/:id" element={<SeriesDetails />} />
             <Route path="/filmes" element={<AllMovies />} />
             <Route path="/series" element={<AllSeries />} />
+            <Route path="/dmca" element={<DMCA />} />
+            <Route path="/termos" element={<Terms />} />
+            <Route path="/privacidade" element={<Privacy />} />
+            <Route path="/sobre" element={<About />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
