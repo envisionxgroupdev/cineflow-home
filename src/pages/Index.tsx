@@ -54,7 +54,7 @@ const Index = () => {
               <ContentSection id="filmes" title="FILMES" items={toCardFormat(movies, 'movie')} />
             )}
             {series.length > 0 && (
-              <ContentSection id="series" title="SÉRIES" items={toCardFormat(series)} />
+              <ContentSection id="series" title="SÉRIES" items={toCardFormat(series, 'series')} />
             )}
             {movies.length === 0 && series.length === 0 && (
               <div className="text-center py-20">
