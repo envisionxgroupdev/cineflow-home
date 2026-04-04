@@ -142,7 +142,7 @@ export function SyncManagement() {
       payload.first_air_date = item.year ? `${item.year}-01-01` : null;
     }
 
-    const { error } = await supabase.from(table).insert(payload);
+    const { error } = await supabase.from(table).upsert(payload, { onConflict: 'tmdb_id' });
     if (error) {
       toast.error(`Erro ao importar: ${error.message}`);
     } else {
