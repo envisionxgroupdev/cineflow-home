@@ -34,9 +34,15 @@ const MovieDetails = () => {
   const loadMovie = async (urlSlug: string) => {
     setLoading(true);
     const { data: all } = await supabase.from('movies').select('*');
-    const found = (all as Movie[] | null)?.find(m => {
-      const fullSlug = `assistir-${slugify(m.title)}-online-gratis`;
-      return fullSlug === urlSlug || slugify(m.title) === urlSlug;
+    const movies = all as Movie[] | null;
+    // Try exact match first, then progressively looser matches
+    const found = movies?.find(m => {
+      const s = slugify(m.title);
+      const fullSlug = `assistir-${s}-online-gratis`;
+      return fullSlug === urlSlug;
+    }) || movies?.find(m => {
+      const s = slugify(m.title);
+      return urlSlug.includes(s) && s.length > 2;
     }) || null;
     if (found) {
       setMovie(found);
