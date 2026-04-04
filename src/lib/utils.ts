@@ -16,5 +16,11 @@ export function slugify(text: string): string {
 
 export function contentUrl(type: 'movie' | 'series', id: string, title: string): string {
   const prefix = type === 'movie' ? 'filme' : 'serie';
-  return `/assistir/${prefix}/${id}/${slugify(title)}`;
+  const slug = `assistir-${slugify(title)}-online-gratis`;
+  return `/${prefix}/${slug}--${id}`;
+}
+
+export function parseContentUrl(param: string): string {
+  const parts = param.split('--');
+  return parts[parts.length - 1];
 }
