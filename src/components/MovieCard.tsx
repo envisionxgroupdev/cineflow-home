@@ -1,6 +1,8 @@
 import { Star } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface MovieCardProps {
+  id: string;
   title: string;
   year: string;
   rating: number;
@@ -9,9 +11,11 @@ interface MovieCardProps {
   type: "movie" | "series";
 }
 
-export function MovieCard({ title, year, rating, imageUrl, genre, type }: MovieCardProps) {
+export function MovieCard({ id, title, year, rating, imageUrl, genre, type }: MovieCardProps) {
+  const href = type === "movie" ? `/filme/${id}` : `/serie/${id}`;
+
   return (
-    <div className="group relative cinema-card-hover cursor-pointer">
+    <Link to={href} className="group relative cinema-card-hover block">
       <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-secondary">
         <img
           src={imageUrl}
@@ -41,6 +45,6 @@ export function MovieCard({ title, year, rating, imageUrl, genre, type }: MovieC
         <h3 className="text-sm font-medium text-foreground truncate">{title}</h3>
         <p className="text-xs text-muted-foreground">{year}</p>
       </div>
-    </div>
+    </Link>
   );
 }
