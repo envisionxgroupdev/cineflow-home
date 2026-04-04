@@ -157,6 +157,73 @@ export function SyncManagement() {
     );
   };
 
+  // Bulk import all non-imported IDs
+  const handleBulkImport = async () => {
+    const idsToImport = warezIds.filter((id) => !importedIds.has(id));
+    if (idsToImport.length === 0) {
+      toast.info("Todos os conteúdos já foram importados!");
+      return;
+    }
+
+    cancelBulkRef.current = false;
+    setBulkImporting(true);
+    setBulkProgress({ done: 0, total: idsToImport.length, failed: 0 });
+
+    const table = category === "movie" ? "movies" : "series";
+    let done = 0;
+    let failed = 0;
+
+    for (let i = 0; i < idsToImport.length; i += BULK_BATCH_SIZE) {
+      if (cancelBulkRef.current) break;
+
+      const batch = idsToImport.slice(i, i + BULK_BATCH_SIZE);
+      const results = await Promise.allSettled(
+        batch.map(async (tmdbId) => {
+          try {
+            let payload: any;
+            if (category === "movie") {
+              const d = await getMovieDetails(tmdbId);
+              payload = {
+                title: d.title, original_title: d.original_title, overview: d.overview,
+                year: d.release_date?.slice(0, 4) || "", genre: d.genres?.map(g => g.name).slice(0, 3).join(", ") || "",
+                rating: Math.round(d.vote_average * 10) / 10, image_url: getImageUrl(d.poster_path),
+                backdrop_url: getImageUrl(d.backdrop_path, "w1280"), tmdb_id: d.id, is_release: false,
+                release_date: d.release_date || null,
+              };
+            } else {
+              const d = await getSeriesDetails(tmdbId);
+              payload = {
+                title: d.name, original_title: d.original_name, overview: d.overview,
+                year: d.first_air_date?.slice(0, 4) || "", genre: d.genres?.map(g => g.name).slice(0, 3).join(", ") || "",
+                rating: Math.round(d.vote_average * 10) / 10, image_url: getImageUrl(d.poster_path),
+                backdrop_url: getImageUrl(d.backdrop_path, "w1280"), tmdb_id: d.id, is_release: false,
+                first_air_date: d.first_air_date || null,
+              };
+            }
+            const { error } = await supabase.from(table).insert(payload);
+            if (error) throw error;
+            setImportedIds((prev) => new Set([...prev, tmdbId]));
+          } catch {
+            throw new Error(`Failed ${tmdbId}`);
+          }
+        })
+      );
+
+      results.forEach((r) => { if (r.status === "fulfilled") done++; else { done++; failed++; } });
+      setBulkProgress({ done, total: idsToImport.length, failed });
+    }
+
+    setBulkImporting(false);
+    if (cancelBulkRef.current) {
+      toast.info(`Importação cancelada. ${done - failed} importados, ${failed} falhas.`);
+    } else {
+      toast.success(`Importação concluída! ${done - failed} importados, ${failed} falhas.`);
+    }
+    await loadImported();
+  };
+
+  const cancelBulkImport = () => { cancelBulkRef.current = true; };
+
   const totalPages = Math.ceil(warezIds.length / PAGE_SIZE);
   const filtered = searchFilter
     ? previews.filter((p) => p.title.toLowerCase().includes(searchFilter.toLowerCase()))
