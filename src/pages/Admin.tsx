@@ -38,13 +38,16 @@ const Admin = () => {
     setLoadingData(false);
   };
 
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+
   const handleDelete = async (id: string) => {
     const table = activeTab === "movies" ? "movies" : "series";
     const { error } = await supabase.from(table).delete().eq('id', id);
-    if (error) { toast.error('Erro ao deletar: ' + error.message); return; }
+    if (error) { toast.error('Erro ao deletar: ' + error.message); setDeleteConfirm(null); return; }
     toast.success('Removido com sucesso');
     if (activeTab === "movies") setMovies(movies.filter(m => m.id !== id));
     else setSeries(series.filter(s => s.id !== id));
+    setDeleteConfirm(null);
   };
 
   const handleSignOut = async () => { await signOut(); navigate('/login'); };
@@ -160,7 +163,7 @@ const Admin = () => {
                                     className="p-1.5 text-muted-foreground hover:text-primary transition-colors" title="Editar">
                                     <Pencil className="h-4 w-4" />
                                   </button>
-                                  <button onClick={() => handleDelete(item.id)}
+                                  <button onClick={() => setDeleteConfirm(item.id)}
                                     className="p-1.5 text-muted-foreground hover:text-destructive transition-colors" title="Excluir">
                                     <Trash2 className="h-4 w-4" />
                                   </button>
@@ -193,6 +196,30 @@ const Admin = () => {
           onClose={() => setEditItem(null)}
           onSaved={() => { loadData(); setEditItem(null); }}
         />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setDeleteConfirm(null)}>
+          <div className="bg-card border border-border rounded-xl w-full max-w-sm" onClick={e => e.stopPropagation()}>
+            <div className="p-6 text-center">
+              <Trash2 className="h-12 w-12 mx-auto mb-4 text-destructive" />
+              <h3 className="font-display text-lg text-foreground mb-2">CONFIRMAR EXCLUSÃO</h3>
+              <p className="text-sm text-muted-foreground mb-6">
+                Tem certeza que deseja excluir este {activeTab === "movies" ? "filme" : "série"}? Essa ação não pode ser desfeita.
+              </p>
+              <div className="flex gap-3">
+                <button onClick={() => setDeleteConfirm(null)} className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium bg-secondary text-muted-foreground hover:text-foreground transition-colors">
+                  Cancelar
+                </button>
+                <button onClick={() => handleDelete(deleteConfirm)}
+                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors">
+                  Excluir
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
