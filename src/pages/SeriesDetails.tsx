@@ -32,15 +32,16 @@ const SeriesDetails = () => {
   const [reportOpen, setReportOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
-  useEffect(() => { if (seriesId) loadSeries(seriesId); }, [seriesId]);
+  useEffect(() => { if (slug) loadSeries(slug); }, [slug]);
 
   useEffect(() => {
     if (series?.tmdb_id && selectedSeason >= 0) loadEpisodes(series.tmdb_id, selectedSeason);
   }, [series?.tmdb_id, selectedSeason]);
 
-  const loadSeries = async (seriesId: string) => {
+  const loadSeries = async (urlSlug: string) => {
     setLoading(true);
-    const { data } = await supabase.from('series').select('*').eq('id', seriesId).single();
+    const titleSearch = extractTitleFromSlug(urlSlug);
+    const { data } = await supabase.from('series').select('*').ilike('title', `%${titleSearch}%`).limit(1).single();
     if (data) {
       setSeries(data as Series);
       if (data.tmdb_id) {
