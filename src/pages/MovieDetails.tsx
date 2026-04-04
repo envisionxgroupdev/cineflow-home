@@ -7,7 +7,7 @@ import { ReportModal } from '@/components/ReportModal';
 import { EditContentModal } from '@/components/EditContentModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { slugify, extractTitleFromSlug } from '@/lib/utils';
+import { slugify } from '@/lib/utils';
 import {
   getMovieDetails, getMovieCredits, getImageUrl, getWarezPlayerUrl, getEmbedMoviesUrl,
   type TmdbMovieDetails, type TmdbCastMember,
@@ -33,12 +33,13 @@ const MovieDetails = () => {
 
   const loadMovie = async (urlSlug: string) => {
     setLoading(true);
-    const titleSearch = extractTitleFromSlug(urlSlug);
-    const { data } = await supabase.from('movies').select('*').ilike('title', `%${titleSearch}%`).limit(1).single();
-    if (data) {
-      setMovie(data as Movie);
-      if (data.tmdb_id) {
-        const [det, cre] = await Promise.all([getMovieDetails(data.tmdb_id), getMovieCredits(data.tmdb_id)]);
+    const expectedSlug = urlSlug.replace(/^assistir-/, '').replace(/-online-gratis$/, '');
+    const { data: all } = await supabase.from('movies').select('*');
+    const found = (all as Movie[] | null)?.find(m => slugify(m.title) === expectedSlug) || null;
+    if (found) {
+      setMovie(found);
+      if (found.tmdb_id) {
+        const [det, cre] = await Promise.all([getMovieDetails(found.tmdb_id), getMovieCredits(found.tmdb_id)]);
         setDetails(det);
         setCast(cre);
       }

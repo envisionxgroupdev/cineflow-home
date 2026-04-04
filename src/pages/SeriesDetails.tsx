@@ -7,7 +7,7 @@ import { ReportModal } from '@/components/ReportModal';
 import { EditContentModal } from '@/components/EditContentModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { slugify, extractTitleFromSlug } from '@/lib/utils';
+import { slugify } from '@/lib/utils';
 import {
   getSeriesDetails, getSeriesCredits, getSeasonEpisodes, getImageUrl, getWarezPlayerUrl, getEmbedMoviesUrl,
   type TmdbSeriesDetails, type TmdbCastMember, type TmdbEpisode, type TmdbSeason,
@@ -40,12 +40,13 @@ const SeriesDetails = () => {
 
   const loadSeries = async (urlSlug: string) => {
     setLoading(true);
-    const titleSearch = extractTitleFromSlug(urlSlug);
-    const { data } = await supabase.from('series').select('*').ilike('title', `%${titleSearch}%`).limit(1).single();
-    if (data) {
-      setSeries(data as Series);
-      if (data.tmdb_id) {
-        const [det, cre] = await Promise.all([getSeriesDetails(data.tmdb_id), getSeriesCredits(data.tmdb_id)]);
+    const expectedSlug = urlSlug.replace(/^assistir-/, '').replace(/-online-gratis$/, '');
+    const { data: all } = await supabase.from('series').select('*');
+    const found = (all as Series[] | null)?.find(s => slugify(s.title) === expectedSlug) || null;
+    if (found) {
+      setSeries(found);
+      if (found.tmdb_id) {
+        const [det, cre] = await Promise.all([getSeriesDetails(found.tmdb_id), getSeriesCredits(found.tmdb_id)]);
         setDetails(det); setCast(cre);
         const firstSeason = det.seasons?.find((s: TmdbSeason) => s.season_number > 0);
         if (firstSeason) setSelectedSeason(firstSeason.season_number);

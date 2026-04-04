@@ -20,9 +20,3 @@ export function contentUrl(type: 'movie' | 'series', _id: string, title: string)
   return `/${prefix}/${slug}`;
 }
 
-export function extractTitleFromSlug(slug: string): string {
-  return slug
-    .replace(/^assistir-/, '')
-    .replace(/-online-gratis$/, '')
-    .replace(/-/g, ' ');
-}
