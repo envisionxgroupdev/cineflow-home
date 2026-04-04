@@ -7,7 +7,7 @@ import { ReportModal } from '@/components/ReportModal';
 import { EditContentModal } from '@/components/EditContentModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { slugify } from '@/lib/utils';
+import { slugify, parseContentUrl } from '@/lib/utils';
 import {
   getSeriesDetails, getSeriesCredits, getSeasonEpisodes, getImageUrl, getWarezPlayerUrl, getEmbedMoviesUrl,
   type TmdbSeriesDetails, type TmdbCastMember, type TmdbEpisode, type TmdbSeason,
@@ -18,7 +18,8 @@ import type { Series } from '@/types/database';
 type PlayerSource = 'warezcdn' | 'embedmovies';
 
 const SeriesDetails = () => {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
+  const seriesId = slug ? parseContentUrl(slug) : '';
   const { isAdmin } = useAuth();
   const [series, setSeries] = useState<Series | null>(null);
   const [details, setDetails] = useState<TmdbSeriesDetails | null>(null);
@@ -32,7 +33,7 @@ const SeriesDetails = () => {
   const [reportOpen, setReportOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
-  useEffect(() => { if (id) loadSeries(id); }, [id]);
+  useEffect(() => { if (seriesId) loadSeries(seriesId); }, [seriesId]);
 
   useEffect(() => {
     if (series?.tmdb_id && selectedSeason >= 0) loadEpisodes(series.tmdb_id, selectedSeason);
@@ -88,7 +89,7 @@ const SeriesDetails = () => {
     return '';
   };
 
-  const canonicalUrl = `https://cineflow.top/assistir/serie/${series.id}/${slugify(series.title)}`;
+  const canonicalUrl = `https://cineflow.top/serie/assistir-${slugify(series.title)}-online-gratis--${series.id}`;
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'TVSeries',

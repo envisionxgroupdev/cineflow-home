@@ -7,7 +7,7 @@ import { ReportModal } from '@/components/ReportModal';
 import { EditContentModal } from '@/components/EditContentModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { slugify } from '@/lib/utils';
+import { slugify, parseContentUrl } from '@/lib/utils';
 import {
   getMovieDetails, getMovieCredits, getImageUrl, getWarezPlayerUrl, getEmbedMoviesUrl,
   type TmdbMovieDetails, type TmdbCastMember,
@@ -18,7 +18,8 @@ import type { Movie } from '@/types/database';
 type PlayerSource = 'warezcdn' | 'embedmovies';
 
 const MovieDetails = () => {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
+  const movieId = slug ? parseContentUrl(slug) : '';
   const { isAdmin } = useAuth();
   const [movie, setMovie] = useState<Movie | null>(null);
   const [details, setDetails] = useState<TmdbMovieDetails | null>(null);
@@ -29,7 +30,7 @@ const MovieDetails = () => {
   const [reportOpen, setReportOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
-  useEffect(() => { if (id) loadMovie(id); }, [id]);
+  useEffect(() => { if (movieId) loadMovie(movieId); }, [movieId]);
 
   const loadMovie = async (movieId: string) => {
     setLoading(true);
@@ -72,7 +73,7 @@ const MovieDetails = () => {
   const hasPlayer1 = !!(movie.player_url || tmdbId);
   const hasPlayer2 = !!(movie.player_url_2 || tmdbId);
 
-  const canonicalUrl = `https://cineflow.top/assistir/filme/${movie.id}/${slugify(movie.title)}`;
+  const canonicalUrl = `https://cineflow.top/filme/assistir-${slugify(movie.title)}-online-gratis--${movie.id}`;
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Movie',
