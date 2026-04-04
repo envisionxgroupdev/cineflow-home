@@ -4,7 +4,7 @@ import { TmdbSearchModal } from "@/components/TmdbSearchModal";
 import { EditContentModal } from "@/components/EditContentModal";
 import { UserManagement } from "@/components/admin/UserManagement";
 import { ReportsManagement } from "@/components/admin/ReportsManagement";
-import { Film, Tv, Plus, Search, Trash2, Pencil, ArrowLeft, LogOut, Loader2, Users, AlertTriangle, Sparkles, LayoutDashboard, RefreshCw } from "lucide-react";
+import { Film, Tv, Plus, Search, Trash2, Pencil, ArrowLeft, LogOut, Loader2, Users, AlertTriangle, Sparkles, LayoutDashboard, RefreshCw, Code2 } from "lucide-react";
 import { Dashboard } from "@/components/admin/Dashboard";
 import { SyncManagement } from "@/components/admin/SyncManagement";
 import { Link, useNavigate } from "react-router-dom";
