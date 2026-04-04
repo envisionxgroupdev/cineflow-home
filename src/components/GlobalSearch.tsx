@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Search, X, Film, Tv, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { contentUrl } from '@/lib/utils';
 import type { Movie, Series } from '@/types/database';
 
 export function GlobalSearch() {
