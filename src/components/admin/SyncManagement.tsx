@@ -47,7 +47,7 @@ export function SyncManagement() {
     setPage(0);
     try {
       const targetUrl = encodeURIComponent(`https://warezcdn.site/lista?category=${category}&type=tmdb&format=json`);
-      const res = await fetch(`https://api.allorigins.win/raw?url=${targetUrl}`);
+      const res = await fetch(`https://api.codetabs.com/v1/proxy/?quest=${targetUrl}`);
       const data = await res.json();
       const ids: number[] = Array.isArray(data) ? data.map((id: any) => Number(id)).filter(Boolean) : [];
       setWarezIds(ids);
