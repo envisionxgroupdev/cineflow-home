@@ -16,6 +16,7 @@ const AllSeries = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [editItem, setEditItem] = useState<Series | null>(null);
+  const [genre, setGenre] = useState<string | null>(null);
 
   useEffect(() => { loadSeries(); }, []);
 
