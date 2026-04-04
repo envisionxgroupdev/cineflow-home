@@ -235,13 +235,13 @@ export function getWarezPlayerUrl(type: 'filme' | 'serie', tmdbId: number, seaso
   return `https://warezcdn.site/serie/${tmdbId}`;
 }
 
-// EmbedMovies player URLs
+// MyEmbed player URLs
 export function getEmbedMoviesUrl(type: 'filme' | 'serie', tmdbId: number, season?: number, episode?: number): string {
   if (type === 'filme') {
-    return `https://embedmovies.org/embed/movie/${tmdbId}`;
+    return `https://myembed.biz/filme/${tmdbId}`;
   }
   if (season !== undefined && episode !== undefined) {
-    return `https://embedmovies.org/embed/tv/${tmdbId}/${season}/${episode}`;
+    return `https://myembed.biz/serie/${tmdbId}/${season}/${episode}`;
   }
-  return `https://embedmovies.org/embed/tv/${tmdbId}`;
+  return `https://myembed.biz/serie/${tmdbId}`;
 }
