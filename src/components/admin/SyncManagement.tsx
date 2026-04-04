@@ -116,13 +116,30 @@ export function SyncManagement() {
     if (warezIds.length > 0) loadPage(page);
   }, [page, warezIds, loadPage]);
 
-  // Import single item
+  // Import single item (skip if already exists)
   const handleImport = async (item: TmdbPreview) => {
+    if (importedIds.has(item.tmdb_id)) {
+      toast.info(`"${item.title}" já foi importado!`);
+      return;
+    }
+
     setPreviews((prev) =>
       prev.map((p) => (p.tmdb_id === item.tmdb_id ? { ...p, loading: true } : p))
     );
 
     const table = category === "movie" ? "movies" : "series";
+
+    // Check if already exists in DB
+    const { data: existing } = await supabase.from(table).select('id').eq('tmdb_id', item.tmdb_id).limit(1);
+    if (existing && existing.length > 0) {
+      toast.info(`"${item.title}" já existe no banco!`);
+      setImportedIds((prev) => new Set([...prev, item.tmdb_id]));
+      setPreviews((prev) =>
+        prev.map((p) => (p.tmdb_id === item.tmdb_id ? { ...p, loading: false, alreadyImported: true } : p))
+      );
+      return;
+    }
+
     const payload: any = {
       title: item.title,
       original_title: item.original_title,
@@ -180,6 +197,13 @@ export function SyncManagement() {
       const results = await Promise.allSettled(
         batch.map(async (tmdbId) => {
           try {
+            // Skip if already in DB
+            const { data: existing } = await supabase.from(table).select('id').eq('tmdb_id', tmdbId).limit(1);
+            if (existing && existing.length > 0) {
+              setImportedIds((prev) => new Set([...prev, tmdbId]));
+              return;
+            }
+
             let payload: any;
             if (category === "movie") {
               const d = await getMovieDetails(tmdbId);
