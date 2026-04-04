@@ -16,6 +16,7 @@ const AllMovies = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [editItem, setEditItem] = useState<Movie | null>(null);
+  const [genre, setGenre] = useState<string | null>(null);
 
   useEffect(() => { loadMovies(); }, []);
 
