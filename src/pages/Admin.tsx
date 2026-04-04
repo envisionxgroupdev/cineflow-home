@@ -112,6 +112,8 @@ const Admin = () => {
             isAdmin ? <UserManagement /> : null
           ) : activeTab === "reports" ? (
             isAdmin ? <ReportsManagement /> : null
+          ) : activeTab === "sync" ? (
+            isAdmin ? <SyncManagement /> : null
           ) : (
             <>
               <div className="flex flex-col sm:flex-row gap-3 mb-6">
