@@ -47,6 +47,7 @@ const Index = () => {
           </div>
         ) : (
           <>
+            <ReleasesSection />
             {movies.length > 0 && <ContentSection id="filmes" title="FILMES" items={toCardFormat(movies, 'movie')} />}
             {series.length > 0 && <ContentSection id="series" title="SÉRIES" items={toCardFormat(series, 'series')} />}
           </>
