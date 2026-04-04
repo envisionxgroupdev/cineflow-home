@@ -4,19 +4,20 @@ import { TmdbSearchModal } from "@/components/TmdbSearchModal";
 import { EditContentModal } from "@/components/EditContentModal";
 import { UserManagement } from "@/components/admin/UserManagement";
 import { ReportsManagement } from "@/components/admin/ReportsManagement";
-import { Film, Tv, Plus, Search, Trash2, Pencil, ArrowLeft, LogOut, Loader2, Users, AlertTriangle, Sparkles } from "lucide-react";
+import { Film, Tv, Plus, Search, Trash2, Pencil, ArrowLeft, LogOut, Loader2, Users, AlertTriangle, Sparkles, LayoutDashboard } from "lucide-react";
+import { Dashboard } from "@/components/admin/Dashboard";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Movie, Series } from "@/types/database";
 
-type Tab = "movies" | "series" | "users" | "reports";
+type Tab = "dashboard" | "movies" | "series" | "users" | "reports";
 
 const Admin = () => {
   const { user, isAdmin, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<Tab>("movies");
+  const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [movies, setMovies] = useState<Movie[]>([]);
   const [series, setSeries] = useState<Series[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -56,6 +57,7 @@ const Admin = () => {
   if (!user) return null;
 
   const tabs = [
+    { key: "dashboard" as Tab, label: "Dashboard", icon: LayoutDashboard, count: null },
     { key: "movies" as Tab, label: "Filmes", icon: Film, count: movies.length },
     { key: "series" as Tab, label: "Séries", icon: Tv, count: series.length },
     { key: "reports" as Tab, label: "Reportes", icon: AlertTriangle, count: null },
@@ -102,7 +104,9 @@ const Admin = () => {
             ))}
           </div>
 
-          {activeTab === "users" ? (
+          {activeTab === "dashboard" ? (
+            isAdmin ? <Dashboard /> : null
+          ) : activeTab === "users" ? (
             isAdmin ? <UserManagement /> : null
           ) : activeTab === "reports" ? (
             isAdmin ? <ReportsManagement /> : null

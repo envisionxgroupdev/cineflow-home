@@ -1,18 +1,20 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Film, Menu, X, Shield } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Film, Menu, X, LogIn, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlobalSearch } from "./GlobalSearch";
+import { useAuth } from "@/hooks/useAuth";
 
 const navLinks = [
   { label: "Início", path: "/" },
+  { label: "Lançamentos", path: "/#lancamentos" },
   { label: "Filmes", path: "/#filmes" },
   { label: "Séries", path: "/#series" },
-  { label: "Lançamentos", path: "/#lancamentos" },
 ];
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, isAdmin } = useAuth();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
@@ -33,10 +35,23 @@ export function Navbar() {
             </a>
           ))}
           <GlobalSearch />
-          <Link to="/admin"
-            className="flex items-center gap-1.5 text-sm font-medium bg-primary/10 text-primary px-3 py-1.5 rounded-md hover:bg-primary/20 transition-colors">
-            <Shield className="h-4 w-4" /> Admin
-          </Link>
+          {isAdmin && (
+            <Link to="/admin"
+              className="flex items-center gap-1.5 text-sm font-medium bg-primary/10 text-primary px-3 py-1.5 rounded-md hover:bg-primary/20 transition-colors">
+              <Shield className="h-4 w-4" /> Painel
+            </Link>
+          )}
+          {user ? (
+            <Link to="/admin"
+              className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              {user.email?.split('@')[0]}
+            </Link>
+          ) : (
+            <Link to="/login"
+              className="flex items-center gap-1.5 text-sm font-medium bg-primary text-primary-foreground px-3 py-1.5 rounded-md hover:bg-primary/90 transition-colors">
+              <LogIn className="h-4 w-4" /> Login
+            </Link>
+          )}
         </div>
 
         {/* Mobile */}
@@ -59,10 +74,20 @@ export function Navbar() {
                   {link.label}
                 </a>
               ))}
-              <Link to="/admin" onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-1.5 text-sm font-medium text-primary py-2">
-                <Shield className="h-4 w-4" /> Admin
-              </Link>
+              {isAdmin && (
+                <Link to="/admin" onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-1.5 text-sm font-medium text-primary py-2">
+                  <Shield className="h-4 w-4" /> Painel
+                </Link>
+              )}
+              {user ? (
+                <span className="text-sm text-muted-foreground py-2">{user.email?.split('@')[0]}</span>
+              ) : (
+                <Link to="/login" onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-1.5 text-sm font-medium text-primary py-2">
+                  <LogIn className="h-4 w-4" /> Login
+                </Link>
+              )}
             </div>
           </motion.div>
         )}
