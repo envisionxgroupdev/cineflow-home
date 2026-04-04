@@ -197,6 +197,30 @@ const Admin = () => {
           onSaved={() => { loadData(); setEditItem(null); }}
         />
       )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setDeleteConfirm(null)}>
+          <div className="bg-card border border-border rounded-xl w-full max-w-sm" onClick={e => e.stopPropagation()}>
+            <div className="p-6 text-center">
+              <Trash2 className="h-12 w-12 mx-auto mb-4 text-destructive" />
+              <h3 className="font-display text-lg text-foreground mb-2">CONFIRMAR EXCLUSÃO</h3>
+              <p className="text-sm text-muted-foreground mb-6">
+                Tem certeza que deseja excluir este {activeTab === "movies" ? "filme" : "série"}? Essa ação não pode ser desfeita.
+              </p>
+              <div className="flex gap-3">
+                <button onClick={() => setDeleteConfirm(null)} className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium bg-secondary text-muted-foreground hover:text-foreground transition-colors">
+                  Cancelar
+                </button>
+                <button onClick={() => handleDelete(deleteConfirm)}
+                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors">
+                  Excluir
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
