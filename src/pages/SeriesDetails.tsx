@@ -41,9 +41,13 @@ const SeriesDetails = () => {
   const loadSeries = async (urlSlug: string) => {
     setLoading(true);
     const { data: all } = await supabase.from('series').select('*');
-    const found = (all as Series[] | null)?.find(s => {
+    const items = all as Series[] | null;
+    const found = items?.find(s => {
       const fullSlug = `assistir-${slugify(s.title)}-online-gratis`;
-      return fullSlug === urlSlug || slugify(s.title) === urlSlug;
+      return fullSlug === urlSlug;
+    }) || items?.find(s => {
+      const s2 = slugify(s.title);
+      return urlSlug.includes(s2) && s2.length > 2;
     }) || null;
     if (found) {
       setSeries(found);
