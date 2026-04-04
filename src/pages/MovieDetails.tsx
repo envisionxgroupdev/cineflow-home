@@ -8,6 +8,7 @@ import { EditContentModal } from '@/components/EditContentModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { slugify } from '@/lib/utils';
+import { findRowBySlug } from '@/lib/contentSlugLookup';
 import {
   getMovieDetails, getMovieCredits, getImageUrl, getWarezPlayerUrl, getEmbedMoviesUrl,
   type TmdbMovieDetails, type TmdbCastMember,
