@@ -104,7 +104,9 @@ const Admin = () => {
             ))}
           </div>
 
-          {activeTab === "users" ? (
+          {activeTab === "dashboard" ? (
+            isAdmin ? <Dashboard /> : null
+          ) : activeTab === "users" ? (
             isAdmin ? <UserManagement /> : null
           ) : activeTab === "reports" ? (
             isAdmin ? <ReportsManagement /> : null
