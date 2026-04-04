@@ -200,7 +200,7 @@ export function SyncManagement() {
                 first_air_date: d.first_air_date || null,
               };
             }
-            const { error } = await supabase.from(table).insert(payload);
+            const { error } = await supabase.from(table).upsert(payload, { onConflict: 'tmdb_id' });
             if (error) throw error;
             setImportedIds((prev) => new Set([...prev, tmdbId]));
           } catch {
