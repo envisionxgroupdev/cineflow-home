@@ -191,8 +191,7 @@ const SeriesDetails = () => {
               <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
                 <iframe src={getEpisodePlayerUrl(playingEpisode.season, playingEpisode.episode, activePlayer)}
                   className="absolute inset-0 w-full h-full" allowFullScreen
-                  allow="autoplay; encrypted-media" referrerPolicy="origin"
-                  sandbox="allow-scripts allow-same-origin allow-forms allow-popups" />
+                  allow="autoplay; encrypted-media" referrerPolicy="origin" />
               </div>
             </div>
           </div>

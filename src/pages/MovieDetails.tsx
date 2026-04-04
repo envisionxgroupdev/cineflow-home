@@ -174,8 +174,7 @@ const MovieDetails = () => {
               <div className="mb-8 rounded-xl overflow-hidden border border-border bg-black">
                 <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
                   <iframe src={playerSrc} className="absolute inset-0 w-full h-full" allowFullScreen
-                    allow="autoplay; encrypted-media" referrerPolicy="origin"
-                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups" />
+                    allow="autoplay; encrypted-media" referrerPolicy="origin" />
                 </div>
               </div>
             )}
