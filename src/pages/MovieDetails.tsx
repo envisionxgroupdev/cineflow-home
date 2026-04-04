@@ -29,11 +29,12 @@ const MovieDetails = () => {
   const [reportOpen, setReportOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
-  useEffect(() => { if (movieId) loadMovie(movieId); }, [movieId]);
+  useEffect(() => { if (slug) loadMovie(slug); }, [slug]);
 
-  const loadMovie = async (movieId: string) => {
+  const loadMovie = async (urlSlug: string) => {
     setLoading(true);
-    const { data } = await supabase.from('movies').select('*').eq('id', movieId).single();
+    const titleSearch = extractTitleFromSlug(urlSlug);
+    const { data } = await supabase.from('movies').select('*').ilike('title', `%${titleSearch}%`).limit(1).single();
     if (data) {
       setMovie(data as Movie);
       if (data.tmdb_id) {
