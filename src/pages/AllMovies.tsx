@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2, Search, Film } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { GenreFilter } from '@/components/GenreFilter';
 import type { Movie } from '@/types/database';
 
 const AllMovies = () => {
