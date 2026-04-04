@@ -8,6 +8,7 @@ export function ReportsManagement() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'resolved' | 'dismissed'>('pending');
+  const [viewingReport, setViewingReport] = useState<Report | null>(null);
 
   useEffect(() => { load(); }, []);
 
@@ -23,6 +24,7 @@ export function ReportsManagement() {
     if (error) { toast.error(error.message); return; }
     toast.success(status === 'resolved' ? 'Marcado como resolvido' : 'Descartado');
     load();
+    if (viewingReport?.id === id) setViewingReport(null);
   };
 
   const filtered = filter === 'all' ? reports : reports.filter(r => r.status === filter);
@@ -64,7 +66,6 @@ export function ReportsManagement() {
                   </td>
                   <td className="px-4 py-3 text-sm text-muted-foreground hidden sm:table-cell">
                     <span className="text-xs bg-destructive/10 text-destructive px-2 py-0.5 rounded">{r.reason}</span>
-                    {r.details && <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{r.details}</p>}
                   </td>
                   <td className="px-4 py-3 text-xs text-muted-foreground hidden md:table-cell">
                     {new Date(r.created_at).toLocaleDateString('pt-BR')}
@@ -79,18 +80,24 @@ export function ReportsManagement() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    {r.status === 'pending' && (
-                      <div className="flex items-center gap-1 justify-end">
-                        <button onClick={() => updateStatus(r.id, 'resolved')} title="Marcar como resolvido"
-                          className="p-1.5 text-green-500 hover:bg-green-500/10 rounded transition-colors">
-                          <Check className="h-4 w-4" />
-                        </button>
-                        <button onClick={() => updateStatus(r.id, 'dismissed')} title="Descartar"
-                          className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded transition-colors">
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-1 justify-end">
+                      <button onClick={() => setViewingReport(r)} title="Ver detalhes"
+                        className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded transition-colors">
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      {r.status === 'pending' && (
+                        <>
+                          <button onClick={() => updateStatus(r.id, 'resolved')} title="Marcar como resolvido"
+                            className="p-1.5 text-green-500 hover:bg-green-500/10 rounded transition-colors">
+                            <Check className="h-4 w-4" />
+                          </button>
+                          <button onClick={() => updateStatus(r.id, 'dismissed')} title="Descartar"
+                            className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded transition-colors">
+                            <X className="h-4 w-4" />
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -103,6 +110,66 @@ export function ReportsManagement() {
           </table>
         </div>
       </div>
+
+      {/* Report Detail Modal */}
+      {viewingReport && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setViewingReport(null)}>
+          <div className="bg-card border border-border rounded-xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+                <h3 className="font-display text-lg text-foreground">DETALHES DO REPORTE</h3>
+              </div>
+              <button onClick={() => setViewingReport(null)} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Conteúdo</p>
+                <p className="text-sm text-foreground font-medium">{viewingReport.content_title}</p>
+                <p className="text-xs text-muted-foreground">{viewingReport.content_type === 'movie' ? 'Filme' : 'Série'}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Motivo</p>
+                <span className="text-xs bg-destructive/10 text-destructive px-2 py-1 rounded">{viewingReport.reason}</span>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Detalhes</p>
+                <p className="text-sm text-muted-foreground bg-secondary rounded-lg p-3">
+                  {viewingReport.details || 'Nenhum detalhe adicional fornecido.'}
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Data</p>
+                  <p className="text-sm text-foreground">{new Date(viewingReport.created_at).toLocaleString('pt-BR')}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Status</p>
+                  <span className={`text-xs font-semibold px-2 py-1 rounded ${
+                    viewingReport.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500' :
+                    viewingReport.status === 'resolved' ? 'bg-green-500/10 text-green-500' :
+                    'bg-muted text-muted-foreground'
+                  }`}>
+                    {viewingReport.status === 'pending' ? 'Pendente' : viewingReport.status === 'resolved' ? 'Resolvido' : 'Descartado'}
+                  </span>
+                </div>
+              </div>
+            </div>
+            {viewingReport.status === 'pending' && (
+              <div className="p-4 border-t border-border flex gap-3">
+                <button onClick={() => updateStatus(viewingReport.id, 'dismissed')}
+                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium bg-secondary text-muted-foreground hover:text-foreground transition-colors">
+                  Descartar
+                </button>
+                <button onClick={() => updateStatus(viewingReport.id, 'resolved')}
+                  className="flex-1 flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors">
+                  <Check className="h-4 w-4" /> Resolvido
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

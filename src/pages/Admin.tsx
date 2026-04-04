@@ -38,13 +38,16 @@ const Admin = () => {
     setLoadingData(false);
   };
 
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+
   const handleDelete = async (id: string) => {
     const table = activeTab === "movies" ? "movies" : "series";
     const { error } = await supabase.from(table).delete().eq('id', id);
-    if (error) { toast.error('Erro ao deletar: ' + error.message); return; }
+    if (error) { toast.error('Erro ao deletar: ' + error.message); setDeleteConfirm(null); return; }
     toast.success('Removido com sucesso');
     if (activeTab === "movies") setMovies(movies.filter(m => m.id !== id));
     else setSeries(series.filter(s => s.id !== id));
+    setDeleteConfirm(null);
   };
 
   const handleSignOut = async () => { await signOut(); navigate('/login'); };
