@@ -33,7 +33,7 @@ const SeriesDetails = () => {
   const [reportOpen, setReportOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
-  useEffect(() => { if (id) loadSeries(id); }, [id]);
+  useEffect(() => { if (seriesId) loadSeries(seriesId); }, [seriesId]);
 
   useEffect(() => {
     if (series?.tmdb_id && selectedSeason >= 0) loadEpisodes(series.tmdb_id, selectedSeason);
