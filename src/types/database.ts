@@ -11,6 +11,7 @@ export interface Movie {
   tmdb_id: number | null;
   release_date: string | null;
   is_release: boolean;
+  player_url: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -29,6 +30,7 @@ export interface Series {
   tmdb_id: number | null;
   first_air_date: string | null;
   is_release: boolean;
+  player_url: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -48,4 +50,16 @@ export interface UserRole {
   id: string;
   user_id: string;
   role: AppRole;
+}
+
+export interface Report {
+  id: string;
+  content_id: string;
+  content_type: 'movie' | 'series';
+  content_title: string;
+  reason: string;
+  details: string | null;
+  status: 'pending' | 'resolved' | 'dismissed';
+  created_at: string;
+  reporter_email: string | null;
 }

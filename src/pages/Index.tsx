@@ -4,14 +4,18 @@ import { HeroSection } from "@/components/HeroSection";
 import { ContentSection } from "@/components/ContentSection";
 import { ReleasesSection } from "@/components/ReleasesSection";
 import { Footer } from "@/components/Footer";
+import { EditContentModal } from "@/components/EditContentModal";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import type { Movie, Series } from "@/types/database";
 import { Loader2 } from "lucide-react";
 
 const Index = () => {
+  const { isAdmin } = useAuth();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [series, setSeries] = useState<Series[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editItem, setEditItem] = useState<{ item: Movie | Series; type: 'movie' | 'series' } | null>(null);
 
   useEffect(() => { loadContent(); }, []);
 
@@ -34,6 +38,8 @@ const Index = () => {
       imageUrl: item.image_url || '/placeholder.svg',
       genre: item.genre || '',
       type,
+      isAdmin,
+      onEdit: isAdmin ? () => setEditItem({ item, type }) : undefined,
     }));
 
   return (
@@ -62,6 +68,16 @@ const Index = () => {
         )}
       </div>
       <Footer />
+
+      {editItem && (
+        <EditContentModal
+          item={editItem.item}
+          type={editItem.type}
+          open={!!editItem}
+          onClose={() => setEditItem(null)}
+          onSaved={() => { loadContent(); setEditItem(null); }}
+        />
+      )}
     </div>
   );
 };
