@@ -12,6 +12,7 @@ export interface Movie {
   release_date: string | null;
   is_release: boolean;
   player_url: string | null;
+  player_url_2: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -31,6 +32,7 @@ export interface Series {
   first_air_date: string | null;
   is_release: boolean;
   player_url: string | null;
+  player_url_2: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
