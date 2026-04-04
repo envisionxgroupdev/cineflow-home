@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ReportModal } from '@/components/ReportModal';
@@ -7,11 +8,13 @@ import { EditContentModal } from '@/components/EditContentModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import {
-  getSeriesDetails, getSeriesCredits, getSeasonEpisodes, getImageUrl, getWarezPlayerUrl,
+  getSeriesDetails, getSeriesCredits, getSeasonEpisodes, getImageUrl, getWarezPlayerUrl, getEmbedMoviesUrl,
   type TmdbSeriesDetails, type TmdbCastMember, type TmdbEpisode, type TmdbSeason,
 } from '@/services/tmdb';
 import { ArrowLeft, Star, Calendar, Play, Loader2, ChevronDown, AlertTriangle, Pencil } from 'lucide-react';
 import type { Series } from '@/types/database';
+
+type PlayerSource = 'warezcdn' | 'embedmovies';
 
 const SeriesDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +27,7 @@ const SeriesDetails = () => {
   const [episodes, setEpisodes] = useState<TmdbEpisode[]>([]);
   const [loadingEpisodes, setLoadingEpisodes] = useState(false);
   const [playingEpisode, setPlayingEpisode] = useState<{ season: number; episode: number } | null>(null);
+  const [activePlayer, setActivePlayer] = useState<PlayerSource>('warezcdn');
   const [reportOpen, setReportOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
@@ -72,14 +76,27 @@ const SeriesDetails = () => {
   const tagline = details?.tagline || '';
   const seasons = details?.seasons?.filter(s => s.season_number > 0) || [];
 
-  const getEpisodePlayerUrl = (season: number, episode: number) => {
-    if (series.player_url) return `${series.player_url}/${season}/${episode}`;
-    if (tmdbId) return getWarezPlayerUrl('serie', tmdbId, season, episode);
+  const getEpisodePlayerUrl = (season: number, episode: number, source: PlayerSource) => {
+    if (source === 'warezcdn') {
+      if (series.player_url) return `${series.player_url}/${season}/${episode}`;
+      if (tmdbId) return getWarezPlayerUrl('serie', tmdbId, season, episode);
+    } else {
+      if (series.player_url_2) return `${series.player_url_2}/${season}/${episode}`;
+      if (tmdbId) return getEmbedMoviesUrl('serie', tmdbId, season, episode);
+    }
     return '';
   };
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>{series.title} — Cineflow</title>
+        <meta name="description" content={overview?.slice(0, 160) || `Assista ${series.title} no Cineflow`} />
+        <meta property="og:title" content={`${series.title} — Cineflow`} />
+        <meta property="og:description" content={overview?.slice(0, 160)} />
+        {series.image_url && <meta property="og:image" content={series.image_url} />}
+        <meta property="og:type" content="video.tv_show" />
+      </Helmet>
       <Navbar />
       <div className="relative w-full h-[50vh] md:h-[60vh]">
         <img src={backdrop || '/placeholder.svg'} alt={series.title} className="w-full h-full object-cover" />
@@ -137,9 +154,19 @@ const SeriesDetails = () => {
               <h3 className="font-display text-xl text-foreground">ASSISTINDO — T{playingEpisode.season} E{playingEpisode.episode}</h3>
               <button onClick={() => setPlayingEpisode(null)} className="text-sm text-muted-foreground hover:text-foreground">Fechar Player</button>
             </div>
+            <div className="flex gap-2 mb-3">
+              <button onClick={() => setActivePlayer('warezcdn')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${activePlayer === 'warezcdn' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}>
+                Player 1 — WarezCDN
+              </button>
+              <button onClick={() => setActivePlayer('embedmovies')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${activePlayer === 'embedmovies' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}>
+                Player 2 — EmbedMovies
+              </button>
+            </div>
             <div className="rounded-xl overflow-hidden border border-border bg-black">
               <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
-                <iframe src={getEpisodePlayerUrl(playingEpisode.season, playingEpisode.episode)}
+                <iframe src={getEpisodePlayerUrl(playingEpisode.season, playingEpisode.episode, activePlayer)}
                   className="absolute inset-0 w-full h-full" allowFullScreen
                   allow="autoplay; encrypted-media" referrerPolicy="origin"
                   sandbox="allow-scripts allow-same-origin allow-forms allow-popups" />
