@@ -33,9 +33,12 @@ const MovieDetails = () => {
 
   const loadMovie = async (urlSlug: string) => {
     setLoading(true);
-    const { data: all } = await supabase.from('movies').select('*');
+    const { data: all, error } = await supabase.from('movies').select('*');
+    console.log('[MovieDetails] slug:', urlSlug, 'total movies:', all?.length, 'error:', error);
     const movies = all as Movie[] | null;
-    // Try exact match first, then progressively looser matches
+    if (movies) {
+      movies.slice(0, 5).forEach(m => console.log('[MovieDetails] sample:', m.title, '->', slugify(m.title)));
+    }
     const found = movies?.find(m => {
       const s = slugify(m.title);
       const fullSlug = `assistir-${s}-online-gratis`;
@@ -44,6 +47,7 @@ const MovieDetails = () => {
       const s = slugify(m.title);
       return urlSlug.includes(s) && s.length > 2;
     }) || null;
+    console.log('[MovieDetails] found:', found?.title || 'null');
     if (found) {
       setMovie(found);
       if (found.tmdb_id) {
