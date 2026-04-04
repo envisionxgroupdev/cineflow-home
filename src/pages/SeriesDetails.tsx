@@ -89,7 +89,7 @@ const SeriesDetails = () => {
     return '';
   };
 
-  const canonicalUrl = `https://cineflow.top/assistir/serie/${series.id}/${slugify(series.title)}`;
+  const canonicalUrl = `https://cineflow.top/serie/assistir-${slugify(series.title)}-online-gratis--${series.id}`;
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'TVSeries',

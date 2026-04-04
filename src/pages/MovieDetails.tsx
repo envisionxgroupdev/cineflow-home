@@ -73,7 +73,7 @@ const MovieDetails = () => {
   const hasPlayer1 = !!(movie.player_url || tmdbId);
   const hasPlayer2 = !!(movie.player_url_2 || tmdbId);
 
-  const canonicalUrl = `https://cineflow.top/assistir/filme/${movie.id}/${slugify(movie.title)}`;
+  const canonicalUrl = `https://cineflow.top/filme/assistir-${slugify(movie.title)}-online-gratis--${movie.id}`;
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Movie',
