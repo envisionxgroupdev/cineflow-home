@@ -22,8 +22,8 @@ const Index = () => {
 
   const loadContent = async () => {
     const [moviesRes, seriesRes] = await Promise.all([
-      supabase.from('movies').select('*').order('created_at', { ascending: false }),
-      supabase.from('series').select('*').order('created_at', { ascending: false }),
+      supabase.from('movies').select('*').order('created_at', { ascending: false }).limit(25),
+      supabase.from('series').select('*').order('created_at', { ascending: false }).limit(25),
     ]);
     if (moviesRes.data) setMovies(moviesRes.data as Movie[]);
     if (seriesRes.data) setSeries(seriesRes.data as Series[]);
