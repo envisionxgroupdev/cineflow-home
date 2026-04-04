@@ -26,6 +26,64 @@ export interface TmdbSeries {
   genre_ids: number[];
 }
 
+export interface TmdbCastMember {
+  id: number;
+  name: string;
+  character: string;
+  profile_path: string | null;
+}
+
+export interface TmdbSeason {
+  id: number;
+  season_number: number;
+  name: string;
+  episode_count: number;
+  poster_path: string | null;
+  air_date: string | null;
+  overview: string;
+}
+
+export interface TmdbEpisode {
+  id: number;
+  episode_number: number;
+  season_number: number;
+  name: string;
+  overview: string;
+  still_path: string | null;
+  air_date: string | null;
+  vote_average: number;
+  runtime: number | null;
+}
+
+export interface TmdbMovieDetails {
+  id: number;
+  title: string;
+  original_title: string;
+  overview: string;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  release_date: string;
+  vote_average: number;
+  runtime: number | null;
+  genres: { id: number; name: string }[];
+  tagline: string;
+}
+
+export interface TmdbSeriesDetails {
+  id: number;
+  name: string;
+  original_name: string;
+  overview: string;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  first_air_date: string;
+  vote_average: number;
+  genres: { id: number; name: string }[];
+  tagline: string;
+  number_of_seasons: number;
+  seasons: TmdbSeason[];
+}
+
 interface TmdbGenre {
   id: number;
   name: string;
@@ -77,6 +135,44 @@ export async function searchSeries(query: string): Promise<TmdbSeries[]> {
   return data.results || [];
 }
 
+export async function getMovieDetails(tmdbId: number): Promise<TmdbMovieDetails> {
+  const res = await fetch(
+    `${TMDB_BASE}/movie/${tmdbId}?api_key=${TMDB_API_KEY}&language=pt-BR`
+  );
+  return res.json();
+}
+
+export async function getSeriesDetails(tmdbId: number): Promise<TmdbSeriesDetails> {
+  const res = await fetch(
+    `${TMDB_BASE}/tv/${tmdbId}?api_key=${TMDB_API_KEY}&language=pt-BR`
+  );
+  return res.json();
+}
+
+export async function getMovieCredits(tmdbId: number): Promise<TmdbCastMember[]> {
+  const res = await fetch(
+    `${TMDB_BASE}/movie/${tmdbId}/credits?api_key=${TMDB_API_KEY}&language=pt-BR`
+  );
+  const data = await res.json();
+  return (data.cast || []).slice(0, 12);
+}
+
+export async function getSeriesCredits(tmdbId: number): Promise<TmdbCastMember[]> {
+  const res = await fetch(
+    `${TMDB_BASE}/tv/${tmdbId}/credits?api_key=${TMDB_API_KEY}&language=pt-BR`
+  );
+  const data = await res.json();
+  return (data.cast || []).slice(0, 12);
+}
+
+export async function getSeasonEpisodes(tmdbId: number, seasonNumber: number): Promise<TmdbEpisode[]> {
+  const res = await fetch(
+    `${TMDB_BASE}/tv/${tmdbId}/season/${seasonNumber}?api_key=${TMDB_API_KEY}&language=pt-BR`
+  );
+  const data = await res.json();
+  return data.episodes || [];
+}
+
 export async function tmdbMovieToDb(movie: TmdbMovie) {
   const genres = await fetchGenres('movie');
   return {
@@ -107,4 +203,18 @@ export async function tmdbSeriesToDb(series: TmdbSeries) {
     tmdb_id: series.id,
     first_air_date: series.first_air_date,
   };
+}
+
+// WarezCDN player URLs
+export function getWarezPlayerUrl(type: 'filme' | 'serie', tmdbId: number, season?: number, episode?: number): string {
+  if (type === 'filme') {
+    return `https://warezcdn.site/filme/${tmdbId}`;
+  }
+  if (season !== undefined && episode !== undefined) {
+    return `https://warezcdn.site/serie/${tmdbId}/${season}/${episode}`;
+  }
+  if (season !== undefined) {
+    return `https://warezcdn.site/serie/${tmdbId}/${season}`;
+  }
+  return `https://warezcdn.site/serie/${tmdbId}`;
 }
