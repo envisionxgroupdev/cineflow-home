@@ -88,15 +88,35 @@ const SeriesDetails = () => {
     return '';
   };
 
+  const canonicalUrl = `https://cineflow.top/assistir/serie/${series.id}/${slugify(series.title)}`;
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'TVSeries',
+    name: series.title,
+    description: overview?.slice(0, 300),
+    image: series.image_url || backdrop,
+    datePublished: series.first_air_date || series.year,
+    genre: genres,
+    numberOfSeasons: details?.number_of_seasons,
+    aggregateRating: series.rating ? { '@type': 'AggregateRating', ratingValue: series.rating, bestRating: 10, ratingCount: 1 } : undefined,
+    url: canonicalUrl,
+    actor: cast.slice(0, 5).map(c => ({ '@type': 'Person', name: c.name })),
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>{series.title} — Cineflow</title>
-        <meta name="description" content={overview?.slice(0, 160) || `Assista ${series.title} no Cineflow`} />
-        <meta property="og:title" content={`${series.title} — Cineflow`} />
+        <title>{series.title} — Assistir Online Grátis | Cineflow</title>
+        <meta name="description" content={`Assistir ${series.title} online grátis em HD dublado. ${overview?.slice(0, 120)}`} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:title" content={`${series.title} — Assistir Online | Cineflow`} />
         <meta property="og:description" content={overview?.slice(0, 160)} />
         {series.image_url && <meta property="og:image" content={series.image_url} />}
         <meta property="og:type" content="video.tv_show" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:site_name" content="Cineflow" />
+        <meta property="og:locale" content="pt_BR" />
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
       <Navbar />
       <div className="relative w-full h-[50vh] md:h-[60vh]">
