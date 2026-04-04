@@ -38,10 +38,17 @@ export function SyncManagement() {
   // Load already imported TMDB IDs
   const loadImported = useCallback(async () => {
     const table = category === "movie" ? "movies" : "series";
-    const { data } = await supabase.from(table).select("tmdb_id");
-    if (data) {
-      setImportedIds(new Set(data.map((d: any) => d.tmdb_id).filter(Boolean)));
+    const allIds: number[] = [];
+    let from = 0;
+    const PAGE = 1000;
+    while (true) {
+      const { data } = await supabase.from(table).select("tmdb_id").range(from, from + PAGE - 1);
+      if (!data || data.length === 0) break;
+      allIds.push(...data.map((d: any) => d.tmdb_id).filter(Boolean));
+      if (data.length < PAGE) break;
+      from += PAGE;
     }
+    setImportedIds(new Set(allIds));
   }, [category]);
 
   // Fetch WarezCDN list
@@ -159,7 +166,7 @@ export function SyncManagement() {
       payload.first_air_date = item.year ? `${item.year}-01-01` : null;
     }
 
-    const { error } = await supabase.from(table).insert(payload);
+    const { error } = await supabase.from(table).upsert(payload, { onConflict: 'tmdb_id' });
     if (error) {
       toast.error(`Erro ao importar: ${error.message}`);
     } else {
@@ -224,7 +231,7 @@ export function SyncManagement() {
                 first_air_date: d.first_air_date || null,
               };
             }
-            const { error } = await supabase.from(table).insert(payload);
+            const { error } = await supabase.from(table).upsert(payload, { onConflict: 'tmdb_id' });
             if (error) throw error;
             setImportedIds((prev) => new Set([...prev, tmdbId]));
           } catch {
