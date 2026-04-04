@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { MovieCard } from "./MovieCard";
+import { GenreFilter } from "./GenreFilter";
 import { ChevronRight, Film, Tv } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -24,6 +26,11 @@ interface ContentSectionProps {
 export function ContentSection({ id, title, items }: ContentSectionProps) {
   const isMovies = id === 'filmes';
   const Icon = isMovies ? Film : Tv;
+  const [genre, setGenre] = useState<string | null>(null);
+
+  const filtered = genre
+    ? items.filter(item => (item.genre || '').split(',').map(g => g.trim()).includes(genre))
+    : items;
 
   return (
     <section id={id} className="py-12">
@@ -47,14 +54,22 @@ export function ContentSection({ id, title, items }: ContentSectionProps) {
             <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </motion.div>
+
+        <GenreFilter items={items} selected={genre} onSelect={setGenre} />
+
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-          {items.map((item, index) => (
+          {filtered.map((item, index) => (
             <motion.div key={item.id}
               initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }} transition={{ delay: index * 0.04, duration: 0.4 }}>
               <MovieCard {...item} />
             </motion.div>
           ))}
+          {filtered.length === 0 && (
+            <div className="col-span-full text-center py-8 text-muted-foreground text-sm">
+              Nenhum resultado para este gênero.
+            </div>
+          )}
         </div>
       </div>
     </section>
