@@ -38,8 +38,8 @@ const MovieDetails = () => {
     const found = (all as Movie[] | null)?.find(m => slugify(m.title) === expectedSlug) || null;
     if (found) {
       setMovie(found);
-      if (data.tmdb_id) {
-        const [det, cre] = await Promise.all([getMovieDetails(data.tmdb_id), getMovieCredits(data.tmdb_id)]);
+      if (found.tmdb_id) {
+        const [det, cre] = await Promise.all([getMovieDetails(found.tmdb_id), getMovieCredits(found.tmdb_id)]);
         setDetails(det);
         setCast(cre);
       }
