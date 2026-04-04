@@ -35,7 +35,7 @@ const Login = () => {
               CINE<span className="text-gradient-cinema">FLOW</span>
             </h1>
           </div>
-          <p className="text-muted-foreground text-sm">Acesso ao painel administrativo</p>
+          <p className="text-muted-foreground text-sm">Faça login na sua conta</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-card border border-border rounded-lg p-6 space-y-4">

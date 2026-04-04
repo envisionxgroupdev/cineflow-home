@@ -91,4 +91,8 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
