@@ -27,7 +27,7 @@ const Index = () => {
     setLoading(false);
   };
 
-  const toCardFormat = (items: (Movie | Series)[]) =>
+  const toCardFormat = (items: (Movie | Series)[], type: 'movie' | 'series') =>
     items.map((item) => ({
       id: item.id,
       title: item.title,
@@ -35,7 +35,7 @@ const Index = () => {
       rating: item.rating,
       imageUrl: item.image_url || '/placeholder.svg',
       genre: item.genre || '',
-      type: ('release_date' in item ? 'movie' : 'series') as 'movie' | 'series',
+      type,
     }));
 
   return (
