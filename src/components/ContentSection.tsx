@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { MovieCard } from "./MovieCard";
 import { ChevronRight, Film, Tv } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface ContentItem {
   id: string;
