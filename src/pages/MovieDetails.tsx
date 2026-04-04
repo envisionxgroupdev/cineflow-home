@@ -33,21 +33,31 @@ const MovieDetails = () => {
 
   const loadMovie = async (urlSlug: string) => {
     setLoading(true);
-    const { data: all, error } = await supabase.from('movies').select('*');
-    console.log('[MovieDetails] slug:', urlSlug, 'total movies:', all?.length, 'error:', error);
-    const movies = all as Movie[] | null;
-    if (movies) {
-      movies.slice(0, 5).forEach(m => console.log('[MovieDetails] sample:', m.title, '->', slugify(m.title)));
+    // Extract search term from slug: "assistir-the-matrix-online-gratis" -> "the matrix"
+    const searchTerm = urlSlug
+      .replace(/^assistir-/, '')
+      .replace(/-online-gratis$/, '')
+      .replace(/-/g, ' ')
+      .trim();
+
+    // Search by title fragments server-side instead of fetching all movies
+    const words = searchTerm.split(' ').filter(w => w.length > 1);
+    let query = supabase.from('movies').select('*');
+    for (const word of words.slice(0, 5)) {
+      query = query.ilike('title', `%${word}%`);
     }
+    const { data: candidates } = await query.limit(50);
+    const movies = candidates as Movie[] | null;
+
+    // Match by slug
     const found = movies?.find(m => {
-      const s = slugify(m.title);
-      const fullSlug = `assistir-${s}-online-gratis`;
+      const fullSlug = `assistir-${slugify(m.title)}-online-gratis`;
       return fullSlug === urlSlug;
     }) || movies?.find(m => {
       const s = slugify(m.title);
       return urlSlug.includes(s) && s.length > 2;
     }) || null;
-    console.log('[MovieDetails] found:', found?.title || 'null');
+
     if (found) {
       setMovie(found);
       if (found.tmdb_id) {
