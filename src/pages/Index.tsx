@@ -52,8 +52,8 @@ const Index = () => {
             {series.length > 0 && <ContentSection id="series" title="SÉRIES" items={toCardFormat(series, 'series')} />}
           </>
         )}
-        <ReleasesSection />
-        {!loading && movies.length === 0 && series.length === 0 && (
+          </>
+        )}
           <div className="text-center py-20">
             <p className="text-muted-foreground">Nenhum conteúdo adicionado ainda.</p>
             <p className="text-muted-foreground text-sm mt-2">
