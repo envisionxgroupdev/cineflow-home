@@ -14,13 +14,15 @@ export function slugify(text: string): string {
     .replace(/(^-|-$)+/g, '');
 }
 
-export function contentUrl(type: 'movie' | 'series', id: string, title: string): string {
+export function contentUrl(type: 'movie' | 'series', _id: string, title: string): string {
   const prefix = type === 'movie' ? 'filme' : 'serie';
   const slug = `assistir-${slugify(title)}-online-gratis`;
-  return `/${prefix}/${slug}--${id}`;
+  return `/${prefix}/${slug}`;
 }
 
-export function parseContentUrl(param: string): string {
-  const parts = param.split('--');
-  return parts[parts.length - 1];
+export function extractTitleFromSlug(slug: string): string {
+  return slug
+    .replace(/^assistir-/, '')
+    .replace(/-online-gratis$/, '')
+    .replace(/-/g, ' ');
 }
