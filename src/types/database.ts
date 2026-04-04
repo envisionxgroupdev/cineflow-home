@@ -10,6 +10,7 @@ export interface Movie {
   backdrop_url: string | null;
   tmdb_id: number | null;
   release_date: string | null;
+  is_release: boolean;
   created_by: string | null;
   created_at: string;
   updated_at: string;
