@@ -29,7 +29,11 @@ export function SyncManagement() {
   const [importedIds, setImportedIds] = useState<Set<number>>(new Set());
   const [searchFilter, setSearchFilter] = useState("");
   const [page, setPage] = useState(0);
+  const [bulkImporting, setBulkImporting] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState({ done: 0, total: 0, failed: 0 });
+  const cancelBulkRef = useRef(false);
   const PAGE_SIZE = 20;
+  const BULK_BATCH_SIZE = 5; // concurrent TMDB requests
 
   // Load already imported TMDB IDs
   const loadImported = useCallback(async () => {
