@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Movie, Series } from "@/types/database";
 
-type Tab = "movies" | "series" | "users" | "reports";
+type Tab = "dashboard" | "movies" | "series" | "users" | "reports";
 
 const Admin = () => {
   const { user, isAdmin, loading: authLoading, signOut } = useAuth();
