@@ -86,7 +86,7 @@ export function GlobalSearch() {
             <div className="p-2">
               <p className="text-xs font-semibold text-muted-foreground uppercase px-2 py-1">Séries</p>
               {series.map(s => (
-                <button key={s.id} onClick={() => go(`/serie/${s.id}`)}
+                <button key={s.id} onClick={() => go(contentUrl('series', s.id, s.title))}
                   className="flex items-center gap-3 w-full px-2 py-2 rounded-lg hover:bg-secondary transition-colors text-left">
                   <Tv className="h-4 w-4 text-primary shrink-0" />
                   <img src={s.image_url || '/placeholder.svg'} alt={s.title} className="w-8 h-11 object-cover rounded" />

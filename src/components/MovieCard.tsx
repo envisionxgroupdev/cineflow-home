@@ -1,5 +1,6 @@
 import { Star, Pencil } from "lucide-react";
 import { Link } from "react-router-dom";
+import { contentUrl } from "@/lib/utils";
 
 interface MovieCardProps {
   id: string;
@@ -14,7 +15,7 @@ interface MovieCardProps {
 }
 
 export function MovieCard({ id, title, year, rating, imageUrl, genre, type, isAdmin, onEdit }: MovieCardProps) {
-  const href = type === "movie" ? `/filme/${id}` : `/serie/${id}`;
+  const href = contentUrl(type, id, title);
 
   return (
     <div className="group relative">
