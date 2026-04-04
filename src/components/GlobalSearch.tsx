@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Search, X, Film, Tv, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { contentUrl } from '@/lib/utils';
 import type { Movie, Series } from '@/types/database';
 
 export function GlobalSearch() {
@@ -69,7 +70,7 @@ export function GlobalSearch() {
             <div className="p-2">
               <p className="text-xs font-semibold text-muted-foreground uppercase px-2 py-1">Filmes</p>
               {movies.map(m => (
-                <button key={m.id} onClick={() => go(`/filme/${m.id}`)}
+                <button key={m.id} onClick={() => go(contentUrl('movie', m.id, m.title))}
                   className="flex items-center gap-3 w-full px-2 py-2 rounded-lg hover:bg-secondary transition-colors text-left">
                   <Film className="h-4 w-4 text-primary shrink-0" />
                   <img src={m.image_url || '/placeholder.svg'} alt={m.title} className="w-8 h-11 object-cover rounded" />
@@ -85,7 +86,7 @@ export function GlobalSearch() {
             <div className="p-2">
               <p className="text-xs font-semibold text-muted-foreground uppercase px-2 py-1">Séries</p>
               {series.map(s => (
-                <button key={s.id} onClick={() => go(`/serie/${s.id}`)}
+                <button key={s.id} onClick={() => go(contentUrl('series', s.id, s.title))}
                   className="flex items-center gap-3 w-full px-2 py-2 rounded-lg hover:bg-secondary transition-colors text-left">
                   <Tv className="h-4 w-4 text-primary shrink-0" />
                   <img src={s.image_url || '/placeholder.svg'} alt={s.title} className="w-8 h-11 object-cover rounded" />

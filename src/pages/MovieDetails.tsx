@@ -7,6 +7,7 @@ import { ReportModal } from '@/components/ReportModal';
 import { EditContentModal } from '@/components/EditContentModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { slugify } from '@/lib/utils';
 import {
   getMovieDetails, getMovieCredits, getImageUrl, getWarezPlayerUrl, getEmbedMoviesUrl,
   type TmdbMovieDetails, type TmdbCastMember,
@@ -71,15 +72,35 @@ const MovieDetails = () => {
   const hasPlayer1 = !!(movie.player_url || tmdbId);
   const hasPlayer2 = !!(movie.player_url_2 || tmdbId);
 
+  const canonicalUrl = `https://cineflow.top/assistir/filme/${movie.id}/${slugify(movie.title)}`;
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Movie',
+    name: movie.title,
+    description: overview?.slice(0, 300),
+    image: movie.image_url || backdrop,
+    datePublished: movie.release_date || movie.year,
+    genre: genres,
+    aggregateRating: movie.rating ? { '@type': 'AggregateRating', ratingValue: movie.rating, bestRating: 10, ratingCount: 1 } : undefined,
+    duration: runtime ? `PT${runtime}M` : undefined,
+    url: canonicalUrl,
+    actor: cast.slice(0, 5).map(c => ({ '@type': 'Person', name: c.name })),
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>{movie.title} — Cineflow</title>
-        <meta name="description" content={overview?.slice(0, 160) || `Assista ${movie.title} no Cineflow`} />
-        <meta property="og:title" content={`${movie.title} — Cineflow`} />
+        <title>{movie.title} — Assistir Online Grátis | Cineflow</title>
+        <meta name="description" content={`Assistir ${movie.title} online grátis em HD dublado. ${overview?.slice(0, 120)}`} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:title" content={`${movie.title} — Assistir Online | Cineflow`} />
         <meta property="og:description" content={overview?.slice(0, 160)} />
         {movie.image_url && <meta property="og:image" content={movie.image_url} />}
         <meta property="og:type" content="video.movie" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:site_name" content="Cineflow" />
+        <meta property="og:locale" content="pt_BR" />
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
       <Navbar />
       <div className="relative w-full h-[50vh] md:h-[60vh]">
