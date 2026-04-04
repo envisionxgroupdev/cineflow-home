@@ -26,7 +26,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <SiteScripts />
+        <SiteScripts>
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
@@ -43,6 +43,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+        </SiteScripts>
       </TooltipProvider>
     </QueryClientProvider>
   </HelmetProvider>

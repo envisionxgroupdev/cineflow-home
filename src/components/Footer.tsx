@@ -1,11 +1,19 @@
 import { Film } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useSiteCodes } from "./SiteScripts";
 
 export function Footer() {
+  const codes = useSiteCodes();
+  const footerHtml = codes.footer_scripts;
+
   return (
     <footer className="border-t border-border bg-cinema-deep py-10">
       <div className="container mx-auto px-4">
         <div className="flex flex-col gap-8">
+          {/* Footer custom code */}
+          {footerHtml && (
+            <div dangerouslySetInnerHTML={{ __html: footerHtml }} />
+          )}
           {/* Top */}
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <Link to="/" className="flex items-center gap-2">
