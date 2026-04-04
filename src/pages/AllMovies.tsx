@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2, Search, Film } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { GenreFilter } from '@/components/GenreFilter';
 import type { Movie } from '@/types/database';
 
 const AllMovies = () => {
@@ -15,6 +16,7 @@ const AllMovies = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [editItem, setEditItem] = useState<Movie | null>(null);
+  const [genre, setGenre] = useState<string | null>(null);
 
   useEffect(() => { loadMovies(); }, []);
 
@@ -24,7 +26,11 @@ const AllMovies = () => {
     setLoading(false);
   };
 
-  const filtered = movies.filter(m => m.title.toLowerCase().includes(search.toLowerCase()));
+  const filtered = movies.filter(m => {
+    const matchSearch = m.title.toLowerCase().includes(search.toLowerCase());
+    const matchGenre = !genre || (m.genre || '').split(',').map(g => g.trim()).includes(genre);
+    return matchSearch && matchGenre;
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -44,6 +50,8 @@ const AllMovies = () => {
               value={search} onChange={e => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
           </div>
+
+          <GenreFilter items={movies} selected={genre} onSelect={setGenre} />
 
           {loading ? (
             <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 text-primary animate-spin" /></div>
