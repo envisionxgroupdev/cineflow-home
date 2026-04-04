@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Sparkles, Loader2 } from 'lucide-react';
+import { X, Sparkles, Loader2, Trash2, Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Movie, Series } from '@/types/database';
@@ -20,6 +20,7 @@ export function EditContentModal({ item, type, open, onClose, onSaved }: EditCon
   const [overview, setOverview] = useState(item.overview || '');
   const [imageUrl, setImageUrl] = useState(item.image_url || '');
   const [playerUrl, setPlayerUrl] = useState(item.player_url || '');
+  const [playerUrl2, setPlayerUrl2] = useState(item.player_url_2 || '');
   const [isRelease, setIsRelease] = useState(item.is_release || false);
   const [saving, setSaving] = useState(false);
 
@@ -31,6 +32,7 @@ export function EditContentModal({ item, type, open, onClose, onSaved }: EditCon
     setOverview(item.overview || '');
     setImageUrl(item.image_url || '');
     setPlayerUrl(item.player_url || '');
+    setPlayerUrl2(item.player_url_2 || '');
     setIsRelease(item.is_release || false);
   }, [item]);
 
@@ -45,6 +47,7 @@ export function EditContentModal({ item, type, open, onClose, onSaved }: EditCon
       overview,
       image_url: imageUrl || null,
       player_url: playerUrl || null,
+      player_url_2: playerUrl2 || null,
       is_release: isRelease,
     }).eq('id', item.id);
 
@@ -98,11 +101,35 @@ export function EditContentModal({ item, type, open, onClose, onSaved }: EditCon
             <label className={labelClass}>URL da Imagem (Poster)</label>
             <input value={imageUrl} onChange={e => setImageUrl(e.target.value)} className={inputClass} placeholder="https://..." />
           </div>
-          <div>
-            <label className={labelClass}>URL do Player (embed)</label>
+
+          {/* Player 1 - WarezCDN */}
+          <div className="border border-border rounded-lg p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <label className={labelClass + " mb-0"}>Player 1 — WarezCDN</label>
+              {playerUrl && (
+                <button onClick={() => setPlayerUrl('')} className="text-destructive hover:text-destructive/80 text-xs flex items-center gap-1">
+                  <Trash2 className="h-3 w-3" /> Remover
+                </button>
+              )}
+            </div>
             <input value={playerUrl} onChange={e => setPlayerUrl(e.target.value)} className={inputClass} placeholder="https://warezcdn.site/filme/..." />
-            <p className="text-[10px] text-muted-foreground mt-1">Deixe vazio para usar o player padrão (WarezCDN via TMDB ID)</p>
+            <p className="text-[10px] text-muted-foreground">Deixe vazio para usar o player padrão (WarezCDN via TMDB ID)</p>
           </div>
+
+          {/* Player 2 - EmbedMovies */}
+          <div className="border border-border rounded-lg p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <label className={labelClass + " mb-0"}>Player 2 — EmbedMovies</label>
+              {playerUrl2 && (
+                <button onClick={() => setPlayerUrl2('')} className="text-destructive hover:text-destructive/80 text-xs flex items-center gap-1">
+                  <Trash2 className="h-3 w-3" /> Remover
+                </button>
+              )}
+            </div>
+            <input value={playerUrl2} onChange={e => setPlayerUrl2(e.target.value)} className={inputClass} placeholder="https://embedmovies.org/embed/movie/..." />
+            <p className="text-[10px] text-muted-foreground">Deixe vazio para usar o player padrão (EmbedMovies via TMDB ID)</p>
+          </div>
+
           <div>
             <button onClick={() => setIsRelease(!isRelease)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors w-full justify-center ${

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ReportModal } from '@/components/ReportModal';
@@ -7,11 +8,13 @@ import { EditContentModal } from '@/components/EditContentModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import {
-  getMovieDetails, getMovieCredits, getImageUrl, getWarezPlayerUrl,
+  getMovieDetails, getMovieCredits, getImageUrl, getWarezPlayerUrl, getEmbedMoviesUrl,
   type TmdbMovieDetails, type TmdbCastMember,
 } from '@/services/tmdb';
 import { ArrowLeft, Star, Clock, Calendar, Play, Loader2, AlertTriangle, Pencil } from 'lucide-react';
 import type { Movie } from '@/types/database';
+
+type PlayerSource = 'warezcdn' | 'embedmovies';
 
 const MovieDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,6 +24,7 @@ const MovieDetails = () => {
   const [cast, setCast] = useState<TmdbCastMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [showPlayer, setShowPlayer] = useState(false);
+  const [activePlayer, setActivePlayer] = useState<PlayerSource>('warezcdn');
   const [reportOpen, setReportOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
@@ -57,10 +61,26 @@ const MovieDetails = () => {
   const runtime = details?.runtime;
   const overview = details?.overview || movie.overview || '';
   const tagline = details?.tagline || '';
-  const playerSrc = movie.player_url || (tmdbId ? getWarezPlayerUrl('filme', tmdbId) : '');
+
+  const getPlayerUrl = (source: PlayerSource) => {
+    if (source === 'warezcdn') return movie.player_url || (tmdbId ? getWarezPlayerUrl('filme', tmdbId) : '');
+    return movie.player_url_2 || (tmdbId ? getEmbedMoviesUrl('filme', tmdbId) : '');
+  };
+
+  const playerSrc = getPlayerUrl(activePlayer);
+  const hasPlayer1 = !!(movie.player_url || tmdbId);
+  const hasPlayer2 = !!(movie.player_url_2 || tmdbId);
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>{movie.title} — Cineflow</title>
+        <meta name="description" content={overview?.slice(0, 160) || `Assista ${movie.title} no Cineflow`} />
+        <meta property="og:title" content={`${movie.title} — Cineflow`} />
+        <meta property="og:description" content={overview?.slice(0, 160)} />
+        {movie.image_url && <meta property="og:image" content={movie.image_url} />}
+        <meta property="og:type" content="video.movie" />
+      </Helmet>
       <Navbar />
       <div className="relative w-full h-[50vh] md:h-[60vh]">
         <img src={backdrop || '/placeholder.svg'} alt={movie.title} className="w-full h-full object-cover" />
@@ -101,12 +121,30 @@ const MovieDetails = () => {
               {genres && <span className="bg-secondary px-2 py-0.5 rounded text-xs">{genres}</span>}
             </div>
 
-            {playerSrc && (
-              <button onClick={() => setShowPlayer(!showPlayer)}
-                className="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-xl text-sm font-bold hover:bg-primary/90 transition-colors mb-6">
-                <Play className="h-5 w-5 fill-current" />
-                {showPlayer ? 'Fechar Player' : 'Assistir Agora'}
-              </button>
+            {(hasPlayer1 || hasPlayer2) && (
+              <div className="flex flex-col gap-3 mb-6">
+                <button onClick={() => setShowPlayer(!showPlayer)}
+                  className="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-xl text-sm font-bold hover:bg-primary/90 transition-colors w-fit">
+                  <Play className="h-5 w-5 fill-current" />
+                  {showPlayer ? 'Fechar Player' : 'Assistir Agora'}
+                </button>
+                {showPlayer && (
+                  <div className="flex gap-2">
+                    {hasPlayer1 && (
+                      <button onClick={() => setActivePlayer('warezcdn')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${activePlayer === 'warezcdn' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}>
+                        Player 1 — WarezCDN
+                      </button>
+                    )}
+                    {hasPlayer2 && (
+                      <button onClick={() => setActivePlayer('embedmovies')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${activePlayer === 'embedmovies' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}>
+                        Player 2 — EmbedMovies
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             )}
 
             {showPlayer && playerSrc && (

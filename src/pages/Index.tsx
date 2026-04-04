@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { ContentSection } from "@/components/ContentSection";
@@ -44,6 +45,10 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Cineflow — Filmes e Séries Online Grátis em HD</title>
+        <meta name="description" content="Assista filmes e séries online grátis em HD com legendas e dublagem em português. Os melhores lançamentos do cinema." />
+      </Helmet>
       <Navbar />
       <HeroSection />
       <div className="cinema-gradient">
