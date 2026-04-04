@@ -17,7 +17,7 @@ type Tab = "dashboard" | "movies" | "series" | "users" | "reports";
 const Admin = () => {
   const { user, isAdmin, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<Tab>("movies");
+  const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [movies, setMovies] = useState<Movie[]>([]);
   const [series, setSeries] = useState<Series[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
