@@ -34,6 +34,10 @@ const App = () => (
             <Route path="/serie/:id" element={<SeriesDetails />} />
             <Route path="/filmes" element={<AllMovies />} />
             <Route path="/series" element={<AllSeries />} />
+            <Route path="/dmca" element={<DMCA />} />
+            <Route path="/termos" element={<Terms />} />
+            <Route path="/privacidade" element={<Privacy />} />
+            <Route path="/sobre" element={<About />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
