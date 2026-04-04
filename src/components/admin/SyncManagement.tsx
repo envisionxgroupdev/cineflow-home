@@ -263,21 +263,63 @@ export function SyncManagement() {
       </div>
 
       {warezIds.length > 0 && (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <p className="text-sm text-muted-foreground">
-            <span className="text-foreground font-semibold">{warezIds.length}</span> conteúdos disponíveis no WarezCDN
-            {" · "}Página {page + 1} de {totalPages}
-          </p>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Filtrar na página..."
-              value={searchFilter}
-              onChange={(e) => setSearchFilter(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-secondary border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-            />
+        <div className="space-y-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground">
+              <span className="text-foreground font-semibold">{warezIds.length}</span> conteúdos disponíveis no WarezCDN
+              {" · "}Página {page + 1} de {totalPages}
+            </p>
+            <div className="flex items-center gap-2 flex-wrap">
+              {!bulkImporting ? (
+                <button
+                  onClick={handleBulkImport}
+                  className="flex items-center gap-1.5 bg-accent text-accent-foreground px-3 py-2 rounded-lg text-xs font-semibold hover:bg-accent/80 transition-colors"
+                >
+                  <Zap className="h-3.5 w-3.5" />
+                  Importar Tudo ({warezIds.filter(id => !importedIds.has(id)).length})
+                </button>
+              ) : (
+                <button
+                  onClick={cancelBulkImport}
+                  className="flex items-center gap-1.5 bg-destructive text-destructive-foreground px-3 py-2 rounded-lg text-xs font-semibold hover:bg-destructive/90 transition-colors"
+                >
+                  <Square className="h-3.5 w-3.5" />
+                  Cancelar
+                </button>
+              )}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Filtrar na página..."
+                  value={searchFilter}
+                  onChange={(e) => setSearchFilter(e.target.value)}
+                  className="pl-10 pr-4 py-2 bg-secondary border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </div>
+            </div>
           </div>
+
+          {bulkImporting && (
+            <div className="bg-card border border-border rounded-lg p-4 space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-foreground font-medium flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  Importando em massa...
+                </span>
+                <span className="text-muted-foreground">
+                  {bulkProgress.done}/{bulkProgress.total}
+                  {bulkProgress.failed > 0 && <span className="text-destructive ml-1">({bulkProgress.failed} falhas)</span>}
+                </span>
+              </div>
+              <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
+                <div
+                  className="bg-primary h-full rounded-full transition-all duration-300"
+                  style={{ width: `${bulkProgress.total > 0 ? (bulkProgress.done / bulkProgress.total) * 100 : 0}%` }}
+                />
+              </div>
+            </div>
+          )}
         </div>
       )}
 
