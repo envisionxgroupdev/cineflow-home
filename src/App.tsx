@@ -30,6 +30,9 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/assistir/filme/:id/:slug?" element={<MovieDetails />} />
+            <Route path="/assistir/serie/:id/:slug?" element={<SeriesDetails />} />
+            {/* Legacy redirects */}
             <Route path="/filme/:id" element={<MovieDetails />} />
             <Route path="/serie/:id" element={<SeriesDetails />} />
             <Route path="/filmes" element={<AllMovies />} />
