@@ -33,9 +33,11 @@ const MovieDetails = () => {
 
   const loadMovie = async (urlSlug: string) => {
     setLoading(true);
-    const expectedSlug = urlSlug.replace(/^assistir-/, '').replace(/-online-gratis$/, '');
     const { data: all } = await supabase.from('movies').select('*');
-    const found = (all as Movie[] | null)?.find(m => slugify(m.title) === expectedSlug) || null;
+    const found = (all as Movie[] | null)?.find(m => {
+      const fullSlug = `assistir-${slugify(m.title)}-online-gratis`;
+      return fullSlug === urlSlug || slugify(m.title) === urlSlug;
+    }) || null;
     if (found) {
       setMovie(found);
       if (found.tmdb_id) {

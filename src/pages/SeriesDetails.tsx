@@ -40,9 +40,11 @@ const SeriesDetails = () => {
 
   const loadSeries = async (urlSlug: string) => {
     setLoading(true);
-    const expectedSlug = urlSlug.replace(/^assistir-/, '').replace(/-online-gratis$/, '');
     const { data: all } = await supabase.from('series').select('*');
-    const found = (all as Series[] | null)?.find(s => slugify(s.title) === expectedSlug) || null;
+    const found = (all as Series[] | null)?.find(s => {
+      const fullSlug = `assistir-${slugify(s.title)}-online-gratis`;
+      return fullSlug === urlSlug || slugify(s.title) === urlSlug;
+    }) || null;
     if (found) {
       setSeries(found);
       if (found.tmdb_id) {
