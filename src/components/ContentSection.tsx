@@ -41,10 +41,10 @@ export function ContentSection({ id, title, items }: ContentSectionProps) {
             <h2 className="font-display text-3xl md:text-4xl text-foreground">{title}</h2>
             <div className="hidden sm:block flex-1 h-px bg-gradient-to-r from-primary/20 to-transparent ml-4 min-w-[60px]" />
           </div>
-          <button className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors group">
+          <Link to={isMovies ? '/filmes' : '/series'} className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors group">
             Ver todos
             <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
-          </button>
+          </Link>
         </motion.div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
           {items.map((item, index) => (
