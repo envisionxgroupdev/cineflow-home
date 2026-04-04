@@ -50,16 +50,15 @@ const Index = () => {
             <ReleasesSection />
             {movies.length > 0 && <ContentSection id="filmes" title="FILMES" items={toCardFormat(movies, 'movie')} />}
             {series.length > 0 && <ContentSection id="series" title="SÉRIES" items={toCardFormat(series, 'series')} />}
+            {movies.length === 0 && series.length === 0 && (
+              <div className="text-center py-20">
+                <p className="text-muted-foreground">Nenhum conteúdo adicionado ainda.</p>
+                <p className="text-muted-foreground text-sm mt-2">
+                  Acesse o <a href="/admin" className="text-primary hover:underline">painel admin</a> para adicionar filmes e séries.
+                </p>
+              </div>
+            )}
           </>
-        )}
-          </>
-        )}
-          <div className="text-center py-20">
-            <p className="text-muted-foreground">Nenhum conteúdo adicionado ainda.</p>
-            <p className="text-muted-foreground text-sm mt-2">
-              Acesse o <a href="/admin" className="text-primary hover:underline">painel admin</a> para adicionar filmes e séries.
-            </p>
-          </div>
         )}
       </div>
       <Footer />
