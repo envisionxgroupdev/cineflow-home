@@ -163,7 +163,7 @@ const Admin = () => {
                                     className="p-1.5 text-muted-foreground hover:text-primary transition-colors" title="Editar">
                                     <Pencil className="h-4 w-4" />
                                   </button>
-                                  <button onClick={() => handleDelete(item.id)}
+                                  <button onClick={() => setDeleteConfirm(item.id)}
                                     className="p-1.5 text-muted-foreground hover:text-destructive transition-colors" title="Excluir">
                                     <Trash2 className="h-4 w-4" />
                                   </button>
