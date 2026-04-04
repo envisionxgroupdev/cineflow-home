@@ -40,8 +40,20 @@ const SeriesDetails = () => {
 
   const loadSeries = async (urlSlug: string) => {
     setLoading(true);
-    const { data: all } = await supabase.from('series').select('*');
-    const items = all as Series[] | null;
+    const searchTerm = urlSlug
+      .replace(/^assistir-/, '')
+      .replace(/-online-gratis$/, '')
+      .replace(/-/g, ' ')
+      .trim();
+
+    const words = searchTerm.split(' ').filter(w => w.length > 1);
+    let query = supabase.from('series').select('*');
+    for (const word of words.slice(0, 5)) {
+      query = query.ilike('title', `%${word}%`);
+    }
+    const { data: candidates } = await query.limit(50);
+    const items = candidates as Series[] | null;
+
     const found = items?.find(s => {
       const fullSlug = `assistir-${slugify(s.title)}-online-gratis`;
       return fullSlug === urlSlug;
