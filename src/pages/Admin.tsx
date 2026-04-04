@@ -63,6 +63,7 @@ const Admin = () => {
     { key: "series" as Tab, label: "Séries", icon: Tv, count: series.length },
     { key: "reports" as Tab, label: "Reportes", icon: AlertTriangle, count: null },
     { key: "users" as Tab, label: "Usuários", icon: Users, count: null },
+    { key: "sync" as Tab, label: "Sincronização", icon: RefreshCw, count: null },
   ];
 
   const currentItems = activeTab === "movies" ? movies : series;
