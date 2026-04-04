@@ -34,30 +34,11 @@ const MovieDetails = () => {
 
   const loadMovie = async (urlSlug: string) => {
     setLoading(true);
-    // Extract search term from slug: "assistir-the-matrix-online-gratis" -> "the matrix"
-    const searchTerm = urlSlug
-      .replace(/^assistir-/, '')
-      .replace(/-online-gratis$/, '')
-      .replace(/-/g, ' ')
-      .trim();
+    setMovie(null);
+    setDetails(null);
+    setCast([]);
 
-    // Search by title fragments server-side instead of fetching all movies
-    const words = searchTerm.split(' ').filter(w => w.length > 1);
-    let query = supabase.from('movies').select('*');
-    for (const word of words.slice(0, 5)) {
-      query = query.ilike('title', `%${word}%`);
-    }
-    const { data: candidates } = await query.limit(50);
-    const movies = candidates as Movie[] | null;
-
-    // Match by slug
-    const found = movies?.find(m => {
-      const fullSlug = `assistir-${slugify(m.title)}-online-gratis`;
-      return fullSlug === urlSlug;
-    }) || movies?.find(m => {
-      const s = slugify(m.title);
-      return urlSlug.includes(s) && s.length > 2;
-    }) || null;
+    const found = await findRowBySlug<Movie>('movies', urlSlug);
 
     if (found) {
       setMovie(found);
@@ -67,6 +48,7 @@ const MovieDetails = () => {
         setCast(cre);
       }
     }
+
     setLoading(false);
   };
 

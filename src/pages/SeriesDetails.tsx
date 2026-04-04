@@ -41,27 +41,13 @@ const SeriesDetails = () => {
 
   const loadSeries = async (urlSlug: string) => {
     setLoading(true);
-    const searchTerm = urlSlug
-      .replace(/^assistir-/, '')
-      .replace(/-online-gratis$/, '')
-      .replace(/-/g, ' ')
-      .trim();
+    setSeries(null);
+    setDetails(null);
+    setCast([]);
+    setEpisodes([]);
 
-    const words = searchTerm.split(' ').filter(w => w.length > 1);
-    let query = supabase.from('series').select('*');
-    for (const word of words.slice(0, 5)) {
-      query = query.ilike('title', `%${word}%`);
-    }
-    const { data: candidates } = await query.limit(50);
-    const items = candidates as Series[] | null;
+    const found = await findRowBySlug<Series>('series', urlSlug);
 
-    const found = items?.find(s => {
-      const fullSlug = `assistir-${slugify(s.title)}-online-gratis`;
-      return fullSlug === urlSlug;
-    }) || items?.find(s => {
-      const s2 = slugify(s.title);
-      return urlSlug.includes(s2) && s2.length > 2;
-    }) || null;
     if (found) {
       setSeries(found);
       if (found.tmdb_id) {
@@ -71,6 +57,7 @@ const SeriesDetails = () => {
         if (firstSeason) setSelectedSeason(firstSeason.season_number);
       }
     }
+
     setLoading(false);
   };
 
