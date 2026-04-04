@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { TmdbSearchModal } from "@/components/TmdbSearchModal";
+import { EditContentModal } from "@/components/EditContentModal";
 import { UserManagement } from "@/components/admin/UserManagement";
-import { Film, Tv, Plus, Search, Trash2, ArrowLeft, LogOut, Loader2, Users } from "lucide-react";
+import { ReportsManagement } from "@/components/admin/ReportsManagement";
+import { Film, Tv, Plus, Search, Trash2, Pencil, ArrowLeft, LogOut, Loader2, Users, AlertTriangle, Sparkles } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Movie, Series } from "@/types/database";
 
-type Tab = "movies" | "series" | "users";
+type Tab = "movies" | "series" | "users" | "reports";
 
 const Admin = () => {
   const { user, isAdmin, loading: authLoading, signOut } = useAuth();
@@ -20,14 +22,10 @@ const Admin = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [loadingData, setLoadingData] = useState(true);
   const [tmdbOpen, setTmdbOpen] = useState(false);
+  const [editItem, setEditItem] = useState<(Movie | Series) | null>(null);
 
-  useEffect(() => {
-    if (!authLoading && !user) navigate('/login');
-  }, [authLoading, user, navigate]);
-
-  useEffect(() => {
-    if (user) loadData();
-  }, [user]);
+  useEffect(() => { if (!authLoading && !user) navigate('/login'); }, [authLoading, user, navigate]);
+  useEffect(() => { if (user) loadData(); }, [user]);
 
   const loadData = async () => {
     setLoadingData(true);
@@ -57,20 +55,18 @@ const Admin = () => {
   const tabs = [
     { key: "movies" as Tab, label: "Filmes", icon: Film, count: movies.length },
     { key: "series" as Tab, label: "Séries", icon: Tv, count: series.length },
+    { key: "reports" as Tab, label: "Reportes", icon: AlertTriangle, count: null },
     { key: "users" as Tab, label: "Usuários", icon: Users, count: null },
   ];
 
   const currentItems = activeTab === "movies" ? movies : series;
-  const filteredItems = currentItems.filter(item =>
-    item.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredItems = currentItems.filter(item => item.title.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="pt-20 pb-10">
         <div className="container mx-auto px-4">
-          {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
               <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors"><ArrowLeft className="h-5 w-5" /></Link>
@@ -84,11 +80,10 @@ const Admin = () => {
 
           {!isAdmin && (
             <div className="bg-destructive/10 border border-destructive/30 text-destructive rounded-lg p-4 mb-6">
-              Você não tem permissão de administrador. Contate o administrador do sistema.
+              Você não tem permissão de administrador.
             </div>
           )}
 
-          {/* Tabs */}
           <div className="flex gap-2 mb-8 border-b border-border pb-4 overflow-x-auto">
             {tabs.map(tab => (
               <button key={tab.key} onClick={() => { setActiveTab(tab.key); setSearchQuery(""); }}
@@ -106,9 +101,10 @@ const Admin = () => {
 
           {activeTab === "users" ? (
             isAdmin ? <UserManagement /> : null
+          ) : activeTab === "reports" ? (
+            isAdmin ? <ReportsManagement /> : null
           ) : (
             <>
-              {/* Toolbar */}
               <div className="flex flex-col sm:flex-row gap-3 mb-6">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -124,7 +120,6 @@ const Admin = () => {
                 )}
               </div>
 
-              {/* Table */}
               {loadingData ? (
                 <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 text-primary animate-spin" /></div>
               ) : (
@@ -137,7 +132,7 @@ const Admin = () => {
                           <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Título</th>
                           <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Ano</th>
                           <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Gênero</th>
-                          <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Nota</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
                           <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Ações</th>
                         </tr>
                       </thead>
@@ -145,16 +140,31 @@ const Admin = () => {
                         {filteredItems.map(item => (
                           <tr key={item.id} className="border-b border-border/50 hover:bg-secondary/50 transition-colors">
                             <td className="px-4 py-2"><img src={item.image_url || '/placeholder.svg'} alt={item.title} className="w-10 h-14 object-cover rounded" /></td>
-                            <td className="px-4 py-3 text-sm font-medium text-foreground">{item.title}</td>
+                            <td className="px-4 py-3">
+                              <p className="text-sm font-medium text-foreground">{item.title}</p>
+                              <p className="text-xs text-muted-foreground">⭐ {item.rating}</p>
+                            </td>
                             <td className="px-4 py-3 text-sm text-muted-foreground hidden sm:table-cell">{item.year}</td>
                             <td className="px-4 py-3 text-sm text-muted-foreground hidden md:table-cell">{item.genre}</td>
-                            <td className="px-4 py-3"><span className="text-xs font-semibold bg-primary/10 text-primary px-2 py-1 rounded">{item.rating}</span></td>
+                            <td className="px-4 py-3">
+                              {item.is_release && (
+                                <span className="text-[10px] font-bold bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 w-fit">
+                                  <Sparkles className="h-3 w-3" /> Lançamento
+                                </span>
+                              )}
+                            </td>
                             <td className="px-4 py-3 text-right">
                               {isAdmin && (
-                                <button onClick={() => handleDelete(item.id)}
-                                  className="p-1.5 text-muted-foreground hover:text-destructive transition-colors">
-                                  <Trash2 className="h-4 w-4" />
-                                </button>
+                                <div className="flex items-center gap-1 justify-end">
+                                  <button onClick={() => setEditItem(item)}
+                                    className="p-1.5 text-muted-foreground hover:text-primary transition-colors" title="Editar">
+                                    <Pencil className="h-4 w-4" />
+                                  </button>
+                                  <button onClick={() => handleDelete(item.id)}
+                                    className="p-1.5 text-muted-foreground hover:text-destructive transition-colors" title="Excluir">
+                                    <Trash2 className="h-4 w-4" />
+                                  </button>
+                                </div>
                               )}
                             </td>
                           </tr>
@@ -174,12 +184,16 @@ const Admin = () => {
         </div>
       </div>
 
-      <TmdbSearchModal
-        type={activeTab === "movies" ? "movie" : "series"}
-        open={tmdbOpen}
-        onClose={() => setTmdbOpen(false)}
-        onAdded={() => loadData()}
-      />
+      <TmdbSearchModal type={activeTab === "movies" ? "movie" : "series"} open={tmdbOpen} onClose={() => setTmdbOpen(false)} onAdded={() => loadData()} />
+      {editItem && (
+        <EditContentModal
+          item={editItem}
+          type={activeTab === "movies" ? "movie" : "series"}
+          open={!!editItem}
+          onClose={() => setEditItem(null)}
+          onSaved={() => { loadData(); setEditItem(null); }}
+        />
+      )}
     </div>
   );
 };
