@@ -197,6 +197,13 @@ export function SyncManagement() {
       const results = await Promise.allSettled(
         batch.map(async (tmdbId) => {
           try {
+            // Skip if already in DB
+            const { data: existing } = await supabase.from(table).select('id').eq('tmdb_id', tmdbId).limit(1);
+            if (existing && existing.length > 0) {
+              setImportedIds((prev) => new Set([...prev, tmdbId]));
+              return;
+            }
+
             let payload: any;
             if (category === "movie") {
               const d = await getMovieDetails(tmdbId);
@@ -217,7 +224,7 @@ export function SyncManagement() {
                 first_air_date: d.first_air_date || null,
               };
             }
-            const { error } = await supabase.from(table).upsert(payload, { onConflict: 'tmdb_id' });
+            const { error } = await supabase.from(table).insert(payload);
             if (error) throw error;
             setImportedIds((prev) => new Set([...prev, tmdbId]));
           } catch {
