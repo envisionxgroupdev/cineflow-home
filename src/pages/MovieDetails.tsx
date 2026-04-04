@@ -30,7 +30,7 @@ const MovieDetails = () => {
   const [reportOpen, setReportOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
-  useEffect(() => { if (id) loadMovie(id); }, [id]);
+  useEffect(() => { if (movieId) loadMovie(movieId); }, [movieId]);
 
   const loadMovie = async (movieId: string) => {
     setLoading(true);
