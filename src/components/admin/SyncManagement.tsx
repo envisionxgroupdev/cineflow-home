@@ -46,9 +46,8 @@ export function SyncManagement() {
     setPreviews([]);
     setPage(0);
     try {
-      const res = await fetch(
-        `https://warezcdn.site/lista?category=${category}&type=tmdb&format=json`
-      );
+      const targetUrl = encodeURIComponent(`https://warezcdn.site/lista?category=${category}&type=tmdb&format=json`);
+      const res = await fetch(`https://api.allorigins.win/raw?url=${targetUrl}`);
       const data = await res.json();
       const ids: number[] = Array.isArray(data) ? data.map((id: any) => Number(id)).filter(Boolean) : [];
       setWarezIds(ids);
