@@ -243,5 +243,8 @@ export function getEmbedMoviesUrl(type: 'filme' | 'serie', tmdbId: number, seaso
   if (season !== undefined && episode !== undefined) {
     return `https://myembed.biz/serie/${tmdbId}/${season}/${episode}`;
   }
+  if (season !== undefined) {
+    return `https://myembed.biz/serie/${tmdbId}/${season}`;
+  }
   return `https://myembed.biz/serie/${tmdbId}`;
 }
