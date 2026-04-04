@@ -127,6 +127,22 @@ export async function searchMovies(query: string): Promise<TmdbMovie[]> {
   return data.results || [];
 }
 
+export async function getTrendingMovies(): Promise<TmdbMovie[]> {
+  const res = await fetch(
+    `${TMDB_BASE}/movie/now_playing?api_key=${TMDB_API_KEY}&language=pt-BR&page=1`
+  );
+  const data = await res.json();
+  return data.results || [];
+}
+
+export async function getTrendingSeries(): Promise<TmdbSeries[]> {
+  const res = await fetch(
+    `${TMDB_BASE}/tv/on_the_air?api_key=${TMDB_API_KEY}&language=pt-BR&page=1`
+  );
+  const data = await res.json();
+  return data.results || [];
+}
+
 export async function searchSeries(query: string): Promise<TmdbSeries[]> {
   const res = await fetch(
     `${TMDB_BASE}/search/tv?api_key=${TMDB_API_KEY}&language=pt-BR&query=${encodeURIComponent(query)}`
