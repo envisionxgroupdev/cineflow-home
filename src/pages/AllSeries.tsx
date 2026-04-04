@@ -26,7 +26,11 @@ const AllSeries = () => {
     setLoading(false);
   };
 
-  const filtered = series.filter(s => s.title.toLowerCase().includes(search.toLowerCase()));
+  const filtered = series.filter(s => {
+    const matchSearch = s.title.toLowerCase().includes(search.toLowerCase());
+    const matchGenre = !genre || (s.genre || '').split(',').map(g => g.trim()).includes(genre);
+    return matchSearch && matchGenre;
+  });
 
   return (
     <div className="min-h-screen bg-background">
