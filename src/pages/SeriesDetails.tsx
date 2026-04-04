@@ -7,7 +7,7 @@ import { ReportModal } from '@/components/ReportModal';
 import { EditContentModal } from '@/components/EditContentModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { slugify, parseContentUrl } from '@/lib/utils';
+import { slugify, extractTitleFromSlug } from '@/lib/utils';
 import {
   getSeriesDetails, getSeriesCredits, getSeasonEpisodes, getImageUrl, getWarezPlayerUrl, getEmbedMoviesUrl,
   type TmdbSeriesDetails, type TmdbCastMember, type TmdbEpisode, type TmdbSeason,
@@ -19,7 +19,6 @@ type PlayerSource = 'warezcdn' | 'embedmovies';
 
 const SeriesDetails = () => {
   const { slug } = useParams<{ slug: string }>();
-  const seriesId = slug ? parseContentUrl(slug) : '';
   const { isAdmin } = useAuth();
   const [series, setSeries] = useState<Series | null>(null);
   const [details, setDetails] = useState<TmdbSeriesDetails | null>(null);
@@ -33,15 +32,16 @@ const SeriesDetails = () => {
   const [reportOpen, setReportOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
-  useEffect(() => { if (seriesId) loadSeries(seriesId); }, [seriesId]);
+  useEffect(() => { if (slug) loadSeries(slug); }, [slug]);
 
   useEffect(() => {
     if (series?.tmdb_id && selectedSeason >= 0) loadEpisodes(series.tmdb_id, selectedSeason);
   }, [series?.tmdb_id, selectedSeason]);
 
-  const loadSeries = async (seriesId: string) => {
+  const loadSeries = async (urlSlug: string) => {
     setLoading(true);
-    const { data } = await supabase.from('series').select('*').eq('id', seriesId).single();
+    const titleSearch = extractTitleFromSlug(urlSlug);
+    const { data } = await supabase.from('series').select('*').ilike('title', `%${titleSearch}%`).limit(1).single();
     if (data) {
       setSeries(data as Series);
       if (data.tmdb_id) {
@@ -89,7 +89,7 @@ const SeriesDetails = () => {
     return '';
   };
 
-  const canonicalUrl = `https://cineflow.top/serie/assistir-${slugify(series.title)}-online-gratis--${series.id}`;
+  const canonicalUrl = `https://cineflow.top/serie/assistir-${slugify(series.title)}-online-gratis`;
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'TVSeries',

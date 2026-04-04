@@ -7,7 +7,7 @@ import { ReportModal } from '@/components/ReportModal';
 import { EditContentModal } from '@/components/EditContentModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { slugify, parseContentUrl } from '@/lib/utils';
+import { slugify, extractTitleFromSlug } from '@/lib/utils';
 import {
   getMovieDetails, getMovieCredits, getImageUrl, getWarezPlayerUrl, getEmbedMoviesUrl,
   type TmdbMovieDetails, type TmdbCastMember,
@@ -19,7 +19,6 @@ type PlayerSource = 'warezcdn' | 'embedmovies';
 
 const MovieDetails = () => {
   const { slug } = useParams<{ slug: string }>();
-  const movieId = slug ? parseContentUrl(slug) : '';
   const { isAdmin } = useAuth();
   const [movie, setMovie] = useState<Movie | null>(null);
   const [details, setDetails] = useState<TmdbMovieDetails | null>(null);
@@ -30,11 +29,12 @@ const MovieDetails = () => {
   const [reportOpen, setReportOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
-  useEffect(() => { if (movieId) loadMovie(movieId); }, [movieId]);
+  useEffect(() => { if (slug) loadMovie(slug); }, [slug]);
 
-  const loadMovie = async (movieId: string) => {
+  const loadMovie = async (urlSlug: string) => {
     setLoading(true);
-    const { data } = await supabase.from('movies').select('*').eq('id', movieId).single();
+    const titleSearch = extractTitleFromSlug(urlSlug);
+    const { data } = await supabase.from('movies').select('*').ilike('title', `%${titleSearch}%`).limit(1).single();
     if (data) {
       setMovie(data as Movie);
       if (data.tmdb_id) {
@@ -73,7 +73,7 @@ const MovieDetails = () => {
   const hasPlayer1 = !!(movie.player_url || tmdbId);
   const hasPlayer2 = !!(movie.player_url_2 || tmdbId);
 
-  const canonicalUrl = `https://cineflow.top/filme/assistir-${slugify(movie.title)}-online-gratis--${movie.id}`;
+  const canonicalUrl = `https://cineflow.top/filme/assistir-${slugify(movie.title)}-online-gratis`;
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Movie',
