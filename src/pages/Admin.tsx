@@ -57,6 +57,7 @@ const Admin = () => {
   if (!user) return null;
 
   const tabs = [
+    { key: "dashboard" as Tab, label: "Dashboard", icon: LayoutDashboard, count: null },
     { key: "movies" as Tab, label: "Filmes", icon: Film, count: movies.length },
     { key: "series" as Tab, label: "Séries", icon: Tv, count: series.length },
     { key: "reports" as Tab, label: "Reportes", icon: AlertTriangle, count: null },
