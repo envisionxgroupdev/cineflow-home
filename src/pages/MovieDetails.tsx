@@ -19,7 +19,6 @@ type PlayerSource = 'warezcdn' | 'embedmovies';
 
 const MovieDetails = () => {
   const { slug } = useParams<{ slug: string }>();
-  const movieId = slug ? parseContentUrl(slug) : '';
   const { isAdmin } = useAuth();
   const [movie, setMovie] = useState<Movie | null>(null);
   const [details, setDetails] = useState<TmdbMovieDetails | null>(null);
