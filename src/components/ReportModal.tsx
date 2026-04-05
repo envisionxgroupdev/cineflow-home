@@ -1,10 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { X, AlertTriangle, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import ReCAPTCHA from 'react-google-recaptcha';
-
-const RECAPTCHA_SITE_KEY = '6LffhagsAAAAAEeoO_4__DnPycbPuXETkIJYPLRI';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 interface ReportModalProps {
   contentId: string;
@@ -28,33 +26,35 @@ export function ReportModal({ contentId, contentType, contentTitle, open, onClos
   const [reason, setReason] = useState('');
   const [details, setDetails] = useState('');
   const [sending, setSending] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const recaptchaRef = useRef<ReCAPTCHA>(null);
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
-  const handleSend = async () => {
+  const handleSend = useCallback(async () => {
     if (!reason) { toast.error('Selecione um motivo'); return; }
-    if (!captchaToken) { toast.error('Complete o reCAPTCHA'); return; }
+    if (!executeRecaptcha) { toast.error('reCAPTCHA não carregou'); return; }
     setSending(true);
-    const { error } = await supabase.from('reports').insert({
-      content_id: contentId,
-      content_type: contentType,
-      content_title: contentTitle,
-      reason,
-      details: details || null,
-      status: 'pending',
-    });
-    if (error) {
-      toast.error('Erro ao enviar: ' + error.message);
-    } else {
-      toast.success('Reporte enviado! Obrigado.');
-      setReason('');
-      setDetails('');
-      setCaptchaToken(null);
-      recaptchaRef.current?.reset();
-      onClose();
+    try {
+      await executeRecaptcha('report');
+      const { error } = await supabase.from('reports').insert({
+        content_id: contentId,
+        content_type: contentType,
+        content_title: contentTitle,
+        reason,
+        details: details || null,
+        status: 'pending',
+      });
+      if (error) {
+        toast.error('Erro ao enviar: ' + error.message);
+      } else {
+        toast.success('Reporte enviado! Obrigado.');
+        setReason('');
+        setDetails('');
+        onClose();
+      }
+    } catch {
+      toast.error('Erro no reCAPTCHA');
     }
     setSending(false);
-  };
+  }, [reason, details, executeRecaptcha, contentId, contentType, contentTitle, onClose]);
 
   if (!open) return null;
 
@@ -93,10 +93,6 @@ export function ReportModal({ contentId, contentType, contentTitle, open, onClos
             <textarea value={details} onChange={e => setDetails(e.target.value)} rows={3}
               placeholder="Descreva o problema..."
               className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none" />
-          </div>
-
-          <div className="flex justify-center">
-            <ReCAPTCHA ref={recaptchaRef} sitekey={RECAPTCHA_SITE_KEY} theme="dark" onChange={setCaptchaToken} onExpired={() => setCaptchaToken(null)} />
           </div>
         </div>
 
