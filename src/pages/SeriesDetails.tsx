@@ -14,6 +14,7 @@ import {
   type TmdbSeriesDetails, type TmdbCastMember, type TmdbEpisode, type TmdbSeason,
 } from '@/services/tmdb';
 import { ArrowLeft, Star, Calendar, Play, Loader2, ChevronDown, AlertTriangle, Pencil } from 'lucide-react';
+import { ShareButtons } from '@/components/ShareButtons';
 import type { Series } from '@/types/database';
 
 type PlayerSource = 'warezcdn' | 'embedmovies';
@@ -139,6 +140,7 @@ const SeriesDetails = () => {
             <ArrowLeft className="h-4 w-4" /> Voltar
           </Link>
           <div className="flex items-center gap-2">
+            <ShareButtons url={canonicalUrl} title={series.title} />
             {isAdmin && (
               <button onClick={() => setEditOpen(true)}
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-medium hover:bg-primary/20 transition-colors">
