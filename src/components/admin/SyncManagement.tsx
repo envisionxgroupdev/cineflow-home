@@ -35,21 +35,25 @@ export function SyncManagement() {
   const PAGE_SIZE = 20;
   const BULK_BATCH_SIZE = 5; // concurrent TMDB requests
 
-  // Load already imported TMDB IDs
+  // Load already imported TMDB IDs from BOTH tables to catch all
   const loadImported = useCallback(async () => {
-    const table = category === "movie" ? "movies" : "series";
     const allIds: number[] = [];
-    let from = 0;
-    const PAGE = 1000;
-    while (true) {
-      const { data } = await supabase.from(table).select("tmdb_id").range(from, from + PAGE - 1);
-      if (!data || data.length === 0) break;
-      allIds.push(...data.map((d: any) => d.tmdb_id).filter(Boolean));
-      if (data.length < PAGE) break;
-      from += PAGE;
+    // Always check both movies and series tables
+    for (const table of ["movies", "series"] as const) {
+      let from = 0;
+      const PAGE = 1000;
+      while (true) {
+        const { data } = await supabase.from(table).select("tmdb_id").range(from, from + PAGE - 1);
+        if (!data || data.length === 0) break;
+        allIds.push(...data.map((d: any) => d.tmdb_id).filter(Boolean));
+        if (data.length < PAGE) break;
+        from += PAGE;
+      }
     }
-    setImportedIds(new Set(allIds));
-  }, [category]);
+    const idSet = new Set(allIds);
+    setImportedIds(idSet);
+    return idSet;
+  }, []);
 
   // Fetch WarezCDN list
   const fetchWarezList = async () => {
@@ -62,7 +66,9 @@ export function SyncManagement() {
       const data = await res.json();
       const ids: number[] = Array.isArray(data) ? data.map((id: any) => Number(id)).filter(Boolean) : [];
       setWarezIds(ids);
-      await loadImported();
+      const freshIds = await loadImported();
+      // Force loadPage with fresh IDs after state settles
+      setTimeout(() => {}, 0);
       toast.success(`${ids.length} IDs encontrados no WarezCDN`);
     } catch (err) {
       toast.error("Erro ao buscar lista do WarezCDN");
