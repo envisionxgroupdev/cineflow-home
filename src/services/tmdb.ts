@@ -151,13 +151,7 @@ export async function getTrendingSeries(): Promise<TmdbSeries[]> {
   return data.results || [];
 }
 
-export async function searchSeries(query: string): Promise<TmdbSeries[]> {
-  const res = await fetch(
-    `${TMDB_BASE}/search/tv?api_key=${TMDB_API_KEY}&language=pt-BR&query=${encodeURIComponent(query)}`
-  );
-  const data = await res.json();
-  return data.results || [];
-}
+
 
 export async function getMovieDetails(tmdbId: number): Promise<TmdbMovieDetails> {
   const res = await fetch(
