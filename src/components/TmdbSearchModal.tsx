@@ -62,6 +62,10 @@ export const TmdbSearchModal = ({ type, open, onClose, onAdded }: TmdbSearchModa
 
   const handleAdd = async (item: TmdbMovie | TmdbSeries) => {
     const tmdbId = item.id;
+    if (importedIds.has(tmdbId)) {
+      toast.info('Este conteúdo já foi importado!');
+      return;
+    }
     setAdding(tmdbId);
     try {
       const isRelease = releaseIds.has(tmdbId);
@@ -75,6 +79,7 @@ export const TmdbSearchModal = ({ type, open, onClose, onAdded }: TmdbSearchModa
         if (error) throw error;
       }
       toast.success(`"${type === 'movie' ? (item as TmdbMovie).title : (item as TmdbSeries).name}" adicionado!`);
+      setImportedIds(prev => new Set([...prev, tmdbId]));
       onAdded();
     } catch (err: any) {
       toast.error(err.message || 'Erro ao salvar');
