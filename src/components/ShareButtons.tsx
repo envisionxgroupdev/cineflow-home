@@ -1,4 +1,4 @@
-import { Share2 } from 'lucide-react';
+import { Share2, Send } from 'lucide-react';
 import { useState } from 'react';
 
 interface ShareButtonsProps {
@@ -10,7 +10,7 @@ const platforms = [
   { name: 'WhatsApp', color: 'bg-green-600 hover:bg-green-700', icon: '💬', getUrl: (url: string, title: string) => `https://wa.me/?text=${encodeURIComponent(`${title} — ${url}`)}` },
   { name: 'X', color: 'bg-neutral-800 hover:bg-neutral-900', icon: '𝕏', getUrl: (url: string, title: string) => `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}` },
   { name: 'Facebook', color: 'bg-blue-600 hover:bg-blue-700', icon: 'f', getUrl: (url: string) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}` },
-  { name: 'Telegram', color: 'bg-sky-500 hover:bg-sky-600', icon: '✈', getUrl: (url: string, title: string) => `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}` },
+  { name: 'Telegram', color: 'bg-sky-500 hover:bg-sky-600', icon: 'telegram', getUrl: (url: string, title: string) => `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}` },
   { name: 'Copiar Link', color: 'bg-secondary hover:bg-secondary/80 text-foreground', icon: '🔗', getUrl: () => '' },
 ];
 
@@ -47,7 +47,9 @@ export function ShareButtons({ url, title }: ShareButtonsProps) {
                 onClick={() => handleShare(p)}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-white transition-colors ${p.color}`}
               >
-                <span className="text-sm w-5 text-center">{p.icon}</span>
+                <span className="text-sm w-5 text-center flex items-center justify-center">
+                  {p.icon === 'telegram' ? <Send className="h-3.5 w-3.5" /> : p.icon}
+                </span>
                 {p.name === 'Copiar Link' && copied ? 'Copiado!' : p.name}
               </button>
             ))}
