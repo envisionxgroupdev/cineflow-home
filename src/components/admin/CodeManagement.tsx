@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Save, Loader2, Code2, FileCode } from 'lucide-react';
+import { Save, Loader2, Code2, FileCode, Eye, EyeOff } from 'lucide-react';
 
 interface CodeSetting {
   key: string;
@@ -15,7 +15,6 @@ const CODE_FIELDS = [
     icon: FileCode,
     placeholder: '<script>...</script> ou <meta .../>',
     help: 'Qualquer código para o <head> (pixels, meta tags, verificações, analytics, etc).',
-    multiline: true,
   },
   {
     key: 'body_scripts',
@@ -23,7 +22,6 @@ const CODE_FIELDS = [
     icon: Code2,
     placeholder: '<script>...</script> ou <noscript>...</noscript>',
     help: 'Qualquer código para o final do <body> (pixels, chatbots, etc).',
-    multiline: true,
   },
   {
     key: 'footer_scripts',
@@ -31,7 +29,6 @@ const CODE_FIELDS = [
     icon: Code2,
     placeholder: 'HTML ou scripts para o footer',
     help: 'Código que será injetado dentro do footer do site (antes do copyright).',
-    multiline: true,
   },
 ];
 
@@ -40,6 +37,7 @@ export function CodeManagement() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [tableExists, setTableExists] = useState(true);
+  const [previewing, setPreviewing] = useState<Record<string, boolean>>({});
 
   useEffect(() => { loadCodes(); }, []);
 
@@ -83,6 +81,10 @@ export function CodeManagement() {
     setSaving(false);
   };
 
+  const togglePreview = (key: string) => {
+    setPreviewing(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 text-primary animate-spin" /></div>;
 
   if (!tableExists) {
@@ -116,8 +118,8 @@ CREATE POLICY "Admins can manage settings"
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="font-display text-xl text-foreground">Códigos de Integração</h3>
-          <p className="text-sm text-muted-foreground mt-1">Configure Google Analytics, Search Console e outros scripts.</p>
+          <h3 className="font-display text-xl text-foreground">Códigos Personalizados</h3>
+          <p className="text-sm text-muted-foreground mt-1">Insira scripts, meta tags e códigos de rastreamento nas áreas do site.</p>
         </div>
         <button onClick={handleSave} disabled={saving}
           className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50">
@@ -127,32 +129,45 @@ CREATE POLICY "Admins can manage settings"
       </div>
 
       <div className="grid gap-4">
-        {CODE_FIELDS.map(field => (
-          <div key={field.key} className="bg-card border border-border rounded-xl p-5">
-            <div className="flex items-center gap-2 mb-2">
-              <field.icon className="h-4 w-4 text-primary" />
-              <label className="text-sm font-semibold text-foreground">{field.label}</label>
+        {CODE_FIELDS.map(field => {
+          const value = codes[field.key] || '';
+          const isPreview = previewing[field.key] && value;
+
+          return (
+            <div key={field.key} className="bg-card border border-border rounded-xl p-5">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <field.icon className="h-4 w-4 text-primary" />
+                  <label className="text-sm font-semibold text-foreground">{field.label}</label>
+                </div>
+                {value && (
+                  <button
+                    onClick={() => togglePreview(field.key)}
+                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {isPreview ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                    {isPreview ? 'Editar' : 'Preview'}
+                  </button>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mb-3">{field.help}</p>
+
+              {isPreview ? (
+                <div className="bg-secondary border border-border rounded-lg p-4 overflow-x-auto">
+                  <pre className="text-xs text-foreground font-mono whitespace-pre-wrap break-all">{value}</pre>
+                </div>
+              ) : (
+                <textarea
+                  value={value}
+                  onChange={e => setCodes({ ...codes, [field.key]: e.target.value })}
+                  placeholder={field.placeholder}
+                  rows={4}
+                  className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono resize-y"
+                />
+              )}
             </div>
-            <p className="text-xs text-muted-foreground mb-3">{field.help}</p>
-            {'multiline' in field && field.multiline ? (
-              <textarea
-                value={codes[field.key] || ''}
-                onChange={e => setCodes({ ...codes, [field.key]: e.target.value })}
-                placeholder={field.placeholder}
-                rows={4}
-                className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono resize-y"
-              />
-            ) : (
-              <input
-                type="text"
-                value={codes[field.key] || ''}
-                onChange={e => setCodes({ ...codes, [field.key]: e.target.value })}
-                placeholder={field.placeholder}
-                className="w-full bg-secondary border border-border rounded-lg px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono"
-              />
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
