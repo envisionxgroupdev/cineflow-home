@@ -119,10 +119,18 @@ function mapGenreIds(ids: number[], genres: TmdbGenre[]): string {
     .join(', ');
 }
 
-export async function searchMovies(query: string): Promise<TmdbMovie[]> {
-  const res = await fetch(
-    `${TMDB_BASE}/search/movie?api_key=${TMDB_API_KEY}&language=pt-BR&query=${encodeURIComponent(query)}`
-  );
+export async function searchMovies(query: string, year?: number): Promise<TmdbMovie[]> {
+  let url = `${TMDB_BASE}/search/movie?api_key=${TMDB_API_KEY}&language=pt-BR&query=${encodeURIComponent(query)}`;
+  if (year) url += `&primary_release_year=${year}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  return data.results || [];
+}
+
+export async function searchSeries(query: string, year?: number): Promise<TmdbSeries[]> {
+  let url = `${TMDB_BASE}/search/tv?api_key=${TMDB_API_KEY}&language=pt-BR&query=${encodeURIComponent(query)}`;
+  if (year) url += `&first_air_date_year=${year}`;
+  const res = await fetch(url);
   const data = await res.json();
   return data.results || [];
 }
