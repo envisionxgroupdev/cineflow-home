@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Search, Plus, X, Loader2, Sparkles, Calendar, Check } from 'lucide-react';
 import { searchMovies, searchSeries, tmdbMovieToDb, tmdbSeriesToDb, getImageUrl, type TmdbMovie, type TmdbSeries } from '@/services/tmdb';
 import { supabase } from '@/integrations/supabase/client';
