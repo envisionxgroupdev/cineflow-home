@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Film, LogIn, Eye, EyeOff } from 'lucide-react';
+import ReCAPTCHA from 'react-google-recaptcha';
+
+const RECAPTCHA_SITE_KEY = '6LffhagsAAAAAEeoO_4__DnPycbPuXETkIJYPLRI';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -9,11 +12,14 @@ const Login = () => {
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
   const { signIn } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!captchaToken) { setError('Complete o reCAPTCHA'); return; }
     setError('');
     setLoading(true);
     const { error } = await signIn(email, password);
@@ -78,9 +84,13 @@ const Login = () => {
             </div>
           </div>
 
+          <div className="flex justify-center">
+            <ReCAPTCHA ref={recaptchaRef} sitekey={RECAPTCHA_SITE_KEY} theme="dark" onChange={setCaptchaToken} onExpired={() => setCaptchaToken(null)} />
+          </div>
+
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !captchaToken}
             className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-2.5 rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
             <LogIn className="h-4 w-4" />
