@@ -28,18 +28,37 @@ export const TmdbSearchModal = ({ type, open, onClose, onAdded }: TmdbSearchModa
     });
   };
 
+  // Load imported IDs when modal opens
+  const loadImported = useCallback(async () => {
+    const table = type === 'movie' ? 'movies' : 'series';
+    const allIds: number[] = [];
+    let from = 0;
+    while (true) {
+      const { data } = await supabase.from(table).select('tmdb_id').range(from, from + 999);
+      if (!data || data.length === 0) break;
+      allIds.push(...data.map((d: any) => d.tmdb_id).filter(Boolean));
+      if (data.length < 1000) break;
+      from += 1000;
+    }
+    setImportedIds(new Set(allIds));
+  }, [type]);
+
+  // Load on open
+  useState(() => { if (open) loadImported(); });
+
   const handleSearch = useCallback(async () => {
-    if (!query.trim()) return;
+    if (!query.trim() && !year.trim()) return;
     setSearching(true);
     try {
+      await loadImported();
       const yearNum = year ? parseInt(year) : undefined;
       const data = type === 'movie' ? await searchMovies(query, yearNum) : await searchSeries(query, yearNum);
-      setResults(data.slice(0, 12));
+      setResults(data.slice(0, 20));
     } catch {
       toast.error('Erro ao buscar no TMDB');
     }
     setSearching(false);
-  }, [query, year, type]);
+  }, [query, year, type, loadImported]);
 
   const handleAdd = async (item: TmdbMovie | TmdbSeries) => {
     const tmdbId = item.id;
