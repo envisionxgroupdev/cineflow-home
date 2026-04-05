@@ -135,15 +135,23 @@ export const TmdbSearchModal = ({ type, open, onClose, onAdded }: TmdbSearchModa
                   <p className="text-sm font-medium text-foreground truncate">{title}</p>
                   <p className="text-xs text-muted-foreground">{date?.slice(0, 4) || '—'} • ⭐ {item.vote_average.toFixed(1)}</p>
                 </div>
-                <button onClick={() => toggleRelease(item.id)} title={isRelease ? 'Remover de lançamentos' : 'Marcar como lançamento'}
-                  className={`p-1.5 rounded-lg transition-colors shrink-0 ${isRelease ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-primary hover:bg-primary/10'}`}>
-                  <Sparkles className="h-4 w-4" />
-                </button>
-                <button onClick={() => handleAdd(item)} disabled={adding === item.id}
-                  className="flex items-center gap-1 bg-primary text-primary-foreground px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-primary/90 disabled:opacity-50 shrink-0">
-                  {adding === item.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
-                  Adicionar
-                </button>
+                {alreadyImported ? (
+                  <span className="flex items-center gap-1 text-green-400 text-xs font-bold px-3 py-1.5 shrink-0">
+                    <Check className="h-3 w-3" /> Importado
+                  </span>
+                ) : (
+                  <>
+                    <button onClick={() => toggleRelease(item.id)} title={isRelease ? 'Remover de lançamentos' : 'Marcar como lançamento'}
+                      className={`p-1.5 rounded-lg transition-colors shrink-0 ${isRelease ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-primary hover:bg-primary/10'}`}>
+                      <Sparkles className="h-4 w-4" />
+                    </button>
+                    <button onClick={() => handleAdd(item)} disabled={adding === item.id}
+                      className="flex items-center gap-1 bg-primary text-primary-foreground px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-primary/90 disabled:opacity-50 shrink-0">
+                      {adding === item.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+                      Adicionar
+                    </button>
+                  </>
+                )}
               </div>
             );
           })}
