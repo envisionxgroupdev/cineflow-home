@@ -120,6 +120,12 @@ function mapGenreIds(ids: number[], genres: TmdbGenre[]): string {
 }
 
 export async function searchMovies(query: string, year?: number): Promise<TmdbMovie[]> {
+  if (!query.trim() && year) {
+    // Discover by year only
+    const res = await fetch(`${TMDB_BASE}/discover/movie?api_key=${TMDB_API_KEY}&language=pt-BR&primary_release_year=${year}&sort_by=popularity.desc`);
+    const data = await res.json();
+    return data.results || [];
+  }
   let url = `${TMDB_BASE}/search/movie?api_key=${TMDB_API_KEY}&language=pt-BR&query=${encodeURIComponent(query)}`;
   if (year) url += `&primary_release_year=${year}`;
   const res = await fetch(url);
@@ -128,6 +134,12 @@ export async function searchMovies(query: string, year?: number): Promise<TmdbMo
 }
 
 export async function searchSeries(query: string, year?: number): Promise<TmdbSeries[]> {
+  if (!query.trim() && year) {
+    // Discover by year only
+    const res = await fetch(`${TMDB_BASE}/discover/tv?api_key=${TMDB_API_KEY}&language=pt-BR&first_air_date_year=${year}&sort_by=popularity.desc`);
+    const data = await res.json();
+    return data.results || [];
+  }
   let url = `${TMDB_BASE}/search/tv?api_key=${TMDB_API_KEY}&language=pt-BR&query=${encodeURIComponent(query)}`;
   if (year) url += `&first_air_date_year=${year}`;
   const res = await fetch(url);

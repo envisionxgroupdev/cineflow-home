@@ -18,6 +18,7 @@ export const TmdbSearchModal = ({ type, open, onClose, onAdded }: TmdbSearchModa
   const [searching, setSearching] = useState(false);
   const [adding, setAdding] = useState<number | null>(null);
   const [releaseIds, setReleaseIds] = useState<Set<number>>(new Set());
+  const [importedIds, setImportedIds] = useState<Set<number>>(new Set());
 
   const toggleRelease = (id: number) => {
     setReleaseIds(prev => {
