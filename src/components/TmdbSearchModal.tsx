@@ -126,9 +126,10 @@ export const TmdbSearchModal = ({ type, open, onClose, onAdded }: TmdbSearchModa
             const date = type === 'movie' ? (item as TmdbMovie).release_date : (item as TmdbSeries).first_air_date;
             const poster = 'poster_path' in item ? item.poster_path : null;
             const isRelease = releaseIds.has(item.id);
+            const alreadyImported = importedIds.has(item.id);
 
             return (
-              <div key={item.id} className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors">
+              <div key={item.id} className={`flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors ${alreadyImported ? 'opacity-60' : ''}`}>
                 <img src={getImageUrl(poster, 'w92')} alt={title} className="w-12 h-16 object-cover rounded" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{title}</p>
