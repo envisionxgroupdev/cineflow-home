@@ -62,27 +62,8 @@ export function SiteScripts({ children }: { children?: React.ReactNode }) {
     });
   }, []);
 
-  const gaId = codes.google_analytics;
-  const gsc = extractContent(codes.google_search_console);
-  const bing = extractContent(codes.bing_webmaster);
-  const yandex = extractContent(codes.yandex_webmaster);
   const headScripts = codes.head_scripts;
   const bodyScripts = codes.body_scripts;
-
-  // Inject verification meta tags directly into DOM
-  useInjectMeta('google-site-verification', gsc);
-  useInjectMeta('msvalidate.01', bing);
-  useInjectMeta('yandex-verification', yandex);
-
-  // Inject Google Analytics
-  useInjectScript(
-    gaId ? `https://www.googletagmanager.com/gtag/js?id=${gaId}` : '',
-    'ga-script'
-  );
-  useInjectInlineScript(
-    gaId ? `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaId}');` : '',
-    'ga-config'
-  );
 
   return (
     <SiteCodesContext.Provider value={codes}>

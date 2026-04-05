@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Save, Loader2, Code2, Search, BarChart3, FileCode } from 'lucide-react';
+import { Save, Loader2, Code2, FileCode } from 'lucide-react';
 
 interface CodeSetting {
   key: string;
@@ -10,39 +10,11 @@ interface CodeSetting {
 
 const CODE_FIELDS = [
   {
-    key: 'google_analytics',
-    label: 'Google Analytics (GA4)',
-    icon: BarChart3,
-    placeholder: 'G-XXXXXXXXXX',
-    help: 'Cole apenas o ID de medição (ex: G-XXXXXXXXXX). O script será injetado automaticamente no <head>.',
-  },
-  {
-    key: 'google_search_console',
-    label: 'Google Search Console',
-    icon: Search,
-    placeholder: 'Cole a meta tag completa ou apenas o content="..."',
-    help: 'Código de verificação do Google Search Console.',
-  },
-  {
-    key: 'bing_webmaster',
-    label: 'Bing Webmaster Tools',
-    icon: Search,
-    placeholder: 'Cole a meta tag completa ou apenas o content="..."',
-    help: 'Código de verificação do Bing Webmaster Tools.',
-  },
-  {
-    key: 'yandex_webmaster',
-    label: 'Yandex Webmaster',
-    icon: Search,
-    placeholder: 'Cole a meta tag completa ou apenas o content="..."',
-    help: 'Código de verificação do Yandex Webmaster.',
-  },
-  {
     key: 'head_scripts',
     label: 'Scripts no <head>',
     icon: FileCode,
     placeholder: '<script>...</script> ou <meta .../>',
-    help: 'Qualquer código extra para o <head> (pixels, meta tags, etc).',
+    help: 'Qualquer código para o <head> (pixels, meta tags, verificações, analytics, etc).',
     multiline: true,
   },
   {
