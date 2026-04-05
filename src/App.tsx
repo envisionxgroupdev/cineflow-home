@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { HelmetProvider } from "react-helmet-async";
+import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import Index from "./pages/Index.tsx";
 import Admin from "./pages/Admin.tsx";
 import Login from "./pages/Login.tsx";
@@ -21,32 +22,34 @@ import { SiteScripts } from "./components/SiteScripts.tsx";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <HelmetProvider>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <SiteScripts>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/filme/:slug" element={<MovieDetails />} />
-            <Route path="/serie/:slug" element={<SeriesDetails />} />
-            <Route path="/filmes" element={<AllMovies />} />
-            <Route path="/series" element={<AllSeries />} />
-            <Route path="/dmca" element={<DMCA />} />
-            <Route path="/termos" element={<Terms />} />
-            <Route path="/privacidade" element={<Privacy />} />
-            <Route path="/sobre" element={<About />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-        </SiteScripts>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </HelmetProvider>
+  <GoogleReCaptchaProvider reCaptchaKey="6LffhagsAAAAAEeoO_4__DnPycbPuXETkIJYPLRI">
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <SiteScripts>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/filme/:slug" element={<MovieDetails />} />
+              <Route path="/serie/:slug" element={<SeriesDetails />} />
+              <Route path="/filmes" element={<AllMovies />} />
+              <Route path="/series" element={<AllSeries />} />
+              <Route path="/dmca" element={<DMCA />} />
+              <Route path="/termos" element={<Terms />} />
+              <Route path="/privacidade" element={<Privacy />} />
+              <Route path="/sobre" element={<About />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+          </SiteScripts>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </HelmetProvider>
+  </GoogleReCaptchaProvider>
 );
 
 export default App;

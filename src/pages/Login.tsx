@@ -1,10 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Film, LogIn, Eye, EyeOff } from 'lucide-react';
-import ReCAPTCHA from 'react-google-recaptcha';
-
-const RECAPTCHA_SITE_KEY = '6LffhagsAAAAAEeoO_4__DnPycbPuXETkIJYPLRI';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -12,24 +10,28 @@ const Login = () => {
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const recaptchaRef = useRef<ReCAPTCHA>(null);
   const { signIn } = useAuth();
   const navigate = useNavigate();
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!captchaToken) { setError('Complete o reCAPTCHA'); return; }
+    if (!executeRecaptcha) { setError('reCAPTCHA não carregou'); return; }
     setError('');
     setLoading(true);
-    const { error } = await signIn(email, password);
-    if (error) {
-      setError('E-mail ou senha incorretos');
-    } else {
-      navigate('/admin');
+    try {
+      await executeRecaptcha('login');
+      const { error } = await signIn(email, password);
+      if (error) {
+        setError('E-mail ou senha incorretos');
+      } else {
+        navigate('/admin');
+      }
+    } catch {
+      setError('Erro no reCAPTCHA');
     }
     setLoading(false);
-  };
+  }, [executeRecaptcha, signIn, email, password, navigate]);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
@@ -84,13 +86,9 @@ const Login = () => {
             </div>
           </div>
 
-          <div className="flex justify-center">
-            <ReCAPTCHA ref={recaptchaRef} sitekey={RECAPTCHA_SITE_KEY} theme="dark" onChange={setCaptchaToken} onExpired={() => setCaptchaToken(null)} />
-          </div>
-
           <button
             type="submit"
-            disabled={loading || !captchaToken}
+            disabled={loading}
             className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-2.5 rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
             <LogIn className="h-4 w-4" />
