@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { Search, Plus, X, Loader2, Sparkles, Calendar } from 'lucide-react';
+import { useState, useCallback, useEffect } from 'react';
+import { Search, Plus, X, Loader2, Sparkles, Calendar, Check } from 'lucide-react';
 import { searchMovies, searchSeries, tmdbMovieToDb, tmdbSeriesToDb, getImageUrl, type TmdbMovie, type TmdbSeries } from '@/services/tmdb';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -18,6 +18,7 @@ export const TmdbSearchModal = ({ type, open, onClose, onAdded }: TmdbSearchModa
   const [searching, setSearching] = useState(false);
   const [adding, setAdding] = useState<number | null>(null);
   const [releaseIds, setReleaseIds] = useState<Set<number>>(new Set());
+  const [importedIds, setImportedIds] = useState<Set<number>>(new Set());
 
   const toggleRelease = (id: number) => {
     setReleaseIds(prev => {
@@ -27,21 +28,43 @@ export const TmdbSearchModal = ({ type, open, onClose, onAdded }: TmdbSearchModa
     });
   };
 
+  // Load imported IDs when modal opens
+  const loadImported = useCallback(async () => {
+    const table = type === 'movie' ? 'movies' : 'series';
+    const allIds: number[] = [];
+    let from = 0;
+    while (true) {
+      const { data } = await supabase.from(table).select('tmdb_id').range(from, from + 999);
+      if (!data || data.length === 0) break;
+      allIds.push(...data.map((d: any) => d.tmdb_id).filter(Boolean));
+      if (data.length < 1000) break;
+      from += 1000;
+    }
+    setImportedIds(new Set(allIds));
+  }, [type]);
+
+  useEffect(() => { if (open) loadImported(); }, [open, loadImported]);
+
   const handleSearch = useCallback(async () => {
-    if (!query.trim()) return;
+    if (!query.trim() && !year.trim()) return;
     setSearching(true);
     try {
+      await loadImported();
       const yearNum = year ? parseInt(year) : undefined;
       const data = type === 'movie' ? await searchMovies(query, yearNum) : await searchSeries(query, yearNum);
-      setResults(data.slice(0, 12));
+      setResults(data.slice(0, 20));
     } catch {
       toast.error('Erro ao buscar no TMDB');
     }
     setSearching(false);
-  }, [query, year, type]);
+  }, [query, year, type, loadImported]);
 
   const handleAdd = async (item: TmdbMovie | TmdbSeries) => {
     const tmdbId = item.id;
+    if (importedIds.has(tmdbId)) {
+      toast.info('Este conteúdo já foi importado!');
+      return;
+    }
     setAdding(tmdbId);
     try {
       const isRelease = releaseIds.has(tmdbId);
@@ -55,6 +78,7 @@ export const TmdbSearchModal = ({ type, open, onClose, onAdded }: TmdbSearchModa
         if (error) throw error;
       }
       toast.success(`"${type === 'movie' ? (item as TmdbMovie).title : (item as TmdbSeries).name}" adicionado!`);
+      setImportedIds(prev => new Set([...prev, tmdbId]));
       onAdded();
     } catch (err: any) {
       toast.error(err.message || 'Erro ao salvar');
@@ -101,23 +125,32 @@ export const TmdbSearchModal = ({ type, open, onClose, onAdded }: TmdbSearchModa
             const date = type === 'movie' ? (item as TmdbMovie).release_date : (item as TmdbSeries).first_air_date;
             const poster = 'poster_path' in item ? item.poster_path : null;
             const isRelease = releaseIds.has(item.id);
+            const alreadyImported = importedIds.has(item.id);
 
             return (
-              <div key={item.id} className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors">
+              <div key={item.id} className={`flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors ${alreadyImported ? 'opacity-60' : ''}`}>
                 <img src={getImageUrl(poster, 'w92')} alt={title} className="w-12 h-16 object-cover rounded" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{title}</p>
                   <p className="text-xs text-muted-foreground">{date?.slice(0, 4) || '—'} • ⭐ {item.vote_average.toFixed(1)}</p>
                 </div>
-                <button onClick={() => toggleRelease(item.id)} title={isRelease ? 'Remover de lançamentos' : 'Marcar como lançamento'}
-                  className={`p-1.5 rounded-lg transition-colors shrink-0 ${isRelease ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-primary hover:bg-primary/10'}`}>
-                  <Sparkles className="h-4 w-4" />
-                </button>
-                <button onClick={() => handleAdd(item)} disabled={adding === item.id}
-                  className="flex items-center gap-1 bg-primary text-primary-foreground px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-primary/90 disabled:opacity-50 shrink-0">
-                  {adding === item.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
-                  Adicionar
-                </button>
+                {alreadyImported ? (
+                  <span className="flex items-center gap-1 text-green-400 text-xs font-bold px-3 py-1.5 shrink-0">
+                    <Check className="h-3 w-3" /> Importado
+                  </span>
+                ) : (
+                  <>
+                    <button onClick={() => toggleRelease(item.id)} title={isRelease ? 'Remover de lançamentos' : 'Marcar como lançamento'}
+                      className={`p-1.5 rounded-lg transition-colors shrink-0 ${isRelease ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-primary hover:bg-primary/10'}`}>
+                      <Sparkles className="h-4 w-4" />
+                    </button>
+                    <button onClick={() => handleAdd(item)} disabled={adding === item.id}
+                      className="flex items-center gap-1 bg-primary text-primary-foreground px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-primary/90 disabled:opacity-50 shrink-0">
+                      {adding === item.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+                      Adicionar
+                    </button>
+                  </>
+                )}
               </div>
             );
           })}
