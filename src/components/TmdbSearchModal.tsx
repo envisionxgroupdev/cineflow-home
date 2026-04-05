@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Search, Plus, X, Loader2, Sparkles } from 'lucide-react';
+import { Search, Plus, X, Loader2, Sparkles, Calendar } from 'lucide-react';
 import { searchMovies, searchSeries, tmdbMovieToDb, tmdbSeriesToDb, getImageUrl, type TmdbMovie, type TmdbSeries } from '@/services/tmdb';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -13,6 +13,7 @@ interface TmdbSearchModalProps {
 
 export const TmdbSearchModal = ({ type, open, onClose, onAdded }: TmdbSearchModalProps) => {
   const [query, setQuery] = useState('');
+  const [year, setYear] = useState('');
   const [results, setResults] = useState<(TmdbMovie | TmdbSeries)[]>([]);
   const [searching, setSearching] = useState(false);
   const [adding, setAdding] = useState<number | null>(null);
@@ -30,13 +31,14 @@ export const TmdbSearchModal = ({ type, open, onClose, onAdded }: TmdbSearchModa
     if (!query.trim()) return;
     setSearching(true);
     try {
-      const data = type === 'movie' ? await searchMovies(query) : await searchSeries(query);
+      const yearNum = year ? parseInt(year) : undefined;
+      const data = type === 'movie' ? await searchMovies(query, yearNum) : await searchSeries(query, yearNum);
       setResults(data.slice(0, 12));
     } catch {
       toast.error('Erro ao buscar no TMDB');
     }
     setSearching(false);
-  }, [query, type]);
+  }, [query, year, type]);
 
   const handleAdd = async (item: TmdbMovie | TmdbSeries) => {
     const tmdbId = item.id;
@@ -76,6 +78,12 @@ export const TmdbSearchModal = ({ type, open, onClose, onAdded }: TmdbSearchModa
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input type="text" value={query} onChange={e => setQuery(e.target.value)} placeholder="Digite o nome..."
                 className="w-full pl-10 pr-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
+            </div>
+            <div className="relative w-24 shrink-0">
+              <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input type="number" value={year} onChange={e => setYear(e.target.value)} placeholder="Ano"
+                min="1900" max={new Date().getFullYear() + 1}
+                className="w-full pl-8 pr-2 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
             </div>
             <button type="submit" disabled={searching}
               className="bg-primary text-primary-foreground px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-primary/90 disabled:opacity-50">

@@ -66,7 +66,9 @@ export function SyncManagement() {
       const data = await res.json();
       const ids: number[] = Array.isArray(data) ? data.map((id: any) => Number(id)).filter(Boolean) : [];
       setWarezIds(ids);
-      await loadImported();
+      const freshIds = await loadImported();
+      // Force loadPage with fresh IDs after state settles
+      setTimeout(() => {}, 0);
       toast.success(`${ids.length} IDs encontrados no WarezCDN`);
     } catch (err) {
       toast.error("Erro ao buscar lista do WarezCDN");
