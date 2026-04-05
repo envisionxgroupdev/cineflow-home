@@ -74,15 +74,26 @@ export function SiteScripts({ children }: { children?: React.ReactNode }) {
   );
 }
 
+function cloneAndActivate(node: Node): Node {
+  if (node.nodeName === 'SCRIPT') {
+    const oldScript = node as HTMLScriptElement;
+    const newScript = document.createElement('script');
+    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+    newScript.textContent = oldScript.textContent;
+    return newScript;
+  }
+  return node.cloneNode(true);
+}
+
 function InjectHead({ html }: { html: string }) {
   useEffect(() => {
     const container = document.createElement('div');
     container.innerHTML = html;
     const nodes: Node[] = [];
     container.childNodes.forEach(node => {
-      const cloned = node.cloneNode(true);
-      document.head.appendChild(cloned);
-      nodes.push(cloned);
+      const active = cloneAndActivate(node);
+      document.head.appendChild(active);
+      nodes.push(active);
     });
     return () => { nodes.forEach(n => n.parentNode?.removeChild(n)); };
   }, [html]);
@@ -95,9 +106,9 @@ function InjectBody({ html }: { html: string }) {
     container.innerHTML = html;
     const nodes: Node[] = [];
     container.childNodes.forEach(node => {
-      const cloned = node.cloneNode(true);
-      document.body.appendChild(cloned);
-      nodes.push(cloned);
+      const active = cloneAndActivate(node);
+      document.body.appendChild(active);
+      nodes.push(active);
     });
     return () => { nodes.forEach(n => n.parentNode?.removeChild(n)); };
   }, [html]);
