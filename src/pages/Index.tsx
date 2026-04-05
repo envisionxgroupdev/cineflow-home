@@ -6,6 +6,7 @@ import { ContentSection } from "@/components/ContentSection";
 import { ReleasesSection } from "@/components/ReleasesSection";
 import { Footer } from "@/components/Footer";
 import { EditContentModal } from "@/components/EditContentModal";
+import { AdBanner } from "@/components/AdBanner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import type { Movie, Series } from "@/types/database";
@@ -58,8 +59,10 @@ const Index = () => {
           </div>
         ) : (
           <>
+            <AdBanner page="home" position="top" />
             <ReleasesSection />
             {movies.length > 0 && <ContentSection id="filmes" title="FILMES" items={toCardFormat(movies, 'movie')} />}
+            <AdBanner page="home" position="middle" />
             {series.length > 0 && <ContentSection id="series" title="SÉRIES" items={toCardFormat(series, 'series')} />}
             {movies.length === 0 && series.length === 0 && (
               <div className="text-center py-20">
@@ -69,6 +72,7 @@ const Index = () => {
                 </p>
               </div>
             )}
+            <AdBanner page="home" position="bottom" />
           </>
         )}
       </div>

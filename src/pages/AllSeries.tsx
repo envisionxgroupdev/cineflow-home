@@ -9,6 +9,7 @@ import { Loader2, Search, Tv } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { GenreFilter } from '@/components/GenreFilter';
 import { PaginationControl } from '@/components/PaginationControl';
+import { AdBanner } from '@/components/AdBanner';
 import type { Series } from '@/types/database';
 
 const PER_PAGE = 25;
@@ -67,6 +68,8 @@ const AllSeries = () => {
 
           <GenreFilter items={series} selected={genre} onSelect={setGenre} />
 
+          <AdBanner page="series" position="top" />
+
           {loading ? (
             <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 text-primary animate-spin" /></div>
           ) : (
@@ -85,7 +88,9 @@ const AllSeries = () => {
                   <div className="col-span-full text-center py-12 text-muted-foreground">Nenhuma série encontrada.</div>
                 )}
               </div>
+              <AdBanner page="series" position="middle" />
               <PaginationControl currentPage={page} totalPages={totalPages} onPageChange={handlePageChange} />
+              <AdBanner page="series" position="bottom" />
             </>
           )}
         </div>
