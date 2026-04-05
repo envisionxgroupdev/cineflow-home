@@ -43,8 +43,7 @@ export const TmdbSearchModal = ({ type, open, onClose, onAdded }: TmdbSearchModa
     setImportedIds(new Set(allIds));
   }, [type]);
 
-  // Load on open
-  useState(() => { if (open) loadImported(); });
+  useEffect(() => { if (open) loadImported(); }, [open, loadImported]);
 
   const handleSearch = useCallback(async () => {
     if (!query.trim() && !year.trim()) return;
