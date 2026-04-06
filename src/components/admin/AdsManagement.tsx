@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Save, Eye, EyeOff, Monitor, Film, Tv } from "lucide-react";
+import { SITE_SETTINGS_UPDATED_EVENT } from "@/lib/siteSettingsEvents";
 
 interface AdField {
   key: string;
@@ -57,6 +58,8 @@ export function AdsManagement() {
           .upsert({ key: field.key, value }, { onConflict: "key" });
         if (error) throw error;
       }
+
+      window.dispatchEvent(new Event(SITE_SETTINGS_UPDATED_EVENT));
       toast.success("Anúncios salvos com sucesso!");
     } catch (err: any) {
       toast.error("Erro ao salvar: " + err.message);
