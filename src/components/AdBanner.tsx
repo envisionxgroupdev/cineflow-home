@@ -10,7 +10,15 @@ function cloneAndActivate(node: Node): Node {
   if (node.nodeName === "SCRIPT") {
     const oldScript = node as HTMLScriptElement;
     const newScript = document.createElement("script");
-    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+    Array.from(oldScript.attributes).forEach(attr => {
+      let val = attr.value;
+      // Add cache-busting to external script src to force re-execution
+      if (attr.name === "src" && val) {
+        const sep = val.includes("?") ? "&" : "?";
+        val = `${val}${sep}_cb=${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      }
+      newScript.setAttribute(attr.name, val);
+    });
     newScript.textContent = oldScript.textContent;
     return newScript;
   }
