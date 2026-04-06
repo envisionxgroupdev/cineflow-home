@@ -1,5 +1,6 @@
 import { useEffect, useState, createContext, useContext } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { SITE_SETTINGS_UPDATED_EVENT } from '@/lib/siteSettingsEvents';
 
 const SiteCodesContext = createContext<Record<string, string>>({});
 export const useSiteCodes = () => useContext(SiteCodesContext);
@@ -53,13 +54,28 @@ export function SiteScripts({ children }: { children?: React.ReactNode }) {
   const [codes, setCodes] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    supabase.from('site_settings').select('*').then(({ data }) => {
-      if (data) {
-        const map: Record<string, string> = {};
-        data.forEach((row: { key: string; value: string }) => { map[row.key] = row.value; });
-        setCodes(map);
-      }
-    });
+    let active = true;
+
+    const loadCodes = async () => {
+      const { data } = await supabase.from('site_settings').select('*');
+      if (!active || !data) return;
+
+      const map: Record<string, string> = {};
+      data.forEach((row: { key: string; value: string }) => { map[row.key] = row.value; });
+      setCodes(map);
+    };
+
+    const handleSettingsUpdated = () => {
+      void loadCodes();
+    };
+
+    void loadCodes();
+    window.addEventListener(SITE_SETTINGS_UPDATED_EVENT, handleSettingsUpdated);
+
+    return () => {
+      active = false;
+      window.removeEventListener(SITE_SETTINGS_UPDATED_EVENT, handleSettingsUpdated);
+    };
   }, []);
 
   const headScripts = codes.head_scripts;
