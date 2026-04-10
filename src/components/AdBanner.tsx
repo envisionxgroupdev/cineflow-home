@@ -3,7 +3,7 @@ import { useSiteCodes } from "./SiteScripts";
 
 interface AdBannerProps {
   position: "top" | "middle" | "bottom";
-  page: "home" | "movies" | "series";
+  page: "home" | "movies" | "series" | "movie_detail" | "series_detail";
 }
 
 export function AdBanner({ position, page }: AdBannerProps) {
