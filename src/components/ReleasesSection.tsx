@@ -1,24 +1,32 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Loader2, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Loader2, Sparkles, ChevronLeft, ChevronRight, Play, Star } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { MovieCard } from './MovieCard';
+import { contentUrl } from '@/lib/utils';
 import type { Movie, Series } from '@/types/database';
 
+interface ReleaseItem {
+  id: string;
+  title: string;
+  year: string;
+  rating: number;
+  imageUrl: string;
+  backdrop: string | null;
+  genre: string;
+  overview: string | null;
+  type: 'movie' | 'series';
+}
+
 export function ReleasesSection() {
-  const [items, setItems] = useState<{ id: string; title: string; year: string; rating: number; imageUrl: string; genre: string; type: 'movie' | 'series' }[]>([]);
+  const [items, setItems] = useState<ReleaseItem[]>([]);
   const [loading, setLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  useEffect(() => {
-    loadReleases();
-  }, []);
-
-  useEffect(() => {
-    checkScroll();
-  }, [items]);
+  useEffect(() => { loadReleases(); }, []);
+  useEffect(() => { checkScroll(); }, [items]);
 
   const checkScroll = () => {
     const el = scrollRef.current;
@@ -30,8 +38,7 @@ export function ReleasesSection() {
   const scroll = (dir: 'left' | 'right') => {
     const el = scrollRef.current;
     if (!el) return;
-    const amount = el.clientWidth * 0.75;
-    el.scrollBy({ left: dir === 'left' ? -amount : amount, behavior: 'smooth' });
+    el.scrollBy({ left: dir === 'left' ? -el.clientWidth * 0.75 : el.clientWidth * 0.75, behavior: 'smooth' });
     setTimeout(checkScroll, 400);
   };
 
@@ -40,31 +47,36 @@ export function ReleasesSection() {
       supabase.from('movies').select('*').eq('is_release', true).order('created_at', { ascending: false }),
       supabase.from('series').select('*').eq('is_release', true).order('created_at', { ascending: false }),
     ]);
-    const movies = ((moviesRes.data || []) as Movie[]).map(m => ({
-      id: m.id, title: m.title, year: m.year || '', rating: m.rating,
-      imageUrl: m.image_url || '/placeholder.svg', genre: m.genre || '', type: 'movie' as const,
-    }));
-    const series = ((seriesRes.data || []) as Series[]).map(s => ({
-      id: s.id, title: s.title, year: s.year || '', rating: s.rating,
-      imageUrl: s.image_url || '/placeholder.svg', genre: s.genre || '', type: 'series' as const,
-    }));
-    setItems([...movies, ...series]);
+    const toItem = (arr: (Movie | Series)[], type: 'movie' | 'series'): ReleaseItem[] =>
+      (arr || []).map(i => ({
+        id: i.id, title: i.title, year: i.year || '', rating: i.rating,
+        imageUrl: i.image_url || '/placeholder.svg',
+        backdrop: i.backdrop_url || null,
+        genre: i.genre || '',
+        overview: i.overview || null,
+        type,
+      }));
+    setItems([
+      ...toItem((moviesRes.data || []) as Movie[], 'movie'),
+      ...toItem((seriesRes.data || []) as Series[], 'series'),
+    ]);
     setLoading(false);
   };
 
   if (!loading && items.length === 0) return null;
 
   return (
-    <section id="lancamentos" className="py-12 relative">
+    <section id="lancamentos" className="py-12 md:py-16 relative">
       <div className="container mx-auto px-4">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="flex items-center gap-3 mb-6"
+          className="flex items-center gap-3 mb-8"
         >
-          <div className="p-2 rounded-lg bg-primary/10 cinema-glow">
+          <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20">
             <Sparkles className="h-6 w-6 text-primary" />
           </div>
           <h2 className="font-display text-3xl md:text-4xl text-foreground">LANÇAMENTOS</h2>
@@ -72,48 +84,44 @@ export function ReleasesSection() {
         </motion.div>
 
         {loading ? (
-          <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 text-primary animate-spin" /></div>
+          <div className="flex justify-center py-16"><Loader2 className="h-8 w-8 text-primary animate-spin" /></div>
         ) : (
-          <div className="relative group">
-            {/* Navigation arrows */}
+          <div className="relative group/carousel">
+            {/* Nav arrows */}
             {canScrollLeft && (
-              <button
-                onClick={() => scroll('left')}
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-background/90 backdrop-blur-sm border border-border hover:border-primary/50 rounded-full p-2 opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-2 group-hover:translate-x-0"
-              >
+              <button onClick={() => scroll('left')}
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-background/90 backdrop-blur-md border border-border/60 hover:border-primary/50 rounded-full p-2.5 opacity-0 group-hover/carousel:opacity-100 transition-all duration-300 -translate-x-3 group-hover/carousel:translate-x-0 shadow-lg">
                 <ChevronLeft className="h-5 w-5 text-foreground" />
               </button>
             )}
             {canScrollRight && (
-              <button
-                onClick={() => scroll('right')}
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background/90 backdrop-blur-sm border border-border hover:border-primary/50 rounded-full p-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0"
-              >
+              <button onClick={() => scroll('right')}
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-background/90 backdrop-blur-md border border-border/60 hover:border-primary/50 rounded-full p-2.5 opacity-0 group-hover/carousel:opacity-100 transition-all duration-300 translate-x-3 group-hover/carousel:translate-x-0 shadow-lg">
                 <ChevronRight className="h-5 w-5 text-foreground" />
               </button>
             )}
 
             {/* Fade edges */}
-            <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-background to-transparent z-[5] pointer-events-none" />
-            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent z-[5] pointer-events-none" />
+            <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
 
             {/* Scrollable carousel */}
             <div
               ref={scrollRef}
               onScroll={checkScroll}
-              className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory"
+              className="flex gap-4 md:gap-5 overflow-x-auto pb-4 snap-x snap-mandatory"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {items.map((item, i) => (
                 <motion.div
                   key={item.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.06, duration: 0.4, ease: 'easeOut' }}
-                  className="min-w-[150px] sm:min-w-[180px] md:min-w-[200px] snap-start"
+                  transition={{ delay: i * 0.05, duration: 0.4 }}
+                  className="snap-start shrink-0 w-[200px] sm:w-[220px] md:w-[240px]"
                 >
-                  <MovieCard {...item} />
+                  <ReleaseCard item={item} />
                 </motion.div>
               ))}
             </div>
@@ -121,5 +129,60 @@ export function ReleasesSection() {
         )}
       </div>
     </section>
+  );
+}
+
+function ReleaseCard({ item }: { item: ReleaseItem }) {
+  const href = contentUrl(item.type, item.id, item.title);
+
+  return (
+    <Link to={href} className="group/card block relative">
+      {/* Poster */}
+      <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-secondary ring-1 ring-border/10 group-hover/card:ring-primary/40 transition-all duration-500 shadow-md group-hover/card:shadow-xl group-hover/card:shadow-primary/10">
+        <img
+          src={item.imageUrl}
+          alt={item.title}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-110"
+        />
+
+        {/* Overlay on hover */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent opacity-0 group-hover/card:opacity-100 transition-all duration-500" />
+
+        {/* Play button */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all duration-300 scale-75 group-hover/card:scale-100">
+          <div className="bg-primary/90 backdrop-blur-sm rounded-full p-3 shadow-lg shadow-primary/30">
+            <Play className="h-5 w-5 text-primary-foreground fill-current" />
+          </div>
+        </div>
+
+        {/* Type badge */}
+        <span className="absolute top-2.5 left-2.5 bg-primary/90 backdrop-blur-sm text-primary-foreground text-[10px] font-bold uppercase px-2 py-0.5 rounded-md tracking-wider">
+          {item.type === 'movie' ? 'Filme' : 'Série'}
+        </span>
+
+        {/* Rating badge */}
+        {item.rating > 0 && (
+          <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-background/80 backdrop-blur-sm text-foreground text-xs font-semibold px-2 py-0.5 rounded-md">
+            <Star className="h-3 w-3 text-yellow-400 fill-current" />
+            {item.rating.toFixed(1)}
+          </div>
+        )}
+
+        {/* Bottom info on hover */}
+        <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-2 opacity-0 group-hover/card:translate-y-0 group-hover/card:opacity-100 transition-all duration-300 delay-75">
+          {item.genre && (
+            <p className="text-[11px] text-muted-foreground truncate">{item.genre}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Info below card */}
+      <div className="mt-3 px-0.5">
+        <h3 className="text-sm font-semibold text-foreground truncate group-hover/card:text-primary transition-colors duration-300">
+          {item.title}
+        </h3>
+        <p className="text-xs text-muted-foreground mt-0.5">{item.year}</p>
+      </div>
+    </Link>
   );
 }
