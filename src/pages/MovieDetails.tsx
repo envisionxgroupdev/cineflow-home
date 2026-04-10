@@ -15,6 +15,7 @@ import {
 } from '@/services/tmdb';
 import { ArrowLeft, Star, Clock, Calendar, Play, Loader2, AlertTriangle, Pencil } from 'lucide-react';
 import { ShareButtons } from '@/components/ShareButtons';
+import { AdBanner } from '@/components/AdBanner';
 import type { Movie } from '@/types/database';
 
 type PlayerSource = 'warezcdn' | 'embedmovies';
@@ -117,6 +118,7 @@ const MovieDetails = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-background/80 to-transparent" />
       </div>
 
+      <AdBanner page="movie_detail" position="top" />
       <div className="container mx-auto px-4 -mt-40 relative z-10 pb-12">
         <div className="flex items-center justify-between mb-6">
           <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm">
@@ -195,6 +197,8 @@ const MovieDetails = () => {
           </div>
         </div>
 
+        <AdBanner page="movie_detail" position="middle" />
+
         {cast.length > 0 && (
           <div className="mt-12">
             <h3 className="font-display text-2xl text-foreground mb-6">ELENCO</h3>
@@ -217,6 +221,7 @@ const MovieDetails = () => {
         )}
       </div>
 
+      <AdBanner page="movie_detail" position="bottom" />
       <Footer />
 
       <ReportModal contentId={movie.id} contentType="movie" contentTitle={movie.title} open={reportOpen} onClose={() => setReportOpen(false)} />

@@ -15,6 +15,7 @@ import {
 } from '@/services/tmdb';
 import { ArrowLeft, Star, Calendar, Play, Loader2, ChevronDown, AlertTriangle, Pencil } from 'lucide-react';
 import { ShareButtons } from '@/components/ShareButtons';
+import { AdBanner } from '@/components/AdBanner';
 import type { Series } from '@/types/database';
 
 type PlayerSource = 'warezcdn' | 'embedmovies';
@@ -134,6 +135,7 @@ const SeriesDetails = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-background/80 to-transparent" />
       </div>
 
+      <AdBanner page="series_detail" position="top" />
       <div className="container mx-auto px-4 -mt-40 relative z-10 pb-12">
         <div className="flex items-center justify-between mb-6">
           <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm">
@@ -260,6 +262,8 @@ const SeriesDetails = () => {
           </div>
         )}
 
+        <AdBanner page="series_detail" position="middle" />
+
         {/* Cast */}
         {cast.length > 0 && (
           <div className="mt-12">
@@ -283,6 +287,7 @@ const SeriesDetails = () => {
         )}
       </div>
 
+      <AdBanner page="series_detail" position="bottom" />
       <Footer />
       <ReportModal contentId={series.id} contentType="series" contentTitle={series.title} open={reportOpen} onClose={() => setReportOpen(false)} />
       {isAdmin && <EditContentModal item={series} type="series" open={editOpen} onClose={() => setEditOpen(false)} onSaved={() => loadSeries(series.id)} />}

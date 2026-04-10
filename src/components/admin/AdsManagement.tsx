@@ -21,12 +21,20 @@ const AD_FIELDS: AdField[] = [
   { key: "ad_series_top", label: "Topo", page: "Séries", position: "Topo da página" },
   { key: "ad_series_middle", label: "Meio", page: "Séries", position: "Entre o conteúdo" },
   { key: "ad_series_bottom", label: "Rodapé", page: "Séries", position: "Antes do footer" },
+  { key: "ad_movie_detail_top", label: "Topo", page: "Detalhe Filme", position: "Acima do conteúdo" },
+  { key: "ad_movie_detail_middle", label: "Meio", page: "Detalhe Filme", position: "Entre sinopse e elenco" },
+  { key: "ad_movie_detail_bottom", label: "Rodapé", page: "Detalhe Filme", position: "Antes do footer" },
+  { key: "ad_series_detail_top", label: "Topo", page: "Detalhe Série", position: "Acima do conteúdo" },
+  { key: "ad_series_detail_middle", label: "Meio", page: "Detalhe Série", position: "Entre episódios e elenco" },
+  { key: "ad_series_detail_bottom", label: "Rodapé", page: "Detalhe Série", position: "Antes do footer" },
 ];
 
 const PAGE_GROUPS = [
   { name: "Home", icon: Monitor, fields: AD_FIELDS.filter(f => f.page === "Home") },
   { name: "Filmes", icon: Film, fields: AD_FIELDS.filter(f => f.page === "Filmes") },
   { name: "Séries", icon: Tv, fields: AD_FIELDS.filter(f => f.page === "Séries") },
+  { name: "Detalhe Filme", icon: Film, fields: AD_FIELDS.filter(f => f.page === "Detalhe Filme") },
+  { name: "Detalhe Série", icon: Tv, fields: AD_FIELDS.filter(f => f.page === "Detalhe Série") },
 ];
 
 export function AdsManagement() {
