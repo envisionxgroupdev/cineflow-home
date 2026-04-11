@@ -99,10 +99,10 @@ const MovieDetails = () => {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>{movie.title} — Assistir Online Grátis | Cineflow</title>
-        <meta name="description" content={`Assistir ${movie.title} online grátis em HD dublado. ${overview?.slice(0, 120)}`} />
+        <title>{`Assistir ${movie.title}${movie.year ? ` (${movie.year})` : ''} Online em HD - Cineflow`}</title>
+        <meta name="description" content={`Assistir ${movie.title} online grátis em HD dublado e legendado. ${overview?.slice(0, 120)}`} />
         <link rel="canonical" href={canonicalUrl} />
-        <meta property="og:title" content={`${movie.title} — Assistir Online | Cineflow`} />
+        <meta property="og:title" content={`Assistir ${movie.title}${movie.year ? ` (${movie.year})` : ''} Online em HD - Cineflow`} />
         <meta property="og:description" content={overview?.slice(0, 160)} />
         {movie.image_url && <meta property="og:image" content={movie.image_url} />}
         <meta property="og:type" content="video.movie" />
@@ -194,6 +194,12 @@ const MovieDetails = () => {
                 <p className="text-muted-foreground leading-relaxed">{overview}</p>
               </div>
             )}
+
+            <div className="mb-8 space-y-1 text-sm text-muted-foreground/70">
+              <p className="font-semibold text-foreground/80 uppercase">ASSISTIR {movie.title.toUpperCase()} ONLINE GRÁTIS</p>
+              <p>{movie.title} LEGENDADO || {movie.title} DUBLADO</p>
+              <p>{movie.title} Online - Assistir {movie.title} Online Grátis Dublado Legendado</p>
+            </div>
           </div>
         </div>
 
