@@ -116,10 +116,10 @@ const SeriesDetails = () => {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>{series.title} — Assistir Online Grátis | Cineflow</title>
-        <meta name="description" content={`Assistir ${series.title} online grátis em HD dublado. ${overview?.slice(0, 120)}`} />
+        <title>{`Assistir ${series.title} Online em HD - Cineflow`}</title>
+        <meta name="description" content={`Assistir ${series.title} online grátis em HD dublado e legendado. ${overview?.slice(0, 120)}`} />
         <link rel="canonical" href={canonicalUrl} />
-        <meta property="og:title" content={`${series.title} — Assistir Online | Cineflow`} />
+        <meta property="og:title" content={`Assistir ${series.title} Online em HD - Cineflow`} />
         <meta property="og:description" content={overview?.slice(0, 160)} />
         {series.image_url && <meta property="og:image" content={series.image_url} />}
         <meta property="og:type" content="video.tv_show" />
@@ -177,6 +177,12 @@ const SeriesDetails = () => {
                 <p className="text-muted-foreground leading-relaxed">{overview}</p>
               </div>
             )}
+
+            <div className="mb-8 space-y-1 text-sm text-muted-foreground/70">
+              <p className="font-semibold text-foreground/80 uppercase">ASSISTIR {series.title.toUpperCase()} ONLINE GRÁTIS</p>
+              <p>{series.title} LEGENDADO || {series.title} DUBLADO</p>
+              <p>{series.title} Online - Assistir {series.title} Online Grátis Dublado Legendado</p>
+            </div>
           </div>
         </div>
 
