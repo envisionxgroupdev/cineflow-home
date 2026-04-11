@@ -6,6 +6,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const DOMAIN = 'https://cineflow.top';
 const TMDB_KEY = '2804ac77b0ad498e90e19b5d48ea8f6e';
+const MAX_URLS_PER_SITEMAP = 5000;
 
 function slugify(text) {
   return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
@@ -30,6 +31,14 @@ function urlEntry(loc, opts = {}) {
   if (opts.priority) xml += `\n    <priority>${opts.priority}</priority>`;
   xml += `\n  </url>`;
   return xml;
+}
+
+function chunkArray(arr, size) {
+  const chunks = [];
+  for (let i = 0; i < arr.length; i += size) {
+    chunks.push(arr.slice(i, i + size));
+  }
+  return chunks.length ? chunks : [[]];
 }
 
 async function fetchSeasons(tmdbId) {
@@ -64,6 +73,7 @@ async function generate() {
   const movies = moviesRes.data || [];
   const series = seriesRes.data || [];
   const now = new Date().toISOString().split('T')[0];
+  const sitemapEntries = [];
 
   // 1. Sitemap pages (static)
   const pageUrls = [
@@ -76,16 +86,23 @@ async function generate() {
     urlEntry(`${DOMAIN}/privacidade`, { changefreq: 'monthly', priority: '0.3' }),
   ];
   writeFileSync('dist/sitemap-pages.xml', wrapUrlset(pageUrls), 'utf-8');
+  sitemapEntries.push({ loc: `${DOMAIN}/sitemap-pages.xml`, lastmod: now });
   console.log(`  ✅ sitemap-pages.xml — ${pageUrls.length} URLs`);
 
-  // 2. Sitemap movies
+  // 2. Sitemap movies — split into chunks of MAX_URLS_PER_SITEMAP
   const movieUrls = movies.map(m =>
     urlEntry(movieUrl(m.title), { lastmod: toDate(m.updated_at), changefreq: 'weekly', priority: '0.8' })
   );
-  writeFileSync('dist/sitemap-filmes.xml', wrapUrlset(movieUrls), 'utf-8');
-  console.log(`  ✅ sitemap-filmes.xml — ${movieUrls.length} URLs`);
+  const movieChunks = chunkArray(movieUrls, MAX_URLS_PER_SITEMAP);
+  movieChunks.forEach((chunk, i) => {
+    const num = i + 1;
+    const filename = `sitemap-filmes-${num}.xml`;
+    writeFileSync(`dist/${filename}`, wrapUrlset(chunk), 'utf-8');
+    sitemapEntries.push({ loc: `${DOMAIN}/${filename}`, lastmod: now });
+    console.log(`  ✅ ${filename} — ${chunk.length} URLs`);
+  });
 
-  // 3. Sitemap series + episodes
+  // 3. Sitemap series + episodes — split into chunks
   const serieUrls = [];
   for (const s of series) {
     const lastmod = toDate(s.updated_at);
@@ -102,29 +119,25 @@ async function generate() {
       }
     }
   }
-  writeFileSync('dist/sitemap-series.xml', wrapUrlset(serieUrls), 'utf-8');
-  console.log(`  ✅ sitemap-series.xml — ${serieUrls.length} URLs`);
+  const seriesChunks = chunkArray(serieUrls, MAX_URLS_PER_SITEMAP);
+  seriesChunks.forEach((chunk, i) => {
+    const num = i + 1;
+    const filename = `sitemap-series-${num}.xml`;
+    writeFileSync(`dist/${filename}`, wrapUrlset(chunk), 'utf-8');
+    sitemapEntries.push({ loc: `${DOMAIN}/${filename}`, lastmod: now });
+    console.log(`  ✅ ${filename} — ${chunk.length} URLs`);
+  });
 
   // 4. Sitemap index
-  const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <sitemap>
-    <loc>${DOMAIN}/sitemap-pages.xml</loc>
-    <lastmod>${now}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>${DOMAIN}/sitemap-filmes.xml</loc>
-    <lastmod>${now}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>${DOMAIN}/sitemap-series.xml</loc>
-    <lastmod>${now}</lastmod>
-  </sitemap>
-</sitemapindex>`;
+  const indexEntries = sitemapEntries.map(e =>
+    `  <sitemap>\n    <loc>${e.loc}</loc>\n    <lastmod>${e.lastmod}</lastmod>\n  </sitemap>`
+  ).join('\n');
+
+  const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${indexEntries}\n</sitemapindex>`;
 
   writeFileSync('dist/sitemap.xml', sitemapIndex, 'utf-8');
   const total = pageUrls.length + movieUrls.length + serieUrls.length;
-  console.log(`\n🎬 Sitemap index gerado — ${total} URLs totais em 3 sitemaps`);
+  console.log(`\n🎬 Sitemap index gerado — ${total} URLs totais em ${sitemapEntries.length} sitemaps`);
 }
 
 generate().catch(console.error);
