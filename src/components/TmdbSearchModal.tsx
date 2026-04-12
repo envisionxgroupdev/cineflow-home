@@ -91,6 +91,7 @@ export const TmdbSearchModal = ({ type, open, onClose, onAdded }: TmdbSearchModa
         imageUrl: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
         type,
       });
+      setImportedIds(prev => new Set([...prev, tmdbId]));
       onAdded();
     } catch (err: any) {
       toast.error(err.message || 'Erro ao salvar');
