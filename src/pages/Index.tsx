@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import type { Movie, Series } from "@/types/database";
 import { Loader2 } from "lucide-react";
+import { TelegramFloat } from "@/components/TelegramFloat";
 
 const Index = () => {
   const { isAdmin } = useAuth();
@@ -76,6 +77,7 @@ const Index = () => {
           </>
         )}
       </div>
+      <TelegramFloat />
       <Footer />
 
       {editItem && (
