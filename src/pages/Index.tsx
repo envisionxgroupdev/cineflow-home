@@ -77,6 +77,7 @@ const Index = () => {
           </>
         )}
       </div>
+      <TelegramFloat />
       <Footer />
 
       {editItem && (
