@@ -26,6 +26,15 @@ interface ContentInfo {
   type: "movie" | "series";
 }
 
+async function callTelegram(botToken: string, chatId: string, text: string, photo?: string | null) {
+  const payload: Record<string, unknown> = { botToken, chatId, text, parse_mode: "Markdown" };
+  if (photo) payload.photo = photo;
+
+  const { data, error } = await supabase.functions.invoke("send-telegram", { body: payload });
+  if (error) throw error;
+  return data;
+}
+
 export async function sendTelegramNotification(content: ContentInfo) {
   try {
     const { data: settings } = await supabase.from("site_settings").select("*");
@@ -37,12 +46,10 @@ export async function sendTelegramNotification(content: ContentInfo) {
     if (config.telegram_enabled !== "true") return;
     if (!config.telegram_bot_token) return;
 
-    // Parse channels
     let channels: TelegramChannel[] = [];
     try {
       channels = JSON.parse(config.telegram_channels || "[]");
     } catch {
-      // Legacy single channel
       if (config.telegram_chat_id) {
         channels = [{ id: "legacy", name: "Principal", chatId: config.telegram_chat_id, type: "all" }];
       }
@@ -50,7 +57,6 @@ export async function sendTelegramNotification(content: ContentInfo) {
 
     if (channels.length === 0) return;
 
-    // Filter channels by content type
     const targetChannels = channels.filter(ch =>
       ch.chatId && (ch.type === "all" || (ch.type === "movies" && content.type === "movie") || (ch.type === "series" && content.type === "series"))
     );
@@ -77,31 +83,9 @@ export async function sendTelegramNotification(content: ContentInfo) {
     const sendPhoto = config.telegram_send_photo === "true";
     const botToken = config.telegram_bot_token;
 
-    // Send to all matching channels
     for (const ch of targetChannels) {
       try {
-        if (sendPhoto && content.imageUrl) {
-          await fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              chat_id: ch.chatId,
-              photo: content.imageUrl,
-              caption: message,
-              parse_mode: "Markdown",
-            }),
-          });
-        } else {
-          await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              chat_id: ch.chatId,
-              text: message,
-              parse_mode: "Markdown",
-            }),
-          });
-        }
+        await callTelegram(botToken, ch.chatId, message, sendPhoto ? content.imageUrl : null);
       } catch (err) {
         console.error(`Telegram send error for channel ${ch.name}:`, err);
       }
