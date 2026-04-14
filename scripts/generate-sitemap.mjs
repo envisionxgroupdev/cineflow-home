@@ -35,7 +35,6 @@ function chunkArray(arr, size) {
   return chunks.length ? chunks : [[]];
 }
 
-// Fetch ALL rows from a table (Supabase limits to 1000 per request)
 async function fetchAll(supabase, table, select) {
   const PAGE_SIZE = 1000;
   let all = [];
@@ -68,7 +67,7 @@ async function generate() {
   const now = new Date().toISOString().split('T')[0];
   const sitemapEntries = [];
 
-  // 1. Static pages
+  // 1. Static pages — canonical URLs only
   const pageUrls = [
     urlEntry(`${DOMAIN}/`),
     urlEntry(`${DOMAIN}/filmes`),
@@ -92,7 +91,7 @@ async function generate() {
     console.log(`  ✅ ${filename} — ${chunk.length} URLs`);
   });
 
-  // 3. Series — chunked (only the series page, no episode query params)
+  // 3. Series — chunked
   const serieEntries = series.map(s => urlEntry(serieUrl(s.title)));
   const seriesChunks = chunkArray(serieEntries, MAX_URLS_PER_SITEMAP);
   seriesChunks.forEach((chunk, i) => {

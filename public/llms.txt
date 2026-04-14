@@ -1,0 +1,35 @@
+# Cineflow
+
+> Plataforma de filmes e séries online grátis em HD com legendas e dublagem em português.
+
+## Sobre
+
+Cineflow é um agregador de conteúdo audiovisual que oferece acesso a filmes e séries com informações detalhadas, sinopses, elenco e avaliações. O site não hospeda nenhum conteúdo em seus servidores.
+
+## Páginas Principais
+
+- [Início](https://cineflow.top/): Página principal com os últimos lançamentos e destaques.
+- [Filmes](https://cineflow.top/filmes): Catálogo completo de filmes disponíveis com busca e filtro por gênero.
+- [Séries](https://cineflow.top/series): Catálogo completo de séries disponíveis com busca e filtro por gênero.
+- [Sobre](https://cineflow.top/sobre): Informações sobre a plataforma e sua missão.
+- [DMCA](https://cineflow.top/dmca): Política de direitos autorais e procedimentos para notificação.
+- [Termos de Uso](https://cineflow.top/termos): Termos e condições de uso do site.
+- [Privacidade](https://cineflow.top/privacidade): Política de privacidade e tratamento de dados.
+
+## Conteúdo
+
+O catálogo inclui filmes e séries de diversos gêneros como Ação, Aventura, Comédia, Drama, Ficção Científica, Terror, Romance, Animação, Documentário e mais. Cada título possui:
+
+- Sinopse completa
+- Avaliação (nota)
+- Ano de lançamento
+- Gêneros
+- Elenco principal
+- Opções de reprodução
+
+## Contato
+
+- DMCA: dmca@cineflow.top
+- Geral: contato@cineflow.top
+- Privacidade: privacidade@cineflow.top
+- Telegram: https://t.me/+ABLySKDmGy4zNDcx
