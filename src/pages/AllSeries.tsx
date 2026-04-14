@@ -10,6 +10,7 @@ import { motion } from 'framer-motion';
 import { GenreFilter } from '@/components/GenreFilter';
 import { PaginationControl } from '@/components/PaginationControl';
 import { AdBanner } from '@/components/AdBanner';
+import { Helmet } from 'react-helmet-async';
 import type { Series } from '@/types/database';
 
 const PER_PAGE = 25;
@@ -49,6 +50,11 @@ const AllSeries = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Séries Online Grátis em HD — Cineflow</title>
+        <meta name="description" content="Assista séries online grátis em HD. Catálogo completo com lançamentos, drama, comédia, ficção e muito mais." />
+        <link rel="canonical" href="https://cineflow.top/series" />
+      </Helmet>
       <Navbar />
       <div className="pt-20 pb-12">
         <div className="container mx-auto px-4">

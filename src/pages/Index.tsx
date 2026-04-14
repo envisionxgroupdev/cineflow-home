@@ -50,6 +50,7 @@ const Index = () => {
       <Helmet>
         <title>Cineflow — Filmes e Séries Online Grátis em HD</title>
         <meta name="description" content="Assista filmes e séries online grátis em HD com legendas e dublagem em português. Os melhores lançamentos do cinema." />
+        <link rel="canonical" href="https://cineflow.top/" />
       </Helmet>
       <Navbar />
       <HeroSection />

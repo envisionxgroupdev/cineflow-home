@@ -40,7 +40,7 @@ const Login = () => {
           <div className="flex items-center justify-center gap-2 mb-4">
             <Film className="h-8 w-8 text-primary" />
             <h1 className="font-display text-4xl text-foreground">
-              CINE<span className="text-gradient-cinema">FLOW</span>
+              Login — CINE<span className="text-gradient-cinema">FLOW</span>
             </h1>
           </div>
           <p className="text-muted-foreground text-sm">Faça login na sua conta</p>
