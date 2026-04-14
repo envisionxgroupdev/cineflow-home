@@ -133,17 +133,15 @@ export function TelegramManagement() {
 
     setTesting(channel.id);
     try {
-      const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: channel.chatId,
+      const { data, error } = await supabase.functions.invoke("send-telegram", {
+        body: {
+          botToken,
+          chatId: channel.chatId,
           text: `✅ *Teste de conexão do CineFlow!*\n\nCanal: ${channel.name || "Sem nome"}\nTipo: ${channel.type === "all" ? "Todos" : channel.type === "movies" ? "Filmes" : "Séries"}\n\nBot configurado e funcionando!`,
           parse_mode: "Markdown",
-        }),
+        },
       });
-      const data = await res.json();
+      if (error) throw error;
       if (data?.ok) {
         toast.success(`Teste enviado para "${channel.name || channel.chatId}"!`);
       } else {
