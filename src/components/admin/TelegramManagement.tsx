@@ -134,12 +134,14 @@ export function TelegramManagement() {
   };
 
   const handleTest = async (channel: TelegramChannel) => {
-    const botToken = config[TELEGRAM_KEYS.botToken];
+    const botToken = (config[TELEGRAM_KEYS.botToken] || "").trim();
+    const chatId = channel.chatId.trim();
+
     if (!botToken) {
       toast.error("Preencha o Token do Bot primeiro");
       return;
     }
-    if (!channel.chatId) {
+    if (!chatId) {
       toast.error("Preencha o Chat ID deste canal");
       return;
     }
@@ -148,13 +150,13 @@ export function TelegramManagement() {
     try {
       const data = await invokeEdgeFunction<{ ok?: boolean; description?: string }>("send-telegram", {
         botToken,
-        chatId: channel.chatId,
+        chatId,
         text: `✅ *Teste de conexão do CineFlow!*\n\nCanal: ${channel.name || "Sem nome"}\nTipo: ${channel.type === "all" ? "Todos" : channel.type === "movies" ? "Filmes" : "Séries"}\n\nBot configurado e funcionando!`,
         parse_mode: "Markdown",
       });
 
       if (data?.ok) {
-        toast.success(`Teste enviado para "${channel.name || channel.chatId}"!`);
+        toast.success(`Teste enviado para "${channel.name || chatId}"!`);
       } else {
         toast.error("Erro: " + (data?.description || "Falha ao enviar"));
       }

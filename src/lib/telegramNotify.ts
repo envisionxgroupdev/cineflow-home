@@ -28,8 +28,14 @@ interface ContentInfo {
 }
 
 async function callTelegram(botToken: string, chatId: string, text: string, photo?: string | null) {
-  const payload: Record<string, unknown> = { botToken, chatId, text, parse_mode: "Markdown" };
-  if (photo) payload.photo = photo;
+  const payload: Record<string, unknown> = {
+    botToken: botToken.trim(),
+    chatId: chatId.trim(),
+    text,
+    parse_mode: "Markdown",
+  };
+
+  if (photo?.trim()) payload.photo = photo.trim();
 
   return invokeEdgeFunction<Record<string, unknown>>("send-telegram", payload);
 }
