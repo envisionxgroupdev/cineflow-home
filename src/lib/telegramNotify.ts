@@ -1,5 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { invokeEdgeFunction } from "@/lib/invokeEdgeFunction";
 
 function slugify(text: string): string {
   return text
@@ -28,16 +27,26 @@ interface ContentInfo {
 }
 
 async function callTelegram(botToken: string, chatId: string, text: string, photo?: string | null) {
-  const payload: Record<string, unknown> = {
-    botToken: botToken.trim(),
-    chatId: chatId.trim(),
-    text,
-    parse_mode: "Markdown",
-  };
+  const baseUrl = `https://api.telegram.org/bot${botToken.trim()}`;
 
-  if (photo?.trim()) payload.photo = photo.trim();
+  let url: string;
+  let body: Record<string, unknown>;
 
-  return invokeEdgeFunction<Record<string, unknown>>("send-telegram", payload);
+  if (photo?.trim()) {
+    url = `${baseUrl}/sendPhoto`;
+    body = { chat_id: chatId.trim(), photo: photo.trim(), caption: text, parse_mode: "Markdown" };
+  } else {
+    url = `${baseUrl}/sendMessage`;
+    body = { chat_id: chatId.trim(), text, parse_mode: "Markdown" };
+  }
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  return res.json();
 }
 
 export async function sendTelegramNotification(content: ContentInfo) {
