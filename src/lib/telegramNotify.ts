@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { invokeEdgeFunction } from "@/lib/invokeEdgeFunction";
 
 function slugify(text: string): string {
   return text
@@ -30,9 +31,7 @@ async function callTelegram(botToken: string, chatId: string, text: string, phot
   const payload: Record<string, unknown> = { botToken, chatId, text, parse_mode: "Markdown" };
   if (photo) payload.photo = photo;
 
-  const { data, error } = await supabase.functions.invoke("send-telegram", { body: payload });
-  if (error) throw error;
-  return data;
+  return invokeEdgeFunction<Record<string, unknown>>("send-telegram", payload);
 }
 
 export async function sendTelegramNotification(content: ContentInfo) {

@@ -1,131 +1,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { invokeEdgeFunction } from "@/lib/invokeEdgeFunction";
 import { toast } from "sonner";
 import { Loader2, Save, Send, Eye, EyeOff, CheckCircle, XCircle, Plus, Trash2 } from "lucide-react";
-
-const TELEGRAM_KEYS = {
-  enabled: "telegram_enabled",
-  botToken: "telegram_bot_token",
-  sendPhoto: "telegram_send_photo",
-  movieTemplate: "telegram_movie_template",
-  seriesTemplate: "telegram_series_template",
-  channels: "telegram_channels", // JSON array: [{id, name, type: 'all'|'movies'|'series'}]
-};
-
-const DEFAULT_MOVIE_TEMPLATE = `🎬 *Novo Filme Adicionado!*
-
-🎥 *{title}* ({year})
-⭐ Nota: {rating}
-🎭 Gênero: {genre}
-
-📖 {overview}
-
-🔗 [Assistir Agora]({link})`;
-
-const DEFAULT_SERIES_TEMPLATE = `📺 *Nova Série Adicionada!*
-
-🎥 *{title}* ({year})
-⭐ Nota: {rating}
-🎭 Gênero: {genre}
-
-📖 {overview}
-
-🔗 [Assistir Agora]({link})`;
-
-interface TelegramChannel {
-  id: string;
-  name: string;
-  chatId: string;
-  type: "all" | "movies" | "series";
-}
-
-function Toggle({ enabled, onChange }: { enabled: boolean; onChange: () => void }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={enabled}
-      onClick={onChange}
-      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${enabled ? "bg-green-500" : "bg-muted-foreground/30"}`}
-    >
-      <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${enabled ? "translate-x-5" : "translate-x-0"}`} />
-    </button>
-  );
-}
-
-export function TelegramManagement() {
-  const [config, setConfig] = useState<Record<string, string>>({});
-  const [channels, setChannels] = useState<TelegramChannel[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [testing, setTesting] = useState<string | null>(null);
-  const [showToken, setShowToken] = useState(false);
-
-  useEffect(() => { loadConfig(); }, []);
-
-  const loadConfig = async () => {
-    setLoading(true);
-    const { data } = await supabase.from("site_settings").select("*");
-    if (data) {
-      const map: Record<string, string> = {};
-      data.forEach((row: { key: string; value: string }) => { map[row.key] = row.value; });
-      if (!map[TELEGRAM_KEYS.movieTemplate]) map[TELEGRAM_KEYS.movieTemplate] = DEFAULT_MOVIE_TEMPLATE;
-      if (!map[TELEGRAM_KEYS.seriesTemplate]) map[TELEGRAM_KEYS.seriesTemplate] = DEFAULT_SERIES_TEMPLATE;
-      if (!map[TELEGRAM_KEYS.sendPhoto]) map[TELEGRAM_KEYS.sendPhoto] = "true";
-      setConfig(map);
-
-      // Load channels
-      try {
-        const parsed = JSON.parse(map[TELEGRAM_KEYS.channels] || "[]");
-        setChannels(parsed);
-      } catch {
-        // Migrate old single chatId
-        if (map.telegram_chat_id) {
-          setChannels([{ id: crypto.randomUUID(), name: "Canal Principal", chatId: map.telegram_chat_id, type: "all" }]);
-        }
-      }
-    }
-    setLoading(false);
-  };
-
-  const updateConfig = (key: string, value: string) => {
-    setConfig(prev => ({ ...prev, [key]: value }));
-  };
-
-  const addChannel = () => {
-    setChannels(prev => [...prev, { id: crypto.randomUUID(), name: "", chatId: "", type: "all" }]);
-  };
-
-  const removeChannel = (id: string) => {
-    setChannels(prev => prev.filter(c => c.id !== id));
-  };
-
-  const updateChannel = (id: string, field: keyof TelegramChannel, value: string) => {
-    setChannels(prev => prev.map(c => c.id === id ? { ...c, [field]: value } : c));
-  };
-
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      const keysToSave = { ...TELEGRAM_KEYS };
-      delete (keysToSave as any).channels;
-
-      for (const [, key] of Object.entries(keysToSave)) {
-        const value = config[key] || "";
-        await supabase.from("site_settings").upsert({ key, value }, { onConflict: "key" });
-      }
-      // Save channels as JSON
-      await supabase.from("site_settings").upsert(
-        { key: TELEGRAM_KEYS.channels, value: JSON.stringify(channels) },
-        { onConflict: "key" }
-      );
-      toast.success("Configurações do Telegram salvas!");
-    } catch (err: any) {
-      toast.error("Erro ao salvar: " + err.message);
-    }
-    setSaving(false);
-  };
-
+...
   const handleTest = async (channel: TelegramChannel) => {
     const botToken = config[TELEGRAM_KEYS.botToken];
     if (!botToken) { toast.error("Preencha o Token do Bot primeiro"); return; }
@@ -133,15 +11,13 @@ export function TelegramManagement() {
 
     setTesting(channel.id);
     try {
-      const { data, error } = await supabase.functions.invoke("send-telegram", {
-        body: {
-          botToken,
-          chatId: channel.chatId,
-          text: `✅ *Teste de conexão do CineFlow!*\n\nCanal: ${channel.name || "Sem nome"}\nTipo: ${channel.type === "all" ? "Todos" : channel.type === "movies" ? "Filmes" : "Séries"}\n\nBot configurado e funcionando!`,
-          parse_mode: "Markdown",
-        },
+      const data = await invokeEdgeFunction<{ ok?: boolean; description?: string }>("send-telegram", {
+        botToken,
+        chatId: channel.chatId,
+        text: `✅ *Teste de conexão do CineFlow!*\n\nCanal: ${channel.name || "Sem nome"}\nTipo: ${channel.type === "all" ? "Todos" : channel.type === "movies" ? "Filmes" : "Séries"}\n\nBot configurado e funcionando!`,
+        parse_mode: "Markdown",
       });
-      if (error) throw error;
+
       if (data?.ok) {
         toast.success(`Teste enviado para "${channel.name || channel.chatId}"!`);
       } else {
