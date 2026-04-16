@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { RefreshCw, Download, Film, Tv, Loader2, Search, Check, ExternalLink, Zap, Square } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getMovieDetails, getSeriesDetails, getImageUrl } from "@/services/tmdb";
+import { sendTelegramNotification } from "@/lib/telegramNotify";
 import { toast } from "sonner";
 
 type Category = "movie" | "serie" | "anime";
