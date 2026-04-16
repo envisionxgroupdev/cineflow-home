@@ -48,9 +48,17 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Cineflow — Filmes e Séries Online Grátis em HD</title>
-        <meta name="description" content="Assista filmes e séries online grátis em HD com legendas e dublagem em português. Os melhores lançamentos do cinema." />
+        <html lang="pt-BR" />
+        <title>Cineflow — Filmes e Séries Online Grátis em HD Dublado</title>
+        <meta name="description" content="Assista filmes e séries online grátis em HD dublado e legendado em português. Lançamentos do cinema atualizados diariamente no Cineflow." />
         <link rel="canonical" href="https://cineflow.top/" />
+        <link rel="alternate" hrefLang="pt-BR" href="https://cineflow.top/" />
+        <meta property="og:title" content="Cineflow — Filmes e Séries Online Grátis em HD Dublado" />
+        <meta property="og:description" content="Assista filmes e séries online grátis em HD dublado e legendado em português. Lançamentos do cinema atualizados diariamente." />
+        <meta property="og:url" content="https://cineflow.top/" />
+        <meta property="og:locale" content="pt_BR" />
+        <meta name="twitter:title" content="Cineflow — Filmes e Séries Online Grátis em HD Dublado" />
+        <meta name="twitter:description" content="Assista filmes e séries online grátis em HD dublado e legendado em português." />
       </Helmet>
       <Navbar />
       <HeroSection />
