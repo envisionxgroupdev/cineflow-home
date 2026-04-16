@@ -116,16 +116,21 @@ const SeriesDetails = () => {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>{`Assistir ${series.title} Online em HD - Cineflow`}</title>
-        <meta name="description" content={`Assistir ${series.title} online grátis em HD dublado e legendado. ${overview?.slice(0, 120)}`} />
+        <html lang="pt-BR" />
+        <title>{`Assistir ${series.title} Online Grátis Dublado HD - Cineflow`}</title>
+        <meta name="description" content={`Assistir ${series.title} todas as temporadas online grátis em HD dublado e legendado. ${overview?.slice(0, 120)}`} />
+        <meta name="keywords" content={`${series.title}, assistir ${series.title}, ${series.title} online, ${series.title} dublado, ${series.title} todas temporadas, série ${series.year || ''}`} />
         <link rel="canonical" href={canonicalUrl} />
-        <meta property="og:title" content={`Assistir ${series.title} Online em HD - Cineflow`} />
+        <link rel="alternate" hrefLang="pt-BR" href={canonicalUrl} />
+        <meta property="og:title" content={`Assistir ${series.title} Online Grátis Dublado HD`} />
         <meta property="og:description" content={overview?.slice(0, 160)} />
         {series.image_url && <meta property="og:image" content={series.image_url} />}
         <meta property="og:type" content="video.tv_show" />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:site_name" content="Cineflow" />
         <meta property="og:locale" content="pt_BR" />
+        <meta name="twitter:card" content="summary_large_image" />
+        {series.image_url && <meta name="twitter:image" content={series.image_url} />}
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
       <Navbar />

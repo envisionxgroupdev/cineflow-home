@@ -99,16 +99,21 @@ const MovieDetails = () => {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>{`Assistir ${movie.title}${movie.year ? ` (${movie.year})` : ''} Online em HD - Cineflow`}</title>
-        <meta name="description" content={`Assistir ${movie.title} online grátis em HD dublado e legendado. ${overview?.slice(0, 120)}`} />
+        <html lang="pt-BR" />
+        <title>{`Assistir ${movie.title}${movie.year ? ` (${movie.year})` : ''} Online Grátis Dublado HD - Cineflow`}</title>
+        <meta name="description" content={`Assistir ${movie.title}${movie.year ? ` (${movie.year})` : ''} online grátis em HD dublado e legendado. ${overview?.slice(0, 120)}`} />
+        <meta name="keywords" content={`${movie.title}, assistir ${movie.title}, ${movie.title} online, ${movie.title} dublado, ${movie.title} legendado, filme ${movie.year || ''}, ${genres}`} />
         <link rel="canonical" href={canonicalUrl} />
-        <meta property="og:title" content={`Assistir ${movie.title}${movie.year ? ` (${movie.year})` : ''} Online em HD - Cineflow`} />
+        <link rel="alternate" hrefLang="pt-BR" href={canonicalUrl} />
+        <meta property="og:title" content={`Assistir ${movie.title}${movie.year ? ` (${movie.year})` : ''} Online Grátis Dublado HD`} />
         <meta property="og:description" content={overview?.slice(0, 160)} />
         {movie.image_url && <meta property="og:image" content={movie.image_url} />}
         <meta property="og:type" content="video.movie" />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:site_name" content="Cineflow" />
         <meta property="og:locale" content="pt_BR" />
+        <meta name="twitter:card" content="summary_large_image" />
+        {movie.image_url && <meta name="twitter:image" content={movie.image_url} />}
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
       <Navbar />
