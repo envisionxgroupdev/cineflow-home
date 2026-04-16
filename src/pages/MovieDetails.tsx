@@ -95,6 +95,15 @@ const MovieDetails = () => {
     url: canonicalUrl,
     actor: cast.slice(0, 5).map(c => ({ '@type': 'Person', name: c.name })),
   };
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Início', item: 'https://cineflow.top/' },
+      { '@type': 'ListItem', position: 2, name: 'Filmes', item: 'https://cineflow.top/filmes' },
+      { '@type': 'ListItem', position: 3, name: movie.title, item: canonicalUrl },
+    ],
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -115,6 +124,7 @@ const MovieDetails = () => {
         <meta name="twitter:card" content="summary_large_image" />
         {movie.image_url && <meta name="twitter:image" content={movie.image_url} />}
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+        <script type="application/ld+json">{JSON.stringify(breadcrumbLd)}</script>
       </Helmet>
       <Navbar />
       <div className="relative w-full h-[50vh] md:h-[60vh]">
@@ -125,6 +135,15 @@ const MovieDetails = () => {
 
       <AdBanner page="movie_detail" position="top" />
       <div className="container mx-auto px-4 -mt-40 relative z-10 pb-12">
+        <nav aria-label="breadcrumb" className="mb-4 text-xs text-muted-foreground">
+          <ol className="flex flex-wrap items-center gap-1.5">
+            <li><Link to="/" className="hover:text-foreground transition-colors">Início</Link></li>
+            <li aria-hidden="true">/</li>
+            <li><Link to="/filmes" className="hover:text-foreground transition-colors">Filmes</Link></li>
+            <li aria-hidden="true">/</li>
+            <li className="text-foreground truncate max-w-[200px]" aria-current="page">{movie.title}</li>
+          </ol>
+        </nav>
         <div className="flex items-center justify-between mb-6">
           <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm">
             <ArrowLeft className="h-4 w-4" /> Voltar
