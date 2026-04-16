@@ -112,6 +112,15 @@ const SeriesDetails = () => {
     url: canonicalUrl,
     actor: cast.slice(0, 5).map(c => ({ '@type': 'Person', name: c.name })),
   };
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Início', item: 'https://cineflow.top/' },
+      { '@type': 'ListItem', position: 2, name: 'Séries', item: 'https://cineflow.top/series' },
+      { '@type': 'ListItem', position: 3, name: series.title, item: canonicalUrl },
+    ],
+  };
 
   return (
     <div className="min-h-screen bg-background">
