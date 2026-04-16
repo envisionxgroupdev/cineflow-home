@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { RefreshCw, Download, Film, Tv, Loader2, Search, Check, ExternalLink, Zap, Square } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getMovieDetails, getSeriesDetails, getImageUrl } from "@/services/tmdb";
+import { sendTelegramNotification } from "@/lib/telegramNotify";
 import { toast } from "sonner";
 
 type Category = "movie" | "serie" | "anime";
@@ -178,6 +179,16 @@ export function SyncManagement() {
     } else {
       toast.success(`${item.title} importado!`);
       setImportedIds((prev) => new Set([...prev, item.tmdb_id]));
+      // Notificar Telegram
+      sendTelegramNotification({
+        title: item.title,
+        year: item.year || null,
+        rating: item.rating,
+        genre: item.genre || null,
+        overview: item.overview || null,
+        imageUrl: item.image_url || null,
+        type: category === "movie" ? "movie" : "series",
+      }).catch((e) => console.error("Telegram notify error:", e));
     }
 
     setPreviews((prev) =>
@@ -240,6 +251,15 @@ export function SyncManagement() {
             const { error } = await supabase.from(table).upsert(payload, { onConflict: 'tmdb_id' });
             if (error) throw error;
             setImportedIds((prev) => new Set([...prev, tmdbId]));
+            sendTelegramNotification({
+              title: payload.title,
+              year: payload.year || null,
+              rating: payload.rating,
+              genre: payload.genre || null,
+              overview: payload.overview || null,
+              imageUrl: payload.image_url || null,
+              type: category === "movie" ? "movie" : "series",
+            }).catch((e) => console.error("Telegram notify error:", e));
           } catch {
             throw new Error(`Failed ${tmdbId}`);
           }
