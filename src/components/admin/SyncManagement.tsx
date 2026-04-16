@@ -179,6 +179,16 @@ export function SyncManagement() {
     } else {
       toast.success(`${item.title} importado!`);
       setImportedIds((prev) => new Set([...prev, item.tmdb_id]));
+      // Notificar Telegram
+      sendTelegramNotification({
+        title: item.title,
+        year: item.year || null,
+        rating: item.rating,
+        genre: item.genre || null,
+        overview: item.overview || null,
+        imageUrl: item.image_url || null,
+        type: category === "movie" ? "movie" : "series",
+      }).catch((e) => console.error("Telegram notify error:", e));
     }
 
     setPreviews((prev) =>
