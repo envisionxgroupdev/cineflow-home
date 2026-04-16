@@ -141,6 +141,7 @@ const SeriesDetails = () => {
         <meta name="twitter:card" content="summary_large_image" />
         {series.image_url && <meta name="twitter:image" content={series.image_url} />}
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+        <script type="application/ld+json">{JSON.stringify(breadcrumbLd)}</script>
       </Helmet>
       <Navbar />
       <div className="relative w-full h-[50vh] md:h-[60vh]">
@@ -151,6 +152,15 @@ const SeriesDetails = () => {
 
       <AdBanner page="series_detail" position="top" />
       <div className="container mx-auto px-4 -mt-40 relative z-10 pb-12">
+        <nav aria-label="breadcrumb" className="mb-4 text-xs text-muted-foreground">
+          <ol className="flex flex-wrap items-center gap-1.5">
+            <li><Link to="/" className="hover:text-foreground transition-colors">Início</Link></li>
+            <li aria-hidden="true">/</li>
+            <li><Link to="/series" className="hover:text-foreground transition-colors">Séries</Link></li>
+            <li aria-hidden="true">/</li>
+            <li className="text-foreground truncate max-w-[200px]" aria-current="page">{series.title}</li>
+          </ol>
+        </nav>
         <div className="flex items-center justify-between mb-6">
           <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm">
             <ArrowLeft className="h-4 w-4" /> Voltar
