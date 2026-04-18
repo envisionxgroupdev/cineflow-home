@@ -49,15 +49,15 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Helmet>
         <html lang="pt-BR" />
-        <title>Cineflow — Filmes e Séries Online Grátis em HD Dublado</title>
-        <meta name="description" content="Assista filmes e séries online grátis em HD dublado e legendado em português. Lançamentos do cinema atualizados diariamente no Cineflow." />
-        <link rel="canonical" href="https://cineflow.top/" />
-        <link rel="alternate" hrefLang="pt-BR" href="https://cineflow.top/" />
-        <meta property="og:title" content="Cineflow — Filmes e Séries Online Grátis em HD Dublado" />
+        <title>PipocaMax — Filmes e Séries Online Grátis em HD Dublado</title>
+        <meta name="description" content="Assista filmes e séries online grátis em HD dublado e legendado em português. Lançamentos do cinema atualizados diariamente no PipocaMax." />
+        <link rel="canonical" href="https://pipocamax.com/" />
+        <link rel="alternate" hrefLang="pt-BR" href="https://pipocamax.com/" />
+        <meta property="og:title" content="PipocaMax — Filmes e Séries Online Grátis em HD Dublado" />
         <meta property="og:description" content="Assista filmes e séries online grátis em HD dublado e legendado em português. Lançamentos do cinema atualizados diariamente." />
-        <meta property="og:url" content="https://cineflow.top/" />
+        <meta property="og:url" content="https://pipocamax.com/" />
         <meta property="og:locale" content="pt_BR" />
-        <meta name="twitter:title" content="Cineflow — Filmes e Séries Online Grátis em HD Dublado" />
+        <meta name="twitter:title" content="PipocaMax — Filmes e Séries Online Grátis em HD Dublado" />
         <meta name="twitter:description" content="Assista filmes e séries online grátis em HD dublado e legendado em português." />
       </Helmet>
       <Navbar />

@@ -1,5 +1,5 @@
 -- =============================================
--- CINEFLOW DATABASE SETUP
+-- PIPOCAMAX DATABASE SETUP
 -- Execute this in Supabase SQL Editor
 -- =============================================
 

@@ -24,5 +24,5 @@ Allow: /
 Disallow: /admin
 Disallow: /login
 
-Host: https://cineflow.top
-Sitemap: https://cineflow.top/sitemap.xml
+Host: https://pipocamax.com
+Sitemap: https://pipocamax.com/sitemap.xml

@@ -6,8 +6,8 @@ import { Film } from "lucide-react";
 const About = () => (
   <div className="min-h-screen bg-background">
     <Helmet>
-      <title>Sobre — Cineflow</title>
-      <meta name="description" content="Conheça o Cineflow, sua plataforma de filmes e séries online." />
+      <title>Sobre — PipocaMax</title>
+      <meta name="description" content="Conheça o PipocaMax, sua plataforma de filmes e séries online." />
     </Helmet>
     <Navbar />
     <div className="container mx-auto px-4 pt-24 pb-16 max-w-3xl">
@@ -19,7 +19,7 @@ const About = () => (
       </div>
       
       <div className="prose prose-invert max-w-none space-y-6 text-muted-foreground">
-        <p>O Cineflow é uma plataforma dedicada a oferecer a melhor experiência para os amantes de cinema e séries de TV. Nossa missão é conectar pessoas ao entretenimento de qualidade.</p>
+        <p>O PipocaMax é uma plataforma dedicada a oferecer a melhor experiência para os amantes de cinema e séries de TV. Nossa missão é conectar pessoas ao entretenimento de qualidade.</p>
 
         <h2 className="text-xl font-semibold text-foreground">Nossa Missão</h2>
         <p>Facilitar o acesso ao melhor conteúdo audiovisual, oferecendo uma plataforma intuitiva, rápida e organizada para que você encontre exatamente o que procura.</p>
@@ -33,7 +33,7 @@ const About = () => (
         </ul>
 
         <h2 className="text-xl font-semibold text-foreground">Aviso Legal</h2>
-        <p>O Cineflow não hospeda nenhum conteúdo em seus servidores. Todo o conteúdo disponível é fornecido por serviços de terceiros. Somos apenas um agregador de links disponíveis publicamente na internet.</p>
+        <p>O PipocaMax não hospeda nenhum conteúdo em seus servidores. Todo o conteúdo disponível é fornecido por serviços de terceiros. Somos apenas um agregador de links disponíveis publicamente na internet.</p>
       </div>
     </div>
     <Footer />

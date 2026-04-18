@@ -14,8 +14,8 @@ const NotFound = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <Helmet>
-        <title>Página Não Encontrada — Cineflow</title>
-        <meta name="description" content="A página que você procura não foi encontrada. Volte para a página inicial do Cineflow." />
+        <title>Página Não Encontrada — PipocaMax</title>
+        <meta name="description" content="A página que você procura não foi encontrada. Volte para a página inicial do PipocaMax." />
       </Helmet>
       <div className="text-center">
         <h1 className="mb-4 text-6xl font-display font-bold text-foreground">404</h1>

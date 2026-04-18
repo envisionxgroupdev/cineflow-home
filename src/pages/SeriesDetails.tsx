@@ -98,7 +98,7 @@ const SeriesDetails = () => {
     return '';
   };
 
-  const canonicalUrl = `https://cineflow.top/serie/assistir-${slugify(series.title)}-online-gratis`;
+  const canonicalUrl = `https://pipocamax.com/serie/assistir-${slugify(series.title)}-online-gratis`;
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'TVSeries',
@@ -116,8 +116,8 @@ const SeriesDetails = () => {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Início', item: 'https://cineflow.top/' },
-      { '@type': 'ListItem', position: 2, name: 'Séries', item: 'https://cineflow.top/series' },
+      { '@type': 'ListItem', position: 1, name: 'Início', item: 'https://pipocamax.com/' },
+      { '@type': 'ListItem', position: 2, name: 'Séries', item: 'https://pipocamax.com/series' },
       { '@type': 'ListItem', position: 3, name: series.title, item: canonicalUrl },
     ],
   };
@@ -126,7 +126,7 @@ const SeriesDetails = () => {
     <div className="min-h-screen bg-background">
       <Helmet>
         <html lang="pt-BR" />
-        <title>{`Assistir ${series.title} Online Grátis Dublado HD - Cineflow`}</title>
+        <title>{`Assistir ${series.title} Online Grátis Dublado HD - PipocaMax`}</title>
         <meta name="description" content={`Assistir ${series.title} todas as temporadas online grátis em HD dublado e legendado. ${overview?.slice(0, 120)}`} />
         <meta name="keywords" content={`${series.title}, assistir ${series.title}, ${series.title} online, ${series.title} dublado, ${series.title} todas temporadas, série ${series.year || ''}`} />
         <link rel="canonical" href={canonicalUrl} />
@@ -136,7 +136,7 @@ const SeriesDetails = () => {
         {series.image_url && <meta property="og:image" content={series.image_url} />}
         <meta property="og:type" content="video.tv_show" />
         <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:site_name" content="Cineflow" />
+        <meta property="og:site_name" content="PipocaMax" />
         <meta property="og:locale" content="pt_BR" />
         <meta name="twitter:card" content="summary_large_image" />
         {series.image_url && <meta name="twitter:image" content={series.image_url} />}

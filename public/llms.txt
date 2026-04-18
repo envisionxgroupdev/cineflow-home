@@ -1,20 +1,20 @@
-# Cineflow
+# PipocaMax
 
 > Plataforma de filmes e séries online grátis em HD com legendas e dublagem em português.
 
 ## Sobre
 
-Cineflow é um agregador de conteúdo audiovisual que oferece acesso a filmes e séries com informações detalhadas, sinopses, elenco e avaliações. O site não hospeda nenhum conteúdo em seus servidores.
+PipocaMax é um agregador de conteúdo audiovisual que oferece acesso a filmes e séries com informações detalhadas, sinopses, elenco e avaliações. O site não hospeda nenhum conteúdo em seus servidores.
 
 ## Páginas Principais
 
-- [Início](https://cineflow.top/): Página principal com os últimos lançamentos e destaques.
-- [Filmes](https://cineflow.top/filmes): Catálogo completo de filmes disponíveis com busca e filtro por gênero.
-- [Séries](https://cineflow.top/series): Catálogo completo de séries disponíveis com busca e filtro por gênero.
-- [Sobre](https://cineflow.top/sobre): Informações sobre a plataforma e sua missão.
-- [DMCA](https://cineflow.top/dmca): Política de direitos autorais e procedimentos para notificação.
-- [Termos de Uso](https://cineflow.top/termos): Termos e condições de uso do site.
-- [Privacidade](https://cineflow.top/privacidade): Política de privacidade e tratamento de dados.
+- [Início](https://pipocamax.com/): Página principal com os últimos lançamentos e destaques.
+- [Filmes](https://pipocamax.com/filmes): Catálogo completo de filmes disponíveis com busca e filtro por gênero.
+- [Séries](https://pipocamax.com/series): Catálogo completo de séries disponíveis com busca e filtro por gênero.
+- [Sobre](https://pipocamax.com/sobre): Informações sobre a plataforma e sua missão.
+- [DMCA](https://pipocamax.com/dmca): Política de direitos autorais e procedimentos para notificação.
+- [Termos de Uso](https://pipocamax.com/termos): Termos e condições de uso do site.
+- [Privacidade](https://pipocamax.com/privacidade): Política de privacidade e tratamento de dados.
 
 ## Conteúdo
 
@@ -29,7 +29,7 @@ O catálogo inclui filmes e séries de diversos gêneros como Ação, Aventura, 
 
 ## Contato
 
-- DMCA: dmca@cineflow.top
-- Geral: contato@cineflow.top
-- Privacidade: privacidade@cineflow.top
+- DMCA: dmca@pipocamax.com
+- Geral: contato@pipocamax.com
+- Privacidade: privacidade@pipocamax.com
 - Telegram: https://t.me/+ABLySKDmGy4zNDcx

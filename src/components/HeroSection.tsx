@@ -78,7 +78,7 @@ export function HeroSection() {
       <section className="relative h-[70vh] min-h-[400px] flex items-center overflow-hidden bg-background">
         <div className="absolute inset-0 bg-gradient-to-t from-background to-background/50" />
         <div className="relative container mx-auto px-4 text-center">
-          <h1 className="font-display text-4xl md:text-6xl text-foreground mb-4">CINEFLOW</h1>
+          <h1 className="font-display text-4xl md:text-6xl text-foreground mb-4">PIPOCAMAX</h1>
           <p className="text-muted-foreground">Filmes e séries online grátis em HD</p>
         </div>
       </section>
