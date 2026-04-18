@@ -51,9 +51,9 @@ const AllSeries = () => {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Séries Online Grátis em HD — Cineflow</title>
+        <title>Séries Online Grátis em HD — PipocaMax</title>
         <meta name="description" content="Assista séries online grátis em HD. Catálogo completo com lançamentos, drama, comédia, ficção e muito mais." />
-        <link rel="canonical" href="https://cineflow.top/series" />
+        <link rel="canonical" href="https://pipocamax.com/series" />
       </Helmet>
       <Navbar />
       <div className="pt-20 pb-12">

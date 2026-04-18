@@ -52,9 +52,9 @@ const AllMovies = () => {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Filmes Online Grátis em HD — Cineflow</title>
+        <title>Filmes Online Grátis em HD — PipocaMax</title>
         <meta name="description" content="Assista filmes online grátis em HD. Catálogo completo com lançamentos, ação, comédia, drama e muito mais." />
-        <link rel="canonical" href="https://cineflow.top/filmes" />
+        <link rel="canonical" href="https://pipocamax.com/filmes" />
       </Helmet>
       <Navbar />
       <div className="pt-20 pb-12">

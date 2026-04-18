@@ -94,7 +94,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-center text-xs text-muted-foreground">
-              © 2026 Cineflow. Todos os direitos reservados.
+              © 2026 PipocaMax. Todos os direitos reservados.
             </p>
             <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-primary transition-colors">Sitemap</a>
           </div>

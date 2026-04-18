@@ -5,15 +5,15 @@ import { Footer } from "@/components/Footer";
 const DMCA = () => (
   <div className="min-h-screen bg-background">
     <Helmet>
-      <title>DMCA — Cineflow</title>
-      <meta name="description" content="Política DMCA do Cineflow. Saiba como reportar violações de direitos autorais." />
+      <title>DMCA — PipocaMax</title>
+      <meta name="description" content="Política DMCA do PipocaMax. Saiba como reportar violações de direitos autorais." />
     </Helmet>
     <Navbar />
     <div className="container mx-auto px-4 pt-24 pb-16 max-w-3xl">
       <h1 className="text-3xl font-display font-bold text-foreground mb-8">Política DMCA</h1>
       
       <div className="prose prose-invert max-w-none space-y-6 text-muted-foreground">
-        <p>O Cineflow respeita os direitos de propriedade intelectual de terceiros e espera que seus usuários façam o mesmo.</p>
+        <p>O PipocaMax respeita os direitos de propriedade intelectual de terceiros e espera que seus usuários façam o mesmo.</p>
         
         <h2 className="text-xl font-semibold text-foreground">Notificação de Violação</h2>
         <p>Se você acredita que seu trabalho protegido por direitos autorais foi copiado de uma maneira que constitui violação de direitos autorais, forneça as seguintes informações:</p>
@@ -30,7 +30,7 @@ const DMCA = () => (
         <p>Se você acredita que seu conteúdo foi removido por engano, pode enviar uma contra-notificação contendo as informações necessárias conforme descrito na legislação DMCA.</p>
 
         <h2 className="text-xl font-semibold text-foreground">Contato</h2>
-        <p>Para enviar uma notificação DMCA, entre em contato conosco através do e-mail: <span className="text-primary">dmca@cineflow.top</span></p>
+        <p>Para enviar uma notificação DMCA, entre em contato conosco através do e-mail: <span className="text-primary">dmca@pipocamax.com</span></p>
       </div>
     </div>
     <Footer />

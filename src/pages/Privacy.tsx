@@ -5,15 +5,15 @@ import { Footer } from "@/components/Footer";
 const Privacy = () => (
   <div className="min-h-screen bg-background">
     <Helmet>
-      <title>Política de Privacidade — Cineflow</title>
-      <meta name="description" content="Política de privacidade do Cineflow. Saiba como tratamos seus dados pessoais." />
+      <title>Política de Privacidade — PipocaMax</title>
+      <meta name="description" content="Política de privacidade do PipocaMax. Saiba como tratamos seus dados pessoais." />
     </Helmet>
     <Navbar />
     <div className="container mx-auto px-4 pt-24 pb-16 max-w-3xl">
       <h1 className="text-3xl font-display font-bold text-foreground mb-8">Política de Privacidade</h1>
       
       <div className="prose prose-invert max-w-none space-y-6 text-muted-foreground">
-        <p>Esta política descreve como o Cineflow coleta, usa e protege suas informações pessoais.</p>
+        <p>Esta política descreve como o PipocaMax coleta, usa e protege suas informações pessoais.</p>
 
         <h2 className="text-xl font-semibold text-foreground">1. Informações Coletadas</h2>
         <p>Coletamos informações que você nos fornece diretamente, como nome e e-mail ao criar uma conta. Também coletamos dados de navegação automaticamente, incluindo endereço IP, tipo de navegador e páginas visitadas.</p>
@@ -34,7 +34,7 @@ const Privacy = () => (
         <p>Você tem o direito de acessar, corrigir ou excluir suas informações pessoais a qualquer momento. Para exercer esses direitos, entre em contato conosco.</p>
 
         <h2 className="text-xl font-semibold text-foreground">7. Contato</h2>
-        <p>Para questões sobre privacidade: <span className="text-primary">privacidade@cineflow.top</span></p>
+        <p>Para questões sobre privacidade: <span className="text-primary">privacidade@pipocamax.com</span></p>
       </div>
     </div>
     <Footer />

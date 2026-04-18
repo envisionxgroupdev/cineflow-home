@@ -81,7 +81,7 @@ const MovieDetails = () => {
   const hasPlayer1 = !!(movie.player_url || tmdbId);
   const hasPlayer2 = !!(movie.player_url_2 || tmdbId);
 
-  const canonicalUrl = `https://cineflow.top/filme/assistir-${slugify(movie.title)}-online-gratis`;
+  const canonicalUrl = `https://pipocamax.com/filme/assistir-${slugify(movie.title)}-online-gratis`;
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Movie',
@@ -99,8 +99,8 @@ const MovieDetails = () => {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Início', item: 'https://cineflow.top/' },
-      { '@type': 'ListItem', position: 2, name: 'Filmes', item: 'https://cineflow.top/filmes' },
+      { '@type': 'ListItem', position: 1, name: 'Início', item: 'https://pipocamax.com/' },
+      { '@type': 'ListItem', position: 2, name: 'Filmes', item: 'https://pipocamax.com/filmes' },
       { '@type': 'ListItem', position: 3, name: movie.title, item: canonicalUrl },
     ],
   };
@@ -109,7 +109,7 @@ const MovieDetails = () => {
     <div className="min-h-screen bg-background">
       <Helmet>
         <html lang="pt-BR" />
-        <title>{`Assistir ${movie.title}${movie.year ? ` (${movie.year})` : ''} Online Grátis Dublado HD - Cineflow`}</title>
+        <title>{`Assistir ${movie.title}${movie.year ? ` (${movie.year})` : ''} Online Grátis Dublado HD - PipocaMax`}</title>
         <meta name="description" content={`Assistir ${movie.title}${movie.year ? ` (${movie.year})` : ''} online grátis em HD dublado e legendado. ${overview?.slice(0, 120)}`} />
         <meta name="keywords" content={`${movie.title}, assistir ${movie.title}, ${movie.title} online, ${movie.title} dublado, ${movie.title} legendado, filme ${movie.year || ''}, ${genres}`} />
         <link rel="canonical" href={canonicalUrl} />
@@ -119,7 +119,7 @@ const MovieDetails = () => {
         {movie.image_url && <meta property="og:image" content={movie.image_url} />}
         <meta property="og:type" content="video.movie" />
         <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:site_name" content="Cineflow" />
+        <meta property="og:site_name" content="PipocaMax" />
         <meta property="og:locale" content="pt_BR" />
         <meta name="twitter:card" content="summary_large_image" />
         {movie.image_url && <meta name="twitter:image" content={movie.image_url} />}
