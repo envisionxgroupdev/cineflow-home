@@ -1,4 +1,4 @@
-import { Film, Home, Clapperboard, Tv, Star, Info, FileText, Shield, Lock, Send, Globe, ExternalLink } from "lucide-react";
+import { Home, Clapperboard, Tv, Star, Info, FileText, Shield, Lock, Send, Globe, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useSiteCodes } from "./SiteScripts";
 
@@ -88,9 +88,9 @@ export function Footer() {
           {/* Brand + Bottom */}
           <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <Link to="/" className="flex items-center gap-2">
-              <Film className="h-5 w-5 text-primary" />
+              <img src="/favicon.png" alt="PipocaMax" width={24} height={24} className="h-6 w-6 object-contain" loading="lazy" />
               <span className="font-display text-xl tracking-wider text-foreground">
-                CINE<span className="text-gradient-cinema">FLOW</span>
+                PIPOCA<span className="text-gradient-cinema">MAX</span>
               </span>
             </Link>
             <p className="text-center text-xs text-muted-foreground">

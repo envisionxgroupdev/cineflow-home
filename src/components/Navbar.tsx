@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Film, Menu, X, LogIn, Shield } from "lucide-react";
+import { Menu, X, LogIn, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlobalSearch } from "./GlobalSearch";
 import { useAuth } from "@/hooks/useAuth";
@@ -20,9 +20,9 @@ export function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
-          <Film className="h-7 w-7 text-primary" />
+          <img src="/favicon.png" alt="PipocaMax" width={32} height={32} className="h-8 w-8 object-contain" />
           <span className="font-display text-2xl tracking-wider text-foreground">
-            CINE<span className="text-gradient-cinema">FLOW</span>
+            PIPOCA<span className="text-gradient-cinema">MAX</span>
           </span>
         </Link>
 

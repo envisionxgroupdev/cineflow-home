@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { Film } from "lucide-react";
+
 
 const About = () => (
   <div className="min-h-screen bg-background">
@@ -12,9 +12,9 @@ const About = () => (
     <Navbar />
     <div className="container mx-auto px-4 pt-24 pb-16 max-w-3xl">
       <div className="flex items-center gap-3 mb-8">
-        <Film className="h-8 w-8 text-primary" />
+        <img src="/favicon.png" alt="PipocaMax" width={32} height={32} className="h-8 w-8 object-contain" loading="lazy" />
         <h1 className="text-3xl font-display font-bold text-foreground">
-          Sobre o CINE<span className="text-gradient-cinema">FLOW</span>
+          Sobre o PIPOCA<span className="text-gradient-cinema">MAX</span>
         </h1>
       </div>
       
