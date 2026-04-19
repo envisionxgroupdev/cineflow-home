@@ -66,6 +66,7 @@ const Admin = () => {
     { key: "movies" as Tab, label: "Filmes", icon: Film, count: movies.length },
     { key: "series" as Tab, label: "Séries", icon: Tv, count: series.length },
     { key: "reports" as Tab, label: "Reportes", icon: AlertTriangle, count: null },
+    { key: "requests" as Tab, label: "Pedidos", icon: Inbox, count: null },
     { key: "users" as Tab, label: "Usuários", icon: Users, count: null },
     { key: "sync" as Tab, label: "Sincronização", icon: RefreshCw, count: null },
     { key: "codes" as Tab, label: "Códigos", icon: Code2, count: null },
