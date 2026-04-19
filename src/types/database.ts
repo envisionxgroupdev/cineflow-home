@@ -65,3 +65,16 @@ export interface Report {
   created_at: string;
   reporter_email: string | null;
 }
+
+export interface ContentRequest {
+  id: string;
+  title: string;
+  type: 'movie' | 'series';
+  year: string | null;
+  notes: string | null;
+  requester_name: string | null;
+  requester_email: string | null;
+  status: 'pending' | 'fulfilled' | 'rejected';
+  created_at: string;
+  updated_at: string;
+}
