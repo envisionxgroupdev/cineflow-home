@@ -120,6 +120,8 @@ const Admin = () => {
             isAdmin ? <UserManagement /> : null
           ) : activeTab === "reports" ? (
             isAdmin ? <ReportsManagement /> : null
+          ) : activeTab === "requests" ? (
+            isAdmin ? <RequestsManagement /> : null
           ) : activeTab === "sync" ? (
             isAdmin ? <SyncManagement /> : null
           ) : activeTab === "codes" ? (
