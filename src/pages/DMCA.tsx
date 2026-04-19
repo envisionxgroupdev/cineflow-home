@@ -30,7 +30,7 @@ const DMCA = () => (
         <p>Se você acredita que seu conteúdo foi removido por engano, pode enviar uma contra-notificação contendo as informações necessárias conforme descrito na legislação DMCA.</p>
 
         <h2 className="text-xl font-semibold text-foreground">Contato</h2>
-        <p>Para enviar uma notificação DMCA, entre em contato conosco através do e-mail: <span className="text-primary">dmca@pipocamax.com</span></p>
+        <p>Para enviar uma notificação DMCA, entre em contato conosco através do e-mail: <span className="text-primary">pipocamax@proton.me</span></p>
       </div>
     </div>
     <Footer />

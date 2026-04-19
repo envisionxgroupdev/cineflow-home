@@ -4,7 +4,8 @@ import { TmdbSearchModal } from "@/components/TmdbSearchModal";
 import { EditContentModal } from "@/components/EditContentModal";
 import { UserManagement } from "@/components/admin/UserManagement";
 import { ReportsManagement } from "@/components/admin/ReportsManagement";
-import { Film, Tv, Plus, Search, Trash2, Pencil, ArrowLeft, LogOut, Loader2, Users, AlertTriangle, Sparkles, LayoutDashboard, RefreshCw, Code2, Megaphone, Send } from "lucide-react";
+import { RequestsManagement } from "@/components/admin/RequestsManagement";
+import { Film, Tv, Plus, Search, Trash2, Pencil, ArrowLeft, LogOut, Loader2, Users, AlertTriangle, Sparkles, LayoutDashboard, RefreshCw, Code2, Megaphone, Send, Inbox } from "lucide-react";
 import { Dashboard } from "@/components/admin/Dashboard";
 import { SyncManagement } from "@/components/admin/SyncManagement";
 import { CodeManagement } from "@/components/admin/CodeManagement";
@@ -16,7 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Movie, Series } from "@/types/database";
 
-type Tab = "dashboard" | "movies" | "series" | "users" | "reports" | "sync" | "codes" | "ads" | "telegram";
+type Tab = "dashboard" | "movies" | "series" | "users" | "reports" | "requests" | "sync" | "codes" | "ads" | "telegram";
 
 const Admin = () => {
   const { user, isAdmin, loading: authLoading, signOut } = useAuth();
@@ -65,6 +66,7 @@ const Admin = () => {
     { key: "movies" as Tab, label: "Filmes", icon: Film, count: movies.length },
     { key: "series" as Tab, label: "Séries", icon: Tv, count: series.length },
     { key: "reports" as Tab, label: "Reportes", icon: AlertTriangle, count: null },
+    { key: "requests" as Tab, label: "Pedidos", icon: Inbox, count: null },
     { key: "users" as Tab, label: "Usuários", icon: Users, count: null },
     { key: "sync" as Tab, label: "Sincronização", icon: RefreshCw, count: null },
     { key: "codes" as Tab, label: "Códigos", icon: Code2, count: null },
@@ -118,6 +120,8 @@ const Admin = () => {
             isAdmin ? <UserManagement /> : null
           ) : activeTab === "reports" ? (
             isAdmin ? <ReportsManagement /> : null
+          ) : activeTab === "requests" ? (
+            isAdmin ? <RequestsManagement /> : null
           ) : activeTab === "sync" ? (
             isAdmin ? <SyncManagement /> : null
           ) : activeTab === "codes" ? (

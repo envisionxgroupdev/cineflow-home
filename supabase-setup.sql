@@ -148,3 +148,44 @@ values ('92942fd0-4f94-40f7-a122-5df1e4a48c0f', 'admin');
 insert into public.profiles (id, email, display_name)
 values ('92942fd0-4f94-40f7-a122-5df1e4a48c0f', 'envisionxgroup@gmail.com', 'Admin')
 on conflict (id) do nothing;
+
+-- =============================================
+-- 7. REQUESTS (pedidos de filmes/séries pelos visitantes)
+-- =============================================
+create table if not exists public.requests (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  type text not null check (type in ('movie','series')),
+  year text,
+  notes text,
+  requester_name text,
+  requester_email text,
+  status text not null default 'pending' check (status in ('pending','fulfilled','rejected')),
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+alter table public.requests enable row level security;
+
+-- Qualquer pessoa (mesmo anônima) pode CRIAR um pedido
+create policy "Anyone can create requests"
+  on public.requests for insert
+  with check (true);
+
+-- Apenas admins podem ler
+create policy "Admins can read requests"
+  on public.requests for select to authenticated
+  using (public.has_role(auth.uid(), 'admin'));
+
+-- Apenas admins podem atualizar (mudar status)
+create policy "Admins can update requests"
+  on public.requests for update to authenticated
+  using (public.has_role(auth.uid(), 'admin'));
+
+-- Apenas admins podem deletar
+create policy "Admins can delete requests"
+  on public.requests for delete to authenticated
+  using (public.has_role(auth.uid(), 'admin'));
+
+create index if not exists idx_requests_status on public.requests(status);
+create index if not exists idx_requests_created_at on public.requests(created_at desc);
