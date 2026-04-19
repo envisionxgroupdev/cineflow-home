@@ -10,6 +10,8 @@ const navLinks = [
   { label: "Lançamentos", path: "/#lancamentos" },
   { label: "Filmes", path: "/#filmes" },
   { label: "Séries", path: "/#series" },
+  { label: "Pedidos", path: "/pedidos" },
+  { label: "Contato", path: "/contato" },
 ];
 
 export function Navbar() {
