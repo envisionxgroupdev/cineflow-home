@@ -17,7 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Movie, Series } from "@/types/database";
 
-type Tab = "dashboard" | "movies" | "series" | "users" | "reports" | "sync" | "codes" | "ads" | "telegram";
+type Tab = "dashboard" | "movies" | "series" | "users" | "reports" | "requests" | "sync" | "codes" | "ads" | "telegram";
 
 const Admin = () => {
   const { user, isAdmin, loading: authLoading, signOut } = useAuth();
