@@ -16,6 +16,7 @@ import DMCA from "./pages/DMCA.tsx";
 import Terms from "./pages/Terms.tsx";
 import Privacy from "./pages/Privacy.tsx";
 import About from "./pages/About.tsx";
+import Requests from "./pages/Requests.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { SiteScripts } from "./components/SiteScripts.tsx";
 
