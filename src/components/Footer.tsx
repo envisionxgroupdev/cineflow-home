@@ -1,4 +1,4 @@
-import { Home, Clapperboard, Tv, Star, Info, FileText, Shield, Lock, Send, Globe, ExternalLink, Inbox } from "lucide-react";
+import { Home, Clapperboard, Tv, Star, Info, FileText, Shield, Lock, Send, Globe, ExternalLink, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useSiteCodes } from "./SiteScripts";
 
@@ -34,8 +34,8 @@ export function Footer() {
                 <Link to="/series" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
                   <Tv className="h-3.5 w-3.5" /> Séries
                 </Link>
-                <Link to="/pedidos" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
-                  <Inbox className="h-3.5 w-3.5" /> Pedidos
+                <Link to="/contato" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
+                  <Mail className="h-3.5 w-3.5" /> Contato
                 </Link>
                 <Link to="/sobre" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
                   <Info className="h-3.5 w-3.5" /> Sobre
