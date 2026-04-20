@@ -27,9 +27,13 @@ const Requests = () => {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [hp, setHp] = useState("");
+  const openedAtRef = useRef<number>(Date.now());
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const guard = checkAntiSpam({ formKey: "requests", honeypotValue: hp, openedAt: openedAtRef.current });
+    if (!guard.ok) { toast.error(guard.reason || "Bloqueado."); return; }
     const parsed = schema.safeParse({ title, type, year, notes, requester_name: name, requester_email: email });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
