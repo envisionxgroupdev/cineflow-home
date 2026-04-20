@@ -116,6 +116,7 @@ export function TelegramManagement() {
   const handleTest = async (channel: TelegramChannel) => {
     const botToken = (config[TELEGRAM_KEYS.botToken] || "").trim();
     const chatId = channel.chatId.trim();
+    const buttonLabel = config[TELEGRAM_KEYS.buttonLabel] || "▶️ Assistir Agora";
 
     if (!botToken) { toast.error("Preencha o Token do Bot primeiro"); return; }
     if (!chatId) { toast.error("Preencha o Chat ID deste canal"); return; }
@@ -127,8 +128,11 @@ export function TelegramManagement() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chat_id: chatId,
-          text: `✅ *Teste de conexão do CineFlow!*\n\nCanal: ${channel.name || "Sem nome"}\nTipo: ${channel.type === "all" ? "Todos" : channel.type === "movies" ? "Filmes" : "Séries"}\n\nBot configurado e funcionando!`,
+          text: `✅ *Teste de conexão!*\n\nCanal: *${channel.name || "Sem nome"}*\nTipo: ${channel.type === "all" ? "Todos" : channel.type === "movies" ? "Filmes" : "Séries"}\n\nBot configurado e funcionando! 🎬`,
           parse_mode: "Markdown",
+          reply_markup: {
+            inline_keyboard: [[{ text: buttonLabel, url: window.location.origin }]],
+          },
         }),
       });
       const data = await res.json();
