@@ -5,9 +5,7 @@
 const COOLDOWN_MS = 60_000; // 1 minute between submissions per form
 const MIN_FILL_TIME_MS = 3_000; // form must be open at least 3s
 
-export type AntiSpamCheck =
-  | { ok: true }
-  | { ok: false; reason: string };
+export type AntiSpamCheck = { ok: boolean; reason?: string };
 
 export function checkAntiSpam(opts: {
   formKey: string;
