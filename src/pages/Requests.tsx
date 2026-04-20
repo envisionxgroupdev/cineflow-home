@@ -55,6 +55,7 @@ const Requests = () => {
     }
     setDone(true);
     setTitle(""); setYear(""); setNotes(""); setName(""); setEmail("");
+    markSubmitted("requests");
     toast.success("Pedido enviado! Obrigado 🎬");
   };
 
