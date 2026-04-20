@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, Save, Send, Eye, EyeOff, CheckCircle, XCircle, Plus, Trash2 } from "lucide-react";
+import { Loader2, Save, Send, Eye, EyeOff, CheckCircle, XCircle, Plus, Trash2, Settings, Sparkles } from "lucide-react";
+import { TelegramManualSend } from "./TelegramManualSend";
+import { TelegramPreview } from "./TelegramPreview";
 
 const TELEGRAM_KEYS = {
   enabled: "telegram_enabled",
@@ -10,6 +12,7 @@ const TELEGRAM_KEYS = {
   movieTemplate: "telegram_movie_template",
   seriesTemplate: "telegram_series_template",
   channels: "telegram_channels",
+  buttonLabel: "telegram_button_label",
 };
 
 const DEFAULT_MOVIE_TEMPLATE = `🎬 *Novo Filme Adicionado!*
