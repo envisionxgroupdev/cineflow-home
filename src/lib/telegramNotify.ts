@@ -26,18 +26,35 @@ interface ContentInfo {
   type: "movie" | "series";
 }
 
-async function callTelegram(botToken: string, chatId: string, text: string, photo?: string | null) {
+export async function callTelegram(
+  botToken: string,
+  chatId: string,
+  text: string,
+  photo?: string | null,
+  link?: string | null,
+  buttonLabel?: string,
+) {
   const baseUrl = `https://api.telegram.org/bot${botToken.trim()}`;
+
+  const reply_markup = link?.trim()
+    ? { inline_keyboard: [[{ text: buttonLabel || "▶️ Assistir Agora", url: link.trim() }]] }
+    : undefined;
 
   let url: string;
   let body: Record<string, unknown>;
 
   if (photo?.trim()) {
     url = `${baseUrl}/sendPhoto`;
-    body = { chat_id: chatId.trim(), photo: photo.trim(), caption: text, parse_mode: "Markdown" };
+    body = { chat_id: chatId.trim(), photo: photo.trim(), caption: text, parse_mode: "Markdown", reply_markup };
   } else {
     url = `${baseUrl}/sendMessage`;
-    body = { chat_id: chatId.trim(), text, parse_mode: "Markdown" };
+    body = {
+      chat_id: chatId.trim(),
+      text,
+      parse_mode: "Markdown",
+      disable_web_page_preview: false,
+      reply_markup,
+    };
   }
 
   const res = await fetch(url, {
@@ -47,6 +64,24 @@ async function callTelegram(botToken: string, chatId: string, text: string, phot
   });
 
   return res.json();
+}
+
+export function buildContentLink(type: "movie" | "series", title: string): string {
+  const slug = slugify(title);
+  const siteUrl = window.location.origin;
+  return type === "movie"
+    ? `${siteUrl}/filme/assistir-${slug}-online-gratis`
+    : `${siteUrl}/serie/assistir-${slug}-online-gratis`;
+}
+
+export function renderTemplate(template: string, content: ContentInfo, link: string): string {
+  return template
+    .replace(/{title}/g, content.title)
+    .replace(/{year}/g, content.year || "—")
+    .replace(/{rating}/g, String(content.rating))
+    .replace(/{genre}/g, content.genre || "—")
+    .replace(/{overview}/g, (content.overview || "").slice(0, 200))
+    .replace(/{link}/g, link);
 }
 
 export async function sendTelegramNotification(content: ContentInfo) {
@@ -77,29 +112,18 @@ export async function sendTelegramNotification(content: ContentInfo) {
 
     if (targetChannels.length === 0) return;
 
-    const slug = slugify(content.title);
-    const siteUrl = window.location.origin;
-    const link = content.type === "movie"
-      ? `${siteUrl}/filme/assistir-${slug}-online-gratis`
-      : `${siteUrl}/serie/assistir-${slug}-online-gratis`;
-
+    const link = buildContentLink(content.type, content.title);
     const templateKey = content.type === "movie" ? "telegram_movie_template" : "telegram_series_template";
     const template = config[templateKey] || "";
-
-    const message = template
-      .replace(/{title}/g, content.title)
-      .replace(/{year}/g, content.year || "—")
-      .replace(/{rating}/g, String(content.rating))
-      .replace(/{genre}/g, content.genre || "—")
-      .replace(/{overview}/g, (content.overview || "").slice(0, 200))
-      .replace(/{link}/g, link);
+    const message = renderTemplate(template, content, link);
 
     const sendPhoto = config.telegram_send_photo === "true";
     const botToken = config.telegram_bot_token;
+    const buttonLabel = config.telegram_button_label || "▶️ Assistir Agora";
 
     for (const ch of targetChannels) {
       try {
-        await callTelegram(botToken, ch.chatId, message, sendPhoto ? content.imageUrl : null);
+        await callTelegram(botToken, ch.chatId, message, sendPhoto ? content.imageUrl : null, link, buttonLabel);
       } catch (err) {
         console.error(`Telegram send error for channel ${ch.name}:`, err);
       }

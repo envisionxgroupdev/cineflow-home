@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, Save, Send, Eye, EyeOff, CheckCircle, XCircle, Plus, Trash2 } from "lucide-react";
+import { Loader2, Save, Send, Eye, EyeOff, CheckCircle, XCircle, Plus, Trash2, Settings, Sparkles } from "lucide-react";
+import { TelegramManualSend } from "./TelegramManualSend";
+import { TelegramPreview } from "./TelegramPreview";
 
 const TELEGRAM_KEYS = {
   enabled: "telegram_enabled",
@@ -10,6 +12,7 @@ const TELEGRAM_KEYS = {
   movieTemplate: "telegram_movie_template",
   seriesTemplate: "telegram_series_template",
   channels: "telegram_channels",
+  buttonLabel: "telegram_button_label",
 };
 
 const DEFAULT_MOVIE_TEMPLATE = `🎬 *Novo Filme Adicionado!*
@@ -53,7 +56,10 @@ function Toggle({ enabled, onChange }: { enabled: boolean; onChange: () => void 
   );
 }
 
+type SubTab = "settings" | "manual";
+
 export function TelegramManagement() {
+  const [subTab, setSubTab] = useState<SubTab>("settings");
   const [config, setConfig] = useState<Record<string, string>>({});
   const [channels, setChannels] = useState<TelegramChannel[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,6 +78,7 @@ export function TelegramManagement() {
       if (!map[TELEGRAM_KEYS.movieTemplate]) map[TELEGRAM_KEYS.movieTemplate] = DEFAULT_MOVIE_TEMPLATE;
       if (!map[TELEGRAM_KEYS.seriesTemplate]) map[TELEGRAM_KEYS.seriesTemplate] = DEFAULT_SERIES_TEMPLATE;
       if (!map[TELEGRAM_KEYS.sendPhoto]) map[TELEGRAM_KEYS.sendPhoto] = "true";
+      if (!map[TELEGRAM_KEYS.buttonLabel]) map[TELEGRAM_KEYS.buttonLabel] = "▶️ Assistir Agora";
       setConfig(map);
       try {
         setChannels(JSON.parse(map[TELEGRAM_KEYS.channels] || "[]"));
@@ -109,6 +116,7 @@ export function TelegramManagement() {
   const handleTest = async (channel: TelegramChannel) => {
     const botToken = (config[TELEGRAM_KEYS.botToken] || "").trim();
     const chatId = channel.chatId.trim();
+    const buttonLabel = config[TELEGRAM_KEYS.buttonLabel] || "▶️ Assistir Agora";
 
     if (!botToken) { toast.error("Preencha o Token do Bot primeiro"); return; }
     if (!chatId) { toast.error("Preencha o Chat ID deste canal"); return; }
@@ -120,8 +128,11 @@ export function TelegramManagement() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chat_id: chatId,
-          text: `✅ *Teste de conexão do CineFlow!*\n\nCanal: ${channel.name || "Sem nome"}\nTipo: ${channel.type === "all" ? "Todos" : channel.type === "movies" ? "Filmes" : "Séries"}\n\nBot configurado e funcionando!`,
+          text: `✅ *Teste de conexão!*\n\nCanal: *${channel.name || "Sem nome"}*\nTipo: ${channel.type === "all" ? "Todos" : channel.type === "movies" ? "Filmes" : "Séries"}\n\nBot configurado e funcionando! 🎬`,
           parse_mode: "Markdown",
+          reply_markup: {
+            inline_keyboard: [[{ text: buttonLabel, url: window.location.origin }]],
+          },
         }),
       });
       const data = await res.json();
@@ -141,133 +152,176 @@ export function TelegramManagement() {
   const isEnabled = config[TELEGRAM_KEYS.enabled] === "true";
   const sendPhoto = config[TELEGRAM_KEYS.sendPhoto] === "true";
 
+  const buttonLabel = config[TELEGRAM_KEYS.buttonLabel] || "▶️ Assistir Agora";
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-xl font-display text-foreground">Bot do Telegram</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Configure o bot para postar automaticamente quando novo conteúdo for adicionado</p>
+          <p className="mt-1 text-sm text-muted-foreground">Configure e dispare mensagens para canais e grupos.</p>
         </div>
-        <button onClick={handleSave} disabled={saving}
-          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
-          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Salvar
-        </button>
+        {subTab === "settings" && (
+          <button onClick={handleSave} disabled={saving}
+            className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Salvar
+          </button>
+        )}
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {isEnabled ? <CheckCircle className="h-5 w-5 text-green-400" /> : <XCircle className="h-5 w-5 text-muted-foreground" />}
-            <div>
-              <p className="text-sm font-medium text-foreground">Notificações do Telegram</p>
-              <p className="text-xs text-muted-foreground">Enviar mensagem quando filmes ou séries forem adicionados</p>
+      <div className="flex gap-2 border-b border-border">
+        {([
+          { k: "settings" as const, label: "Configurações", icon: Settings },
+          { k: "manual" as const, label: "Enviar Manual", icon: Send },
+        ]).map(t => (
+          <button key={t.k} onClick={() => setSubTab(t.k)}
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors -mb-px ${
+              subTab === t.k ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}>
+            <t.icon className="h-4 w-4" /> {t.label}
+          </button>
+        ))}
+      </div>
+
+      {subTab === "manual" ? (
+        <TelegramManualSend />
+      ) : (
+        <>
+          <div className="rounded-xl border border-border bg-card p-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {isEnabled ? <CheckCircle className="h-5 w-5 text-green-500" /> : <XCircle className="h-5 w-5 text-muted-foreground" />}
+                <div>
+                  <p className="text-sm font-medium text-foreground">Notificações automáticas</p>
+                  <p className="text-xs text-muted-foreground">Postar quando filmes ou séries forem adicionados</p>
+                </div>
+              </div>
+              <Toggle enabled={isEnabled} onChange={() => updateConfig(TELEGRAM_KEYS.enabled, isEnabled ? "false" : "true")} />
             </div>
           </div>
-          <Toggle enabled={isEnabled} onChange={() => updateConfig(TELEGRAM_KEYS.enabled, isEnabled ? "false" : "true")} />
-        </div>
-      </div>
 
-      <div className="overflow-hidden rounded-xl border border-border bg-card">
-        <div className="border-b border-border bg-secondary/50 px-5 py-3">
-          <h3 className="text-sm font-semibold text-foreground">Token do Bot</h3>
-        </div>
-        <div className="space-y-4 p-5">
-          <div>
-            <p className="mb-2 text-xs text-muted-foreground">Obtenha em <a href="https://t.me/BotFather" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">@BotFather</a></p>
-            <div className="relative">
-              <input type={showToken ? "text" : "password"} value={config[TELEGRAM_KEYS.botToken] || ""}
-                onChange={e => updateConfig(TELEGRAM_KEYS.botToken, e.target.value)}
-                placeholder="123456789:ABC-DEF1234ghIkl-zyx57W2v..."
-                className="w-full rounded-lg border border-border bg-secondary px-3 py-2.5 pr-10 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
-              <button onClick={() => setShowToken(!showToken)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                {showToken ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          <div className="overflow-hidden rounded-xl border border-border bg-card">
+            <div className="border-b border-border bg-secondary/50 px-5 py-3">
+              <h3 className="text-sm font-semibold text-foreground">Bot & Aparência</h3>
+            </div>
+            <div className="space-y-4 p-5">
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Token do Bot</label>
+                <p className="mb-2 text-xs text-muted-foreground">Obtenha em <a href="https://t.me/BotFather" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">@BotFather</a></p>
+                <div className="relative">
+                  <input type={showToken ? "text" : "password"} value={config[TELEGRAM_KEYS.botToken] || ""}
+                    onChange={e => updateConfig(TELEGRAM_KEYS.botToken, e.target.value)}
+                    placeholder="123456789:ABC-DEF1234ghIkl-zyx57W2v..."
+                    className="w-full rounded-lg border border-border bg-secondary px-3 py-2.5 pr-10 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                  <button onClick={() => setShowToken(!showToken)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                    {showToken ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <Sparkles className="h-3 w-3" /> Texto do botão "Assistir"
+                </label>
+                <input type="text" value={buttonLabel}
+                  onChange={e => updateConfig(TELEGRAM_KEYS.buttonLabel, e.target.value)}
+                  placeholder="▶️ Assistir Agora"
+                  className="w-full rounded-lg border border-border bg-secondary px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                <p className="mt-1 text-[11px] text-muted-foreground">Aparece como botão clicável abaixo da mensagem no Telegram.</p>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                <div>
+                  <p className="text-sm font-medium text-foreground">Enviar com foto</p>
+                  <p className="text-xs text-muted-foreground">Incluir poster na mensagem (recomendado)</p>
+                </div>
+                <Toggle enabled={sendPhoto} onChange={() => updateConfig(TELEGRAM_KEYS.sendPhoto, sendPhoto ? "false" : "true")} />
+              </div>
+            </div>
+          </div>
+
+          <div className="overflow-hidden rounded-xl border border-border bg-card">
+            <div className="flex items-center justify-between border-b border-border bg-secondary/50 px-5 py-3">
+              <h3 className="text-sm font-semibold text-foreground">Canais / Grupos</h3>
+              <button onClick={addChannel} className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80">
+                <Plus className="h-3.5 w-3.5" /> Adicionar Canal
               </button>
             </div>
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-foreground">Enviar com foto</p>
-              <p className="text-xs text-muted-foreground">Incluir poster do conteúdo na mensagem</p>
-            </div>
-            <Toggle enabled={sendPhoto} onChange={() => updateConfig(TELEGRAM_KEYS.sendPhoto, sendPhoto ? "false" : "true")} />
-          </div>
-        </div>
-      </div>
-
-      <div className="overflow-hidden rounded-xl border border-border bg-card">
-        <div className="flex items-center justify-between border-b border-border bg-secondary/50 px-5 py-3">
-          <h3 className="text-sm font-semibold text-foreground">Canais / Grupos</h3>
-          <button onClick={addChannel} className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80">
-            <Plus className="h-3.5 w-3.5" /> Adicionar Canal
-          </button>
-        </div>
-        <div className="space-y-4 p-5">
-          {channels.length === 0 && (
-            <p className="py-4 text-center text-sm text-muted-foreground">Nenhum canal configurado. Adicione um canal para receber notificações.</p>
-          )}
-          {channels.map(ch => (
-            <div key={ch.id} className="space-y-3 rounded-lg border border-border bg-secondary/50 p-4">
-              <div className="flex items-center gap-2">
-                <input type="text" value={ch.name} onChange={e => updateChannel(ch.id, "name", e.target.value)}
-                  placeholder="Nome do canal (ex: Filmes HD)"
-                  className="flex-1 rounded-lg border border-border bg-secondary px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
-                <button onClick={() => removeChannel(ch.id)} className="rounded-lg p-2 text-destructive hover:bg-destructive/10">
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-              <div>
-                <label className="mb-1 block text-xs text-muted-foreground">Chat ID</label>
-                <input type="text" value={ch.chatId} onChange={e => updateChannel(ch.id, "chatId", e.target.value)}
-                  placeholder="-1001234567890"
-                  className="w-full rounded-lg border border-border bg-secondary px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <label className="mb-1.5 block text-xs text-muted-foreground">Tipo de conteúdo</label>
-                  <div className="flex gap-2">
-                    {(["all", "movies", "series"] as const).map(t => (
-                      <button key={t} onClick={() => updateChannel(ch.id, "type", t)}
-                        className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${ch.type === t ? "bg-primary text-primary-foreground" : "border border-border bg-secondary text-muted-foreground hover:text-foreground"}`}>
-                        {t === "all" ? "Todos" : t === "movies" ? "Filmes" : "Séries"}
-                      </button>
-                    ))}
+            <div className="space-y-4 p-5">
+              {channels.length === 0 && (
+                <p className="py-4 text-center text-sm text-muted-foreground">Nenhum canal configurado.</p>
+              )}
+              {channels.map(ch => (
+                <div key={ch.id} className="space-y-3 rounded-lg border border-border bg-secondary/50 p-4">
+                  <div className="flex items-center gap-2">
+                    <input type="text" value={ch.name} onChange={e => updateChannel(ch.id, "name", e.target.value)}
+                      placeholder="Nome do canal (ex: Filmes HD)"
+                      className="flex-1 rounded-lg border border-border bg-secondary px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                    <button onClick={() => removeChannel(ch.id)} className="rounded-lg p-2 text-destructive hover:bg-destructive/10">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs text-muted-foreground">Chat ID</label>
+                    <input type="text" value={ch.chatId} onChange={e => updateChannel(ch.id, "chatId", e.target.value)}
+                      placeholder="-1001234567890"
+                      className="w-full rounded-lg border border-border bg-secondary px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                  </div>
+                  <div className="flex items-end justify-between flex-wrap gap-3">
+                    <div>
+                      <label className="mb-1.5 block text-xs text-muted-foreground">Tipo de conteúdo</label>
+                      <div className="flex gap-2">
+                        {(["all", "movies", "series"] as const).map(t => (
+                          <button key={t} onClick={() => updateChannel(ch.id, "type", t)}
+                            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${ch.type === t ? "bg-primary text-primary-foreground" : "border border-border bg-secondary text-muted-foreground hover:text-foreground"}`}>
+                            {t === "all" ? "Todos" : t === "movies" ? "Filmes" : "Séries"}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <button onClick={() => handleTest(ch)} disabled={testing === ch.id}
+                      className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
+                      {testing === ch.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />} Testar
+                    </button>
                   </div>
                 </div>
-                <button onClick={() => handleTest(ch)} disabled={testing === ch.id}
-                  className="flex items-center gap-1.5 self-end rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
-                  {testing === ch.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />} Testar
-                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-4">
+            <div className="overflow-hidden rounded-xl border border-border bg-card">
+              <div className="border-b border-border bg-secondary/50 px-5 py-3">
+                <h3 className="text-sm font-semibold text-foreground">Template — Filmes</h3>
+              </div>
+              <div className="p-5">
+                <p className="mb-2 text-xs text-muted-foreground">
+                  Variáveis: <code className="rounded bg-secondary px-1">{'{title}'}</code> <code className="rounded bg-secondary px-1">{'{year}'}</code> <code className="rounded bg-secondary px-1">{'{rating}'}</code> <code className="rounded bg-secondary px-1">{'{genre}'}</code> <code className="rounded bg-secondary px-1">{'{overview}'}</code> <code className="rounded bg-secondary px-1">{'{link}'}</code>
+                </p>
+                <textarea value={config[TELEGRAM_KEYS.movieTemplate] || ""} onChange={e => updateConfig(TELEGRAM_KEYS.movieTemplate, e.target.value)}
+                  rows={10} className="w-full resize-y rounded-lg border border-border bg-secondary px-3 py-2 font-mono text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
               </div>
             </div>
-          ))}
-        </div>
-      </div>
+            <TelegramPreview template={config[TELEGRAM_KEYS.movieTemplate] || ""} sendPhoto={sendPhoto} buttonLabel={buttonLabel} type="movie" />
+          </div>
 
-      <div className="overflow-hidden rounded-xl border border-border bg-card">
-        <div className="border-b border-border bg-secondary/50 px-5 py-3">
-          <h3 className="text-sm font-semibold text-foreground">Template — Filmes</h3>
-        </div>
-        <div className="p-5">
-          <p className="mb-2 text-xs text-muted-foreground">
-            Variáveis: <code className="rounded bg-secondary px-1">{'{title}'}</code> <code className="rounded bg-secondary px-1">{'{year}'}</code> <code className="rounded bg-secondary px-1">{'{rating}'}</code> <code className="rounded bg-secondary px-1">{'{genre}'}</code> <code className="rounded bg-secondary px-1">{'{overview}'}</code> <code className="rounded bg-secondary px-1">{'{link}'}</code>
-          </p>
-          <textarea value={config[TELEGRAM_KEYS.movieTemplate] || ""} onChange={e => updateConfig(TELEGRAM_KEYS.movieTemplate, e.target.value)}
-            rows={8} className="w-full resize-y rounded-lg border border-border bg-secondary px-3 py-2 font-mono text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
-        </div>
-      </div>
-
-      <div className="overflow-hidden rounded-xl border border-border bg-card">
-        <div className="border-b border-border bg-secondary/50 px-5 py-3">
-          <h3 className="text-sm font-semibold text-foreground">Template — Séries</h3>
-        </div>
-        <div className="p-5">
-          <p className="mb-2 text-xs text-muted-foreground">
-            Variáveis: <code className="rounded bg-secondary px-1">{'{title}'}</code> <code className="rounded bg-secondary px-1">{'{year}'}</code> <code className="rounded bg-secondary px-1">{'{rating}'}</code> <code className="rounded bg-secondary px-1">{'{genre}'}</code> <code className="rounded bg-secondary px-1">{'{overview}'}</code> <code className="rounded bg-secondary px-1">{'{link}'}</code>
-          </p>
-          <textarea value={config[TELEGRAM_KEYS.seriesTemplate] || ""} onChange={e => updateConfig(TELEGRAM_KEYS.seriesTemplate, e.target.value)}
-            rows={8} className="w-full resize-y rounded-lg border border-border bg-secondary px-3 py-2 font-mono text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
-        </div>
-      </div>
+          <div className="grid lg:grid-cols-2 gap-4">
+            <div className="overflow-hidden rounded-xl border border-border bg-card">
+              <div className="border-b border-border bg-secondary/50 px-5 py-3">
+                <h3 className="text-sm font-semibold text-foreground">Template — Séries</h3>
+              </div>
+              <div className="p-5">
+                <p className="mb-2 text-xs text-muted-foreground">
+                  Variáveis: <code className="rounded bg-secondary px-1">{'{title}'}</code> <code className="rounded bg-secondary px-1">{'{year}'}</code> <code className="rounded bg-secondary px-1">{'{rating}'}</code> <code className="rounded bg-secondary px-1">{'{genre}'}</code> <code className="rounded bg-secondary px-1">{'{overview}'}</code> <code className="rounded bg-secondary px-1">{'{link}'}</code>
+                </p>
+                <textarea value={config[TELEGRAM_KEYS.seriesTemplate] || ""} onChange={e => updateConfig(TELEGRAM_KEYS.seriesTemplate, e.target.value)}
+                  rows={10} className="w-full resize-y rounded-lg border border-border bg-secondary px-3 py-2 font-mono text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
+              </div>
+            </div>
+            <TelegramPreview template={config[TELEGRAM_KEYS.seriesTemplate] || ""} sendPhoto={sendPhoto} buttonLabel={buttonLabel} type="series" />
+          </div>
+        </>
+      )}
     </div>
   );
 }
