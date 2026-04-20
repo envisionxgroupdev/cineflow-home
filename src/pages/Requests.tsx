@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { checkAntiSpam, markSubmitted, honeypotInputProps } from "@/lib/antiSpam";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -26,9 +27,13 @@ const Requests = () => {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [hp, setHp] = useState("");
+  const openedAtRef = useRef<number>(Date.now());
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const guard = checkAntiSpam({ formKey: "requests", honeypotValue: hp, openedAt: openedAtRef.current });
+    if (!guard.ok) { toast.error(guard.reason || "Bloqueado."); return; }
     const parsed = schema.safeParse({ title, type, year, notes, requester_name: name, requester_email: email });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
@@ -50,6 +55,7 @@ const Requests = () => {
     }
     setDone(true);
     setTitle(""); setYear(""); setNotes(""); setName(""); setEmail("");
+    markSubmitted("requests");
     toast.success("Pedido enviado! Obrigado 🎬");
   };
 
@@ -90,6 +96,7 @@ const Requests = () => {
             </div>
           ) : (
             <form onSubmit={submit} className="bg-card border border-border rounded-xl p-6 space-y-5">
+              <input {...honeypotInputProps} value={hp} onChange={e => setHp(e.target.value)} name="website" />
               <div>
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">Tipo *</label>
                 <div className="grid grid-cols-2 gap-2">

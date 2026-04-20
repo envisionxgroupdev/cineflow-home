@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { Film, Tv, AlertTriangle, Database, Globe, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { Film, Tv, AlertTriangle, Database, Globe, CheckCircle, XCircle, Loader2, Inbox, MessageSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Stats {
   movies: number;
   series: number;
   reports: number;
+  pendingRequests: number;
+  newMessages: number;
   dbConnected: boolean;
   tmdbOnline: boolean;
   warezOnline: boolean;
@@ -21,10 +23,12 @@ export function Dashboard() {
 
   async function checkAll() {
     setLoading(true);
-    const [moviesRes, seriesRes, reportsRes, tmdbRes, warezRes] = await Promise.all([
+    const [moviesRes, seriesRes, reportsRes, requestsRes, messagesRes, tmdbRes, warezRes] = await Promise.all([
       supabase.from('movies').select('id', { count: 'exact', head: true }),
       supabase.from('series').select('id', { count: 'exact', head: true }),
       supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+      supabase.from('requests').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+      supabase.from('contact_messages').select('id', { count: 'exact', head: true }).eq('status', 'new'),
       fetch('https://api.themoviedb.org/3/configuration?api_key=c3303b4812a831ae634e26763a65644e').then(r => r.ok).catch(() => false),
       fetch('https://embed.warezcdn.com/').then(r => r.ok).catch(() => false),
     ]);
@@ -33,6 +37,8 @@ export function Dashboard() {
       movies: moviesRes.count ?? 0,
       series: seriesRes.count ?? 0,
       reports: reportsRes.count ?? 0,
+      pendingRequests: requestsRes.count ?? 0,
+      newMessages: messagesRes.count ?? 0,
       dbConnected: !moviesRes.error,
       tmdbOnline: tmdbRes as boolean,
       warezOnline: warezRes as boolean,
@@ -47,6 +53,8 @@ export function Dashboard() {
     { label: "Filmes", value: stats.movies, icon: Film, color: "text-primary" },
     { label: "Séries", value: stats.series, icon: Tv, color: "text-primary" },
     { label: "Reports Pendentes", value: stats.reports, icon: AlertTriangle, color: stats.reports > 0 ? "text-destructive" : "text-primary" },
+    { label: "Pedidos Pendentes", value: stats.pendingRequests, icon: Inbox, color: stats.pendingRequests > 0 ? "text-yellow-500" : "text-primary" },
+    { label: "Mensagens Novas", value: stats.newMessages, icon: MessageSquare, color: stats.newMessages > 0 ? "text-yellow-500" : "text-primary" },
   ];
 
   const services = [
@@ -57,7 +65,7 @@ export function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {cards.map(card => (
           <div key={card.label} className="bg-card border border-border rounded-lg p-5 flex items-center gap-4">
             <div className={`p-3 rounded-lg bg-secondary ${card.color}`}>

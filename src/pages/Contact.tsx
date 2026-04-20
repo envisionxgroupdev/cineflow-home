@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -6,6 +6,7 @@ import { Send, CheckCircle2, Loader2, Mail, MessageSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
+import { checkAntiSpam, markSubmitted, honeypotInputProps } from "@/lib/antiSpam";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Nome muito curto").max(100),
@@ -24,9 +25,13 @@ const Contact = () => {
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [hp, setHp] = useState("");
+  const openedAtRef = useRef<number>(Date.now());
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const guard = checkAntiSpam({ formKey: "contact", honeypotValue: hp, openedAt: openedAtRef.current });
+    if (!guard.ok) { toast.error(guard.reason); return; }
     const parsed = schema.safeParse({ name, telegram, email, subject, message });
     if (!parsed.success) {
       toast.error(parsed.error.errors[0].message);
@@ -43,6 +48,7 @@ const Contact = () => {
     });
     setSubmitting(false);
     if (error) { toast.error("Erro ao enviar: " + error.message); return; }
+    markSubmitted("contact");
     toast.success("Mensagem enviada!");
     setDone(true);
   };
@@ -79,6 +85,7 @@ const Contact = () => {
             </div>
           ) : (
             <form onSubmit={submit} className="bg-card border border-border rounded-xl p-6 md:p-8 space-y-4">
+              <input {...honeypotInputProps} value={hp} onChange={e => setHp(e.target.value)} name="website" />
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">Seu nome *</label>
