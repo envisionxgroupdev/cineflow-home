@@ -65,7 +65,7 @@ export function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {cards.map(card => (
           <div key={card.label} className="bg-card border border-border rounded-lg p-5 flex items-center gap-4">
             <div className={`p-3 rounded-lg bg-secondary ${card.color}`}>
