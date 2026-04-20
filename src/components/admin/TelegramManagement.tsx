@@ -56,7 +56,10 @@ function Toggle({ enabled, onChange }: { enabled: boolean; onChange: () => void 
   );
 }
 
+type SubTab = "settings" | "manual";
+
 export function TelegramManagement() {
+  const [subTab, setSubTab] = useState<SubTab>("settings");
   const [config, setConfig] = useState<Record<string, string>>({});
   const [channels, setChannels] = useState<TelegramChannel[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,6 +78,7 @@ export function TelegramManagement() {
       if (!map[TELEGRAM_KEYS.movieTemplate]) map[TELEGRAM_KEYS.movieTemplate] = DEFAULT_MOVIE_TEMPLATE;
       if (!map[TELEGRAM_KEYS.seriesTemplate]) map[TELEGRAM_KEYS.seriesTemplate] = DEFAULT_SERIES_TEMPLATE;
       if (!map[TELEGRAM_KEYS.sendPhoto]) map[TELEGRAM_KEYS.sendPhoto] = "true";
+      if (!map[TELEGRAM_KEYS.buttonLabel]) map[TELEGRAM_KEYS.buttonLabel] = "▶️ Assistir Agora";
       setConfig(map);
       try {
         setChannels(JSON.parse(map[TELEGRAM_KEYS.channels] || "[]"));
