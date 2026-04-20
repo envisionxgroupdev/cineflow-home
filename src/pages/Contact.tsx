@@ -25,9 +25,13 @@ const Contact = () => {
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [hp, setHp] = useState("");
+  const openedAtRef = useRef<number>(Date.now());
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const guard = checkAntiSpam({ formKey: "contact", honeypotValue: hp, openedAt: openedAtRef.current });
+    if (!guard.ok) { toast.error(guard.reason); return; }
     const parsed = schema.safeParse({ name, telegram, email, subject, message });
     if (!parsed.success) {
       toast.error(parsed.error.errors[0].message);
@@ -44,6 +48,7 @@ const Contact = () => {
     });
     setSubmitting(false);
     if (error) { toast.error("Erro ao enviar: " + error.message); return; }
+    markSubmitted("contact");
     toast.success("Mensagem enviada!");
     setDone(true);
   };
