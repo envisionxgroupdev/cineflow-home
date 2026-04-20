@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -6,6 +6,7 @@ import { Send, CheckCircle2, Loader2, Mail, MessageSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
+import { checkAntiSpam, markSubmitted, honeypotInputProps } from "@/lib/antiSpam";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Nome muito curto").max(100),
