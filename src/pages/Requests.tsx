@@ -96,6 +96,7 @@ const Requests = () => {
             </div>
           ) : (
             <form onSubmit={submit} className="bg-card border border-border rounded-xl p-6 space-y-5">
+              <input {...honeypotInputProps} value={hp} onChange={e => setHp(e.target.value)} name="website" />
               <div>
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">Tipo *</label>
                 <div className="grid grid-cols-2 gap-2">
