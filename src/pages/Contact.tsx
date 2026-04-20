@@ -85,6 +85,7 @@ const Contact = () => {
             </div>
           ) : (
             <form onSubmit={submit} className="bg-card border border-border rounded-xl p-6 md:p-8 space-y-4">
+              <input {...honeypotInputProps} value={hp} onChange={e => setHp(e.target.value)} name="website" />
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">Seu nome *</label>
