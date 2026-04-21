@@ -8,7 +8,7 @@ import { ReleasesSection } from "@/components/ReleasesSection";
 import { Footer } from "@/components/Footer";
 import { EditContentModal } from "@/components/EditContentModal";
 import { AdBanner } from "@/components/AdBanner";
-import { ContentSectionSkeleton } from "@/components/HeroSkeleton";
+import { SplashLoader } from "@/components/SplashLoader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import type { Movie, Series } from "@/types/database";
@@ -52,6 +52,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SplashLoader done={!isLoading} />
       <Helmet>
         <html lang="pt-BR" />
         <title>PipocaMax — Filmes e Séries Online Grátis em HD Dublado</title>
@@ -68,30 +69,20 @@ const Index = () => {
       <Navbar />
       <HeroSection />
       <div className="cinema-gradient">
-        {isLoading ? (
-          <>
-            <ContentSectionSkeleton title="LANÇAMENTOS" />
-            <ContentSectionSkeleton title="FILMES" />
-            <ContentSectionSkeleton title="SÉRIES" />
-          </>
-        ) : (
-          <>
-            <AdBanner page="home" position="top" />
-            <ReleasesSection />
-            {movies.length > 0 && <ContentSection id="filmes" title="FILMES" items={toCardFormat(movies, 'movie')} />}
-            <AdBanner page="home" position="middle" />
-            {series.length > 0 && <ContentSection id="series" title="SÉRIES" items={toCardFormat(series, 'series')} />}
-            {movies.length === 0 && series.length === 0 && (
-              <div className="text-center py-20">
-                <p className="text-muted-foreground">Nenhum conteúdo adicionado ainda.</p>
-                <p className="text-muted-foreground text-sm mt-2">
-                  Acesse o <a href="/admin" className="text-primary hover:underline">painel admin</a> para adicionar filmes e séries.
-                </p>
-              </div>
-            )}
-            <AdBanner page="home" position="bottom" />
-          </>
+        <AdBanner page="home" position="top" />
+        <ReleasesSection />
+        {movies.length > 0 && <ContentSection id="filmes" title="FILMES" items={toCardFormat(movies, 'movie')} />}
+        <AdBanner page="home" position="middle" />
+        {series.length > 0 && <ContentSection id="series" title="SÉRIES" items={toCardFormat(series, 'series')} />}
+        {!isLoading && movies.length === 0 && series.length === 0 && (
+          <div className="text-center py-20">
+            <p className="text-muted-foreground">Nenhum conteúdo adicionado ainda.</p>
+            <p className="text-muted-foreground text-sm mt-2">
+              Acesse o <a href="/admin" className="text-primary hover:underline">painel admin</a> para adicionar filmes e séries.
+            </p>
+          </div>
         )}
+        <AdBanner page="home" position="bottom" />
       </div>
       <TelegramFloat />
       <Footer />
