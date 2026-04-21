@@ -106,9 +106,14 @@ export async function sendTelegramNotification(content: ContentInfo) {
 
     if (channels.length === 0) return;
 
-    const targetChannels = channels.filter(ch =>
-      ch.chatId && (ch.type === "all" || (ch.type === "movies" && content.type === "movie") || (ch.type === "series" && content.type === "series"))
-    );
+    // Strict routing: if specific-type channels exist for this content,
+    // send ONLY to them. "all" channels are a fallback for when no
+    // specific channel was configured for the content type.
+    const specificType = content.type === "movie" ? "movies" : "series";
+    const specific = channels.filter(ch => ch.chatId && ch.type === specificType);
+    const targetChannels = specific.length > 0
+      ? specific
+      : channels.filter(ch => ch.chatId && ch.type === "all");
 
     if (targetChannels.length === 0) return;
 
