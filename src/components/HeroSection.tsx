@@ -4,6 +4,7 @@ import { Play, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { contentUrl } from "@/lib/utils";
+import { HeroSkeleton } from "@/components/HeroSkeleton";
 import type { Movie, Series } from "@/types/database";
 
 interface HeroItem {
@@ -21,6 +22,7 @@ interface HeroItem {
 export function HeroSection() {
   const [items, setItems] = useState<HeroItem[]>([]);
   const [current, setCurrent] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadFeatured();
@@ -60,6 +62,7 @@ export function HeroSection() {
     ].slice(0, 8);
 
     setItems(all);
+    setLoading(false);
   };
 
   const go = useCallback(
@@ -72,7 +75,10 @@ export function HeroSection() {
 
   const item = items[current];
 
-  // Fallback while loading or no data
+  // Skeleton while loading
+  if (loading) return <HeroSkeleton />;
+
+  // Fallback when no data
   if (items.length === 0) {
     return (
       <section className="relative h-[70vh] min-h-[400px] flex items-center overflow-hidden bg-background">
