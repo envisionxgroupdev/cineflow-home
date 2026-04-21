@@ -5,23 +5,42 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { HelmetProvider } from "react-helmet-async";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
+import { lazy, Suspense } from "react";
 import Index from "./pages/Index.tsx";
-import Admin from "./pages/Admin.tsx";
-import Login from "./pages/Login.tsx";
-import MovieDetails from "./pages/MovieDetails.tsx";
-import SeriesDetails from "./pages/SeriesDetails.tsx";
-import AllMovies from "./pages/AllMovies.tsx";
-import AllSeries from "./pages/AllSeries.tsx";
-import DMCA from "./pages/DMCA.tsx";
-import Terms from "./pages/Terms.tsx";
-import Privacy from "./pages/Privacy.tsx";
-import About from "./pages/About.tsx";
-import Requests from "./pages/Requests.tsx";
-import Contact from "./pages/Contact.tsx";
-import NotFound from "./pages/NotFound.tsx";
 import { SiteScripts } from "./components/SiteScripts.tsx";
+import { Loader2 } from "lucide-react";
 
-const queryClient = new QueryClient();
+// Lazy-loaded routes — keeps initial bundle small
+const Admin = lazy(() => import("./pages/Admin.tsx"));
+const Login = lazy(() => import("./pages/Login.tsx"));
+const MovieDetails = lazy(() => import("./pages/MovieDetails.tsx"));
+const SeriesDetails = lazy(() => import("./pages/SeriesDetails.tsx"));
+const AllMovies = lazy(() => import("./pages/AllMovies.tsx"));
+const AllSeries = lazy(() => import("./pages/AllSeries.tsx"));
+const DMCA = lazy(() => import("./pages/DMCA.tsx"));
+const Terms = lazy(() => import("./pages/Terms.tsx"));
+const Privacy = lazy(() => import("./pages/Privacy.tsx"));
+const About = lazy(() => import("./pages/About.tsx"));
+const Requests = lazy(() => import("./pages/Requests.tsx"));
+const Contact = lazy(() => import("./pages/Contact.tsx"));
+const NotFound = lazy(() => import("./pages/NotFound.tsx"));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 min — content changes are infrequent
+      gcTime: 1000 * 60 * 30,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
+
+const RouteFallback = () => (
+  <div className="min-h-screen bg-background flex items-center justify-center">
+    <Loader2 className="h-8 w-8 text-primary animate-spin" />
+  </div>
+);
 
 const App = () => (
   <GoogleReCaptchaProvider reCaptchaKey="6LffhagsAAAAAEeoO_4__DnPycbPuXETkIJYPLRI">
@@ -32,22 +51,24 @@ const App = () => (
           <Sonner />
           <SiteScripts>
           <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/filme/:slug" element={<MovieDetails />} />
-              <Route path="/serie/:slug" element={<SeriesDetails />} />
-              <Route path="/filmes" element={<AllMovies />} />
-              <Route path="/series" element={<AllSeries />} />
-              <Route path="/dmca" element={<DMCA />} />
-              <Route path="/termos" element={<Terms />} />
-              <Route path="/privacidade" element={<Privacy />} />
-              <Route path="/sobre" element={<About />} />
-              <Route path="/pedidos" element={<Requests />} />
-              <Route path="/contato" element={<Contact />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <Suspense fallback={<RouteFallback />}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/filme/:slug" element={<MovieDetails />} />
+                <Route path="/serie/:slug" element={<SeriesDetails />} />
+                <Route path="/filmes" element={<AllMovies />} />
+                <Route path="/series" element={<AllSeries />} />
+                <Route path="/dmca" element={<DMCA />} />
+                <Route path="/termos" element={<Terms />} />
+                <Route path="/privacidade" element={<Privacy />} />
+                <Route path="/sobre" element={<About />} />
+                <Route path="/pedidos" element={<Requests />} />
+                <Route path="/contato" element={<Contact />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
           </BrowserRouter>
           </SiteScripts>
         </TooltipProvider>

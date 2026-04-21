@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
@@ -7,30 +8,34 @@ import { ReleasesSection } from "@/components/ReleasesSection";
 import { Footer } from "@/components/Footer";
 import { EditContentModal } from "@/components/EditContentModal";
 import { AdBanner } from "@/components/AdBanner";
+import { ContentSectionSkeleton } from "@/components/HeroSkeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import type { Movie, Series } from "@/types/database";
-import { Loader2 } from "lucide-react";
 import { TelegramFloat } from "@/components/TelegramFloat";
+
+const HOME_LIMIT = 12;
 
 const Index = () => {
   const { isAdmin } = useAuth();
-  const [movies, setMovies] = useState<Movie[]>([]);
-  const [series, setSeries] = useState<Series[]>([]);
-  const [loading, setLoading] = useState(true);
   const [editItem, setEditItem] = useState<{ item: Movie | Series; type: 'movie' | 'series' } | null>(null);
 
-  useEffect(() => { loadContent(); }, []);
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ['home-content'],
+    queryFn: async () => {
+      const [moviesRes, seriesRes] = await Promise.all([
+        supabase.from('movies').select('*').order('created_at', { ascending: false }).limit(HOME_LIMIT),
+        supabase.from('series').select('*').order('created_at', { ascending: false }).limit(HOME_LIMIT),
+      ]);
+      return {
+        movies: (moviesRes.data || []) as Movie[],
+        series: (seriesRes.data || []) as Series[],
+      };
+    },
+  });
 
-  const loadContent = async () => {
-    const [moviesRes, seriesRes] = await Promise.all([
-      supabase.from('movies').select('*').order('created_at', { ascending: false }).limit(25),
-      supabase.from('series').select('*').order('created_at', { ascending: false }).limit(25),
-    ]);
-    if (moviesRes.data) setMovies(moviesRes.data as Movie[]);
-    if (seriesRes.data) setSeries(seriesRes.data as Series[]);
-    setLoading(false);
-  };
+  const movies = data?.movies || [];
+  const series = data?.series || [];
 
   const toCardFormat = (items: (Movie | Series)[], type: 'movie' | 'series') =>
     items.map((item) => ({
@@ -63,10 +68,12 @@ const Index = () => {
       <Navbar />
       <HeroSection />
       <div className="cinema-gradient">
-        {loading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="h-8 w-8 text-primary animate-spin" />
-          </div>
+        {isLoading ? (
+          <>
+            <ContentSectionSkeleton title="LANÇAMENTOS" />
+            <ContentSectionSkeleton title="FILMES" />
+            <ContentSectionSkeleton title="SÉRIES" />
+          </>
         ) : (
           <>
             <AdBanner page="home" position="top" />
@@ -95,7 +102,7 @@ const Index = () => {
           type={editItem.type}
           open={!!editItem}
           onClose={() => setEditItem(null)}
-          onSaved={() => { loadContent(); setEditItem(null); }}
+          onSaved={() => { void refetch(); setEditItem(null); }}
         />
       )}
     </div>
