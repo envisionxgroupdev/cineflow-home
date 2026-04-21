@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
-import { Film, Tv, AlertTriangle, Database, Globe, CheckCircle, XCircle, Loader2, Inbox, MessageSquare } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Film, Tv, AlertTriangle, Database, Globe, CheckCircle, XCircle, Loader2, Inbox, MessageSquare, Volume2, VolumeX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { playAlertBeep, sendServiceAlert } from "@/lib/serviceAlert";
 
 interface Stats {
   movies: number;
@@ -13,16 +15,23 @@ interface Stats {
   warezOnline: boolean;
 }
 
+const REFRESH_MS = 30_000;
+
 export function Dashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [lastCheck, setLastCheck] = useState<Date | null>(null);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const previousRef = useRef<Stats | null>(null);
 
   useEffect(() => {
     checkAll();
+    const id = setInterval(checkAll, REFRESH_MS);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function checkAll() {
-    setLoading(true);
     const [moviesRes, seriesRes, reportsRes, requestsRes, messagesRes, tmdbRes, warezRes] = await Promise.all([
       supabase.from('movies').select('id', { count: 'exact', head: true }),
       supabase.from('series').select('id', { count: 'exact', head: true }),
@@ -30,10 +39,10 @@ export function Dashboard() {
       supabase.from('requests').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('contact_messages').select('id', { count: 'exact', head: true }).eq('status', 'new'),
       fetch('https://api.themoviedb.org/3/configuration?api_key=c3303b4812a831ae634e26763a65644e').then(r => r.ok).catch(() => false),
-      fetch('https://embed.warezcdn.com/').then(r => r.ok).catch(() => false),
+      fetch('https://embed.warezcdn.com/', { mode: 'no-cors' }).then(() => true).catch(() => false),
     ]);
 
-    setStats({
+    const next: Stats = {
       movies: moviesRes.count ?? 0,
       series: seriesRes.count ?? 0,
       reports: reportsRes.count ?? 0,
@@ -42,11 +51,35 @@ export function Dashboard() {
       dbConnected: !moviesRes.error,
       tmdbOnline: tmdbRes as boolean,
       warezOnline: warezRes as boolean,
-    });
+    };
+
+    // Compare to previous and trigger alerts on transitions
+    const prev = previousRef.current;
+    if (prev) {
+      const checks: Array<[string, boolean, boolean]> = [
+        ["Banco de Dados", prev.dbConnected, next.dbConnected],
+        ["TMDB API", prev.tmdbOnline, next.tmdbOnline],
+        ["WarezCDN", prev.warezOnline, next.warezOnline],
+      ];
+      for (const [name, before, after] of checks) {
+        if (before && !after) {
+          toast.error(`⚠️ ${name} está OFFLINE`, { duration: 8000 });
+          if (soundEnabled) playAlertBeep();
+          void sendServiceAlert(name, "down");
+        } else if (!before && after) {
+          toast.success(`✅ ${name} voltou ao ar`);
+          void sendServiceAlert(name, "up");
+        }
+      }
+    }
+    previousRef.current = next;
+
+    setStats(next);
+    setLastCheck(new Date());
     setLoading(false);
   }
 
-  if (loading) return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 text-primary animate-spin" /></div>;
+  if (loading && !stats) return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 text-primary animate-spin" /></div>;
   if (!stats) return null;
 
   const cards = [
@@ -62,6 +95,8 @@ export function Dashboard() {
     { label: "TMDB API", online: stats.tmdbOnline, icon: Globe },
     { label: "WarezCDN", online: stats.warezOnline, icon: Globe },
   ];
+
+  const anyDown = services.some(s => !s.online);
 
   return (
     <div className="space-y-6">
@@ -80,7 +115,29 @@ export function Dashboard() {
       </div>
 
       <div className="bg-card border border-border rounded-lg p-5">
-        <h3 className="font-display text-lg text-foreground mb-4">STATUS DOS SERVIÇOS</h3>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <h3 className="font-display text-lg text-foreground">STATUS DOS SERVIÇOS</h3>
+            {anyDown && (
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-destructive" />
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSoundEnabled(s => !s)}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              title={soundEnabled ? "Desativar som de alerta" : "Ativar som de alerta"}
+            >
+              {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+            </button>
+            <span className="text-[11px] text-muted-foreground">
+              {lastCheck ? `Atualizado ${lastCheck.toLocaleTimeString("pt-BR")}` : ""}
+            </span>
+          </div>
+        </div>
         <div className="space-y-3">
           {services.map(svc => (
             <div key={svc.label} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
@@ -94,15 +151,24 @@ export function Dashboard() {
                 </span>
               ) : (
                 <span className="flex items-center gap-1.5 text-xs font-medium text-destructive">
+                  <span className="relative flex h-2 w-2 mr-0.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive" />
+                  </span>
                   <XCircle className="h-4 w-4" /> Offline
                 </span>
               )}
             </div>
           ))}
         </div>
+        <p className="mt-4 text-[11px] text-muted-foreground">
+          Verificação automática a cada 30s. Falhas geram toast, beep sonoro e alerta no Telegram (canais do tipo "alerts" ou "all").
+        </p>
       </div>
 
-      <button onClick={checkAll} className="text-sm text-primary hover:underline">Atualizar status</button>
+      <button onClick={() => { setLoading(true); checkAll(); }} className="text-sm text-primary hover:underline">
+        Atualizar agora
+      </button>
     </div>
   );
 }
