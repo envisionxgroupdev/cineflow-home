@@ -6,19 +6,18 @@ import { UserManagement } from "@/components/admin/UserManagement";
 import { ReportsManagement } from "@/components/admin/ReportsManagement";
 import { RequestsManagement } from "@/components/admin/RequestsManagement";
 import { ContactMessagesManagement } from "@/components/admin/ContactMessagesManagement";
-import { Film, Tv, Plus, Search, Trash2, Pencil, ArrowLeft, LogOut, Loader2, Users, AlertTriangle, Sparkles, LayoutDashboard, RefreshCw, Code2, Megaphone, Send, Inbox, MessageSquare } from "lucide-react";
+import { Film, Tv, Plus, Search, Trash2, Pencil, ArrowLeft, LogOut, Loader2, Users, AlertTriangle, Sparkles, LayoutDashboard, RefreshCw, Code2, Megaphone, Inbox, MessageSquare } from "lucide-react";
 import { Dashboard } from "@/components/admin/Dashboard";
 import { SyncManagement } from "@/components/admin/SyncManagement";
 import { CodeManagement } from "@/components/admin/CodeManagement";
 import { AdsManagement } from "@/components/admin/AdsManagement";
-import { TelegramManagement } from "@/components/admin/TelegramManagement";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Movie, Series } from "@/types/database";
 
-type Tab = "dashboard" | "movies" | "series" | "users" | "reports" | "requests" | "contact" | "sync" | "codes" | "ads" | "telegram";
+type Tab = "dashboard" | "movies" | "series" | "users" | "reports" | "requests" | "contact" | "sync" | "codes" | "ads";
 
 const Admin = () => {
   const { user, isAdmin, loading: authLoading, signOut } = useAuth();
@@ -26,6 +25,8 @@ const Admin = () => {
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [movies, setMovies] = useState<Movie[]>([]);
   const [series, setSeries] = useState<Series[]>([]);
+  const [moviesCount, setMoviesCount] = useState<number>(0);
+  const [seriesCount, setSeriesCount] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [loadingData, setLoadingData] = useState(true);
   const [tmdbOpen, setTmdbOpen] = useState(false);
@@ -36,12 +37,16 @@ const Admin = () => {
 
   const loadData = async () => {
     setLoadingData(true);
-    const [moviesRes, seriesRes] = await Promise.all([
+    const [moviesRes, seriesRes, mCount, sCount] = await Promise.all([
       supabase.from('movies').select('*').order('created_at', { ascending: false }),
       supabase.from('series').select('*').order('created_at', { ascending: false }),
+      supabase.from('movies').select('id', { count: 'exact', head: true }),
+      supabase.from('series').select('id', { count: 'exact', head: true }),
     ]);
     if (moviesRes.data) setMovies(moviesRes.data as Movie[]);
     if (seriesRes.data) setSeries(seriesRes.data as Series[]);
+    setMoviesCount(mCount.count ?? 0);
+    setSeriesCount(sCount.count ?? 0);
     setLoadingData(false);
   };
 
@@ -64,8 +69,8 @@ const Admin = () => {
 
   const tabs = [
     { key: "dashboard" as Tab, label: "Dashboard", icon: LayoutDashboard, count: null },
-    { key: "movies" as Tab, label: "Filmes", icon: Film, count: movies.length },
-    { key: "series" as Tab, label: "Séries", icon: Tv, count: series.length },
+    { key: "movies" as Tab, label: "Filmes", icon: Film, count: moviesCount },
+    { key: "series" as Tab, label: "Séries", icon: Tv, count: seriesCount },
     { key: "reports" as Tab, label: "Reportes", icon: AlertTriangle, count: null },
     { key: "requests" as Tab, label: "Pedidos", icon: Inbox, count: null },
     { key: "contact" as Tab, label: "Contato", icon: MessageSquare, count: null },
@@ -73,7 +78,6 @@ const Admin = () => {
     { key: "sync" as Tab, label: "Sincronização", icon: RefreshCw, count: null },
     { key: "codes" as Tab, label: "Códigos", icon: Code2, count: null },
     { key: "ads" as Tab, label: "Anúncios", icon: Megaphone, count: null },
-    { key: "telegram" as Tab, label: "Telegram", icon: Send, count: null },
   ];
 
   const currentItems = activeTab === "movies" ? movies : series;
@@ -132,8 +136,6 @@ const Admin = () => {
             isAdmin ? <CodeManagement /> : null
           ) : activeTab === "ads" ? (
             isAdmin ? <AdsManagement /> : null
-          ) : activeTab === "telegram" ? (
-            isAdmin ? <TelegramManagement /> : null
           ) : (
             <>
               <div className="flex flex-col sm:flex-row gap-3 mb-6">

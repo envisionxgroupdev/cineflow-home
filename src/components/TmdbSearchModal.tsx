@@ -3,7 +3,7 @@ import { Search, Plus, X, Loader2, Sparkles, Calendar, Check } from 'lucide-reac
 import { searchMovies, searchSeries, tmdbMovieToDb, tmdbSeriesToDb, getImageUrl, type TmdbMovie, type TmdbSeries } from '@/services/tmdb';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { sendTelegramNotification } from '@/lib/telegramNotify';
+
 
 interface TmdbSearchModalProps {
   type: 'movie' | 'series';
@@ -80,17 +80,6 @@ export const TmdbSearchModal = ({ type, open, onClose, onAdded }: TmdbSearchModa
       }
       const itemTitle = type === 'movie' ? (item as TmdbMovie).title : (item as TmdbSeries).name;
       toast.success(`"${itemTitle}" adicionado!`);
-      
-      // Send Telegram notification
-      sendTelegramNotification({
-        title: itemTitle,
-        year: (type === 'movie' ? (item as TmdbMovie).release_date : (item as TmdbSeries).first_air_date)?.slice(0, 4) || null,
-        rating: item.vote_average,
-        genre: item.genre_ids?.join(', ') || null,
-        overview: item.overview || null,
-        imageUrl: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
-        type,
-      });
       setImportedIds(prev => new Set([...prev, tmdbId]));
       onAdded();
     } catch (err: any) {

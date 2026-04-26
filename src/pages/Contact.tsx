@@ -12,10 +12,13 @@ const schema = z.object({
   name: z.string().trim().min(2, "Nome muito curto").max(100),
   telegram: z.string().trim().min(2, "Informe seu Telegram").max(64)
     .regex(/^@?[A-Za-z0-9_]{2,}$/, "Use seu @username do Telegram"),
-  email: z.string().trim().email("E-mail inválido").max(255).optional().or(z.literal("")),
+  email: z.string().trim().email("E-mail inválido").max(255),
   subject: z.string().trim().min(3, "Assunto muito curto").max(150),
   message: z.string().trim().min(10, "Mensagem muito curta").max(2000),
 });
+
+const CONTACT_EMAIL = "pipocamax@proton.me";
+const CONTACT_TELEGRAM = "https://t.me/+ABLySKDmGy4zNDcx";
 
 const Contact = () => {
   const [name, setName] = useState("");
@@ -42,7 +45,7 @@ const Contact = () => {
     const { error } = await supabase.from("contact_messages").insert({
       name: parsed.data.name,
       telegram: tg,
-      email: parsed.data.email || null,
+      email: parsed.data.email,
       subject: parsed.data.subject,
       message: parsed.data.message,
     });
@@ -71,15 +74,27 @@ const Contact = () => {
               FALE <span className="text-gradient-cinema">CONOSCO</span>
             </h1>
             <p className="text-muted-foreground text-sm md:text-base">
-              Dúvidas, sugestões ou parcerias? Envie sua mensagem — responderemos pelo seu Telegram.
+              Dúvidas, sugestões ou parcerias? Envie sua mensagem.
             </p>
+
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+              <a href={`mailto:${CONTACT_EMAIL}`}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary text-xs font-semibold hover:bg-primary/20 transition-colors">
+                <Mail className="h-3.5 w-3.5" /> {CONTACT_EMAIL}
+              </a>
+              <a href={CONTACT_TELEGRAM} target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0088cc]/10 border border-[#0088cc]/30 text-[#0088cc] text-xs font-semibold hover:bg-[#0088cc]/20 transition-colors">
+                <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-current"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                Canal no Telegram
+              </a>
+            </div>
           </div>
 
           {done ? (
             <div className="bg-card border border-border rounded-xl p-8 text-center">
               <CheckCircle2 className="h-14 w-14 mx-auto text-primary mb-4" />
               <h2 className="font-display text-2xl text-foreground mb-2">MENSAGEM ENVIADA!</h2>
-              <p className="text-muted-foreground mb-6">Entraremos em contato pelo seu Telegram em breve.</p>
+              <p className="text-muted-foreground mb-6">Recebemos sua mensagem e entraremos em contato em breve.</p>
               <button onClick={() => { setDone(false); setName(""); setTelegram(""); setEmail(""); setSubject(""); setMessage(""); }}
                 className="text-sm text-primary hover:underline">Enviar outra mensagem</button>
             </div>
@@ -99,8 +114,8 @@ const Contact = () => {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">E-mail (opcional)</label>
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)} maxLength={255}
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">E-mail *</label>
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} required maxLength={255}
                   className="w-full px-3 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
               </div>
               <div>
@@ -113,9 +128,6 @@ const Contact = () => {
                 <textarea value={message} onChange={e => setMessage(e.target.value)} required maxLength={2000} rows={6}
                   className="w-full px-3 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-y" />
               </div>
-              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <Mail className="h-3.5 w-3.5" /> Ou envie um e-mail direto para <a href="mailto:pipocamax@proton.me" className="text-primary hover:underline">pipocamax@proton.me</a>
-              </p>
               <button type="submit" disabled={submitting}
                 className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60">
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
