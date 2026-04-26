@@ -12,10 +12,13 @@ const schema = z.object({
   name: z.string().trim().min(2, "Nome muito curto").max(100),
   telegram: z.string().trim().min(2, "Informe seu Telegram").max(64)
     .regex(/^@?[A-Za-z0-9_]{2,}$/, "Use seu @username do Telegram"),
-  email: z.string().trim().email("E-mail inválido").max(255).optional().or(z.literal("")),
+  email: z.string().trim().email("E-mail inválido").max(255),
   subject: z.string().trim().min(3, "Assunto muito curto").max(150),
   message: z.string().trim().min(10, "Mensagem muito curta").max(2000),
 });
+
+const CONTACT_EMAIL = "pipocamax@proton.me";
+const CONTACT_TELEGRAM = "https://t.me/+ABLySKDmGy4zNDcx";
 
 const Contact = () => {
   const [name, setName] = useState("");
@@ -42,7 +45,7 @@ const Contact = () => {
     const { error } = await supabase.from("contact_messages").insert({
       name: parsed.data.name,
       telegram: tg,
-      email: parsed.data.email || null,
+      email: parsed.data.email,
       subject: parsed.data.subject,
       message: parsed.data.message,
     });
