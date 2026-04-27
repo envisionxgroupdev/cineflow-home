@@ -7,9 +7,10 @@ import { useAuth } from "@/hooks/useAuth";
 
 const navLinks = [
   { label: "Início", path: "/" },
-  { label: "Lançamentos", path: "/#lancamentos" },
-  { label: "Filmes", path: "/#filmes" },
-  { label: "Séries", path: "/#series" },
+  { label: "Filmes", path: "/filmes" },
+  { label: "Séries", path: "/series" },
+  { label: "Animes", path: "/animes" },
+  { label: "Canais", path: "/canais" },
   { label: "Pedidos", path: "/pedidos" },
   { label: "Contato", path: "/contato" },
 ];

@@ -17,6 +17,9 @@ const MovieDetails = lazy(() => import("./pages/MovieDetails.tsx"));
 const SeriesDetails = lazy(() => import("./pages/SeriesDetails.tsx"));
 const AllMovies = lazy(() => import("./pages/AllMovies.tsx"));
 const AllSeries = lazy(() => import("./pages/AllSeries.tsx"));
+const AllAnimes = lazy(() => import("./pages/AllAnimes.tsx"));
+const AllChannels = lazy(() => import("./pages/AllChannels.tsx"));
+const ChannelPlayer = lazy(() => import("./pages/ChannelPlayer.tsx"));
 const DMCA = lazy(() => import("./pages/DMCA.tsx"));
 const Terms = lazy(() => import("./pages/Terms.tsx"));
 const Privacy = lazy(() => import("./pages/Privacy.tsx"));
@@ -60,6 +63,9 @@ const App = () => (
                 <Route path="/serie/:slug" element={<SeriesDetails />} />
                 <Route path="/filmes" element={<AllMovies />} />
                 <Route path="/series" element={<AllSeries />} />
+                <Route path="/animes" element={<AllAnimes />} />
+                <Route path="/canais" element={<AllChannels />} />
+                <Route path="/canal/:externalId" element={<ChannelPlayer />} />
                 <Route path="/dmca" element={<DMCA />} />
                 <Route path="/termos" element={<Terms />} />
                 <Route path="/privacidade" element={<Privacy />} />
