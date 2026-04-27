@@ -27,7 +27,7 @@ const AllSeries = () => {
   useEffect(() => { loadSeries(); }, []);
 
   const loadSeries = async () => {
-    const { data } = await supabase.from('series').select('*').order('created_at', { ascending: false });
+    const { data } = await supabase.from('series').select('*').eq('is_anime', false).order('created_at', { ascending: false });
     if (data) setSeries(data as Series[]);
     setLoading(false);
   };
