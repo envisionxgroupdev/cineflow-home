@@ -35,6 +35,8 @@ export function SyncManagement() {
   const [category, setCategory] = useState<Category>("movie");
   const [warezIds, setWarezIds] = useState<number[]>([]);
   const [previews, setPreviews] = useState<TmdbPreview[]>([]);
+  const [channels, setChannels] = useState<ChannelItem[]>([]);
+  const [importedChannelIds, setImportedChannelIds] = useState<Set<string>>(new Set());
   const [loadingList, setLoadingList] = useState(false);
   const [loadingPreviews, setLoadingPreviews] = useState(false);
   const [importedIds, setImportedIds] = useState<Set<number>>(new Set());
@@ -45,6 +47,9 @@ export function SyncManagement() {
   const cancelBulkRef = useRef(false);
   const PAGE_SIZE = 20;
   const BULK_BATCH_SIZE = 5; // concurrent TMDB requests
+
+  // Series table is used for both series and animes; movies stays movies
+  const tableFor = (cat: Category) => (cat === "movie" ? "movies" : "series");
 
   // Load already imported TMDB IDs from BOTH tables to catch all
   const loadImported = useCallback(async () => {
