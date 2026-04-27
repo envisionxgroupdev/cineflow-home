@@ -84,13 +84,14 @@ const Index = () => {
         <AdBanner page="home" position="top" />
 
         {/* Stats strip */}
-        {!isLoading && (movies.length > 0 || series.length > 0) && (
+        {!isLoading && (movies.length > 0 || series.length > 0 || animes.length > 0 || channels.length > 0) && (
           <section className="container mx-auto px-4 py-4">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { icon: Film, label: "Filmes", value: movies.length, suffix: "+" },
                 { icon: Tv, label: "Séries", value: series.length, suffix: "+" },
-                { icon: Sparkles, label: "HD Grátis", value: "100", suffix: "%" },
+                { icon: Sparkles, label: "Animes", value: animes.length, suffix: "+" },
+                { icon: Radio, label: "Canais TV", value: channels.length, suffix: "+" },
               ].map(s => (
                 <div key={s.label} className="bg-card/50 backdrop-blur-sm border border-border/60 rounded-xl px-3 py-3 flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
