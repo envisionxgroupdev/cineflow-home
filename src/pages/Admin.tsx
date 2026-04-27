@@ -160,7 +160,77 @@ const Admin = () => {
             isAdmin ? <CodeManagement /> : null
           ) : activeTab === "ads" ? (
             isAdmin ? <AdsManagement /> : null
-          ) : (
+          ) : activeTab === "channels" ? (
+            <>
+              <div className="flex flex-col sm:flex-row gap-3 mb-6">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input type="text" placeholder="Buscar canais..."
+                    value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                </div>
+                {isAdmin && (
+                  <button onClick={() => setActiveTab("sync")}
+                    className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors">
+                    <RefreshCw className="h-4 w-4" /> Sincronizar canais
+                  </button>
+                )}
+              </div>
+              {loadingData ? (
+                <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 text-primary animate-spin" /></div>
+              ) : (
+                <div className="bg-card border border-border rounded-lg overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-border">
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Logo</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Nome</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Categoria</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                          <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredChannels.map(ch => (
+                          <tr key={ch.id} className="border-b border-border/50 hover:bg-secondary/50 transition-colors">
+                            <td className="px-4 py-2">
+                              <div className="w-10 h-10 rounded bg-secondary flex items-center justify-center p-1">
+                                {ch.logo_url ? <img src={ch.logo_url} alt={ch.name} className="max-w-full max-h-full object-contain" /> : <Radio className="h-4 w-4 text-muted-foreground" />}
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
+                              <p className="text-sm font-medium text-foreground">{ch.name}</p>
+                              <p className="text-xs text-muted-foreground font-mono">{ch.external_id}</p>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-muted-foreground hidden sm:table-cell">{ch.category || '—'}</td>
+                            <td className="px-4 py-3">
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${ch.is_active ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                                {ch.is_active ? 'Ativo' : 'Inativo'}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-right">
+                              {isAdmin && (
+                                <button onClick={() => setDeleteConfirm(ch.id)}
+                                  className="p-1.5 text-muted-foreground hover:text-destructive transition-colors" title="Excluir">
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                        {filteredChannels.length === 0 && (
+                          <tr><td colSpan={5} className="px-4 py-8 text-center text-sm text-muted-foreground">
+                            {channels.length === 0 ? 'Nenhum canal sincronizado. Vá em Sincronização → Canais.' : 'Nenhum canal encontrado.'}
+                          </td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : isContentTab ? (
             <>
               <div className="flex flex-col sm:flex-row gap-3 mb-6">
                 <div className="relative flex-1">
