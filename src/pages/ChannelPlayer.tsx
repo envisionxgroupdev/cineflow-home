@@ -1,0 +1,88 @@
+import { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { Navbar } from '@/components/Navbar';
+import { Footer } from '@/components/Footer';
+import { supabase } from '@/integrations/supabase/client';
+import { Loader2, ArrowLeft, Radio, Tv } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
+import type { TvChannel } from '@/types/channel';
+
+const ChannelPlayer = () => {
+  const { externalId } = useParams<{ externalId: string }>();
+  const [channel, setChannel] = useState<TvChannel | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!externalId) return;
+    (async () => {
+      const { data } = await supabase.from('tv_channels').select('*').eq('external_id', externalId).maybeSingle();
+      setChannel(data as TvChannel | null);
+      setLoading(false);
+    })();
+  }, [externalId]);
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>{channel ? `${channel.name} ao vivo` : 'Canal'} — PipocaMax</title>
+        <meta name="description" content={`Assista ${channel?.name || 'canais de TV'} ao vivo online grátis em HD no PipocaMax.`} />
+      </Helmet>
+      <Navbar />
+      <div className="pt-20 pb-12">
+        <div className="container mx-auto px-4">
+          <Link to="/canais" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
+            <ArrowLeft className="h-4 w-4" /> Voltar para canais
+          </Link>
+
+          {loading ? (
+            <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 text-primary animate-spin" /></div>
+          ) : !channel ? (
+            <div className="text-center py-20">
+              <Tv className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-40" />
+              <p className="text-muted-foreground">Canal não encontrado.</p>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-4 mb-6">
+                {channel.logo_url && (
+                  <div className="w-16 h-16 rounded-xl bg-card border border-border p-2 flex items-center justify-center shrink-0">
+                    <img src={channel.logo_url} alt={channel.name} className="max-w-full max-h-full object-contain" />
+                  </div>
+                )}
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="flex items-center gap-1 text-[10px] font-bold bg-primary/10 text-primary px-2 py-0.5 rounded uppercase tracking-wider">
+                      <Radio className="h-3 w-3" /> Ao vivo
+                    </span>
+                    {channel.category && (
+                      <span className="text-xs text-muted-foreground">{channel.category}</span>
+                    )}
+                  </div>
+                  <h1 className="font-display text-2xl md:text-4xl text-foreground">{channel.name}</h1>
+                </div>
+              </div>
+
+              <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-border">
+                <iframe
+                  src={channel.embed_url}
+                  className="absolute inset-0 w-full h-full"
+                  allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+                  allowFullScreen
+                  referrerPolicy="no-referrer"
+                  title={channel.name}
+                />
+              </div>
+
+              {channel.description && (
+                <p className="mt-6 text-sm text-muted-foreground max-w-3xl">{channel.description}</p>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+      <Footer />
+    </div>
+  );
+};
+
+export default ChannelPlayer;

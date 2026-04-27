@@ -31,6 +31,7 @@ export interface Series {
   tmdb_id: number | null;
   first_air_date: string | null;
   is_release: boolean;
+  is_anime: boolean;
   player_url: string | null;
   player_url_2: string | null;
   created_by: string | null;

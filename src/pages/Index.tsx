@@ -13,8 +13,12 @@ import { CookieBanner } from "@/components/CookieBanner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import type { Movie, Series } from "@/types/database";
+import type { TvChannel } from "@/types/channel";
 import { TelegramFloat } from "@/components/TelegramFloat";
-import { Film, Tv, Sparkles } from "lucide-react";
+import { ChannelCard } from "@/components/ChannelCard";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Film, Tv, Sparkles, Radio, ChevronRight } from "lucide-react";
 
 const HOME_LIMIT = 12;
 
@@ -25,19 +29,25 @@ const Index = () => {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['home-content'],
     queryFn: async () => {
-      const [moviesRes, seriesRes] = await Promise.all([
+      const [moviesRes, seriesRes, animesRes, channelsRes] = await Promise.all([
         supabase.from('movies').select('*').order('created_at', { ascending: false }).limit(HOME_LIMIT),
-        supabase.from('series').select('*').order('created_at', { ascending: false }).limit(HOME_LIMIT),
+        supabase.from('series').select('*').eq('is_anime', false).order('created_at', { ascending: false }).limit(HOME_LIMIT),
+        supabase.from('series').select('*').eq('is_anime', true).order('created_at', { ascending: false }).limit(HOME_LIMIT),
+        supabase.from('tv_channels').select('*').eq('is_active', true).order('name').limit(18),
       ]);
       return {
         movies: (moviesRes.data || []) as Movie[],
         series: (seriesRes.data || []) as Series[],
+        animes: (animesRes.data || []) as Series[],
+        channels: (channelsRes.data || []) as TvChannel[],
       };
     },
   });
 
   const movies = data?.movies || [];
   const series = data?.series || [];
+  const animes = data?.animes || [];
+  const channels = data?.channels || [];
 
   const toCardFormat = (items: (Movie | Series)[], type: 'movie' | 'series') =>
     items.map((item) => ({
@@ -74,13 +84,14 @@ const Index = () => {
         <AdBanner page="home" position="top" />
 
         {/* Stats strip */}
-        {!isLoading && (movies.length > 0 || series.length > 0) && (
+        {!isLoading && (movies.length > 0 || series.length > 0 || animes.length > 0 || channels.length > 0) && (
           <section className="container mx-auto px-4 py-4">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { icon: Film, label: "Filmes", value: movies.length, suffix: "+" },
                 { icon: Tv, label: "Séries", value: series.length, suffix: "+" },
-                { icon: Sparkles, label: "HD Grátis", value: "100", suffix: "%" },
+                { icon: Sparkles, label: "Animes", value: animes.length, suffix: "+" },
+                { icon: Radio, label: "Canais TV", value: channels.length, suffix: "+" },
               ].map(s => (
                 <div key={s.label} className="bg-card/50 backdrop-blur-sm border border-border/60 rounded-xl px-3 py-3 flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
@@ -102,11 +113,48 @@ const Index = () => {
         {movies.length > 0 && <ContentSection id="filmes" title="FILMES" items={toCardFormat(movies, 'movie')} />}
         <AdBanner page="home" position="middle" />
         {series.length > 0 && <ContentSection id="series" title="SÉRIES" items={toCardFormat(series, 'series')} />}
-        {!isLoading && movies.length === 0 && series.length === 0 && (
+        {animes.length > 0 && <ContentSection id="animes" title="ANIMES" items={toCardFormat(animes, 'series')} />}
+
+        {channels.length > 0 && (
+          <section id="canais" className="py-12">
+            <div className="container mx-auto px-4">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }} transition={{ duration: 0.5 }}
+                className="flex items-center justify-between mb-6"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Radio className="h-5 w-5 text-primary" />
+                  </div>
+                  <h2 className="font-display text-3xl md:text-4xl text-foreground">CANAIS AO VIVO</h2>
+                  <div className="hidden sm:block flex-1 h-px bg-gradient-to-r from-primary/20 to-transparent ml-4 min-w-[60px]" />
+                </div>
+                <Link to="/canais" className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors group">
+                  Ver todos <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+              </motion.div>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-9 gap-3">
+                {channels.map((c, i) => (
+                  <motion.div key={c.id}
+                    initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }} transition={{ delay: i * 0.02, duration: 0.3 }}>
+                    <ChannelCard
+                      id={c.id} externalId={c.external_id} name={c.name}
+                      category={c.category} logoUrl={c.logo_url}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {!isLoading && movies.length === 0 && series.length === 0 && animes.length === 0 && channels.length === 0 && (
           <div className="text-center py-20">
             <p className="text-muted-foreground">Nenhum conteúdo adicionado ainda.</p>
             <p className="text-muted-foreground text-sm mt-2">
-              Acesse o <a href="/admin" className="text-primary hover:underline">painel admin</a> para adicionar filmes e séries.
+              Acesse o <a href="/admin" className="text-primary hover:underline">painel admin</a> para adicionar conteúdo.
             </p>
           </div>
         )}

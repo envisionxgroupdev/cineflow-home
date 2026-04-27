@@ -5,7 +5,7 @@ import { MovieCard } from '@/components/MovieCard';
 import { EditContentModal } from '@/components/EditContentModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Loader2, Search, Tv } from 'lucide-react';
+import { Loader2, Search, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { GenreFilter } from '@/components/GenreFilter';
 import { PaginationControl } from '@/components/PaginationControl';
@@ -15,28 +15,28 @@ import type { Series } from '@/types/database';
 
 const PER_PAGE = 25;
 
-const AllSeries = () => {
+const AllAnimes = () => {
   const { isAdmin } = useAuth();
-  const [series, setSeries] = useState<Series[]>([]);
+  const [animes, setAnimes] = useState<Series[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [editItem, setEditItem] = useState<Series | null>(null);
   const [genre, setGenre] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
-  useEffect(() => { loadSeries(); }, []);
+  useEffect(() => { load(); }, []);
 
-  const loadSeries = async () => {
-    const { data } = await supabase.from('series').select('*').eq('is_anime', false).order('created_at', { ascending: false });
-    if (data) setSeries(data as Series[]);
+  const load = async () => {
+    const { data } = await supabase.from('series').select('*').eq('is_anime', true).order('created_at', { ascending: false });
+    if (data) setAnimes(data as Series[]);
     setLoading(false);
   };
 
-  const filtered = useMemo(() => series.filter(s => {
+  const filtered = useMemo(() => animes.filter(s => {
     const matchSearch = s.title.toLowerCase().includes(search.toLowerCase());
     const matchGenre = !genre || (s.genre || '').split(',').map(g => g.trim()).includes(genre);
     return matchSearch && matchGenre;
-  }), [series, search, genre]);
+  }), [animes, search, genre]);
 
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
   const paged = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
@@ -51,28 +51,28 @@ const AllSeries = () => {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Séries Online Grátis em HD — PipocaMax</title>
-        <meta name="description" content="Assista séries online grátis em HD. Catálogo completo com lançamentos, drama, comédia, ficção e muito mais." />
-        <link rel="canonical" href="https://pipocamax.com/series" />
+        <title>Animes Online Grátis em HD — PipocaMax</title>
+        <meta name="description" content="Assista animes online grátis dublado e legendado em HD. Catálogo completo de animes clássicos e lançamentos." />
+        <link rel="canonical" href="https://pipocamax.com/animes" />
       </Helmet>
       <Navbar />
       <div className="pt-20 pb-12">
         <div className="container mx-auto px-4">
           <div className="flex items-center gap-3 mb-8">
             <div className="p-2 rounded-lg bg-primary/10">
-              <Tv className="h-6 w-6 text-primary" />
+              <Sparkles className="h-6 w-6 text-primary" />
             </div>
-            <h1 className="font-display text-3xl md:text-5xl text-foreground">TODAS AS <span className="text-gradient-cinema">SÉRIES</span></h1>
+            <h1 className="font-display text-3xl md:text-5xl text-foreground">TODOS OS <span className="text-gradient-cinema">ANIMES</span></h1>
           </div>
 
           <div className="relative max-w-md mb-8">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input type="text" placeholder="Buscar séries..."
+            <input type="text" placeholder="Buscar animes..."
               value={search} onChange={e => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
           </div>
 
-          <GenreFilter items={series} selected={genre} onSelect={setGenre} />
+          <GenreFilter items={animes} selected={genre} onSelect={setGenre} />
 
           <AdBanner page="series" position="top" />
 
@@ -91,7 +91,7 @@ const AllSeries = () => {
                   </motion.div>
                 ))}
                 {filtered.length === 0 && (
-                  <div className="col-span-full text-center py-12 text-muted-foreground">Nenhuma série encontrada.</div>
+                  <div className="col-span-full text-center py-12 text-muted-foreground">Nenhum anime encontrado.</div>
                 )}
               </div>
               <AdBanner page="series" position="middle" />
@@ -104,10 +104,10 @@ const AllSeries = () => {
       <Footer />
       {editItem && (
         <EditContentModal item={editItem} type="series" open={!!editItem}
-          onClose={() => setEditItem(null)} onSaved={() => { loadSeries(); setEditItem(null); }} />
+          onClose={() => setEditItem(null)} onSaved={() => { load(); setEditItem(null); }} />
       )}
     </div>
   );
 };
 
-export default AllSeries;
+export default AllAnimes;

@@ -6,7 +6,7 @@ import { UserManagement } from "@/components/admin/UserManagement";
 import { ReportsManagement } from "@/components/admin/ReportsManagement";
 import { RequestsManagement } from "@/components/admin/RequestsManagement";
 import { ContactMessagesManagement } from "@/components/admin/ContactMessagesManagement";
-import { Film, Tv, Plus, Search, Trash2, Pencil, ArrowLeft, LogOut, Loader2, Users, AlertTriangle, Sparkles, LayoutDashboard, RefreshCw, Code2, Megaphone, Inbox, MessageSquare } from "lucide-react";
+import { Film, Tv, Plus, Search, Trash2, Pencil, ArrowLeft, LogOut, Loader2, Users, AlertTriangle, Sparkles, LayoutDashboard, RefreshCw, Code2, Megaphone, Inbox, MessageSquare, Radio } from "lucide-react";
 import { Dashboard } from "@/components/admin/Dashboard";
 import { SyncManagement } from "@/components/admin/SyncManagement";
 import { CodeManagement } from "@/components/admin/CodeManagement";
@@ -16,8 +16,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Movie, Series } from "@/types/database";
+import type { TvChannel } from "@/types/channel";
 
-type Tab = "dashboard" | "movies" | "series" | "users" | "reports" | "requests" | "contact" | "sync" | "codes" | "ads";
+type Tab = "dashboard" | "movies" | "series" | "animes" | "channels" | "users" | "reports" | "requests" | "contact" | "sync" | "codes" | "ads";
 
 const Admin = () => {
   const { user, isAdmin, loading: authLoading, signOut } = useAuth();
@@ -25,8 +26,12 @@ const Admin = () => {
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [movies, setMovies] = useState<Movie[]>([]);
   const [series, setSeries] = useState<Series[]>([]);
+  const [animes, setAnimes] = useState<Series[]>([]);
+  const [channels, setChannels] = useState<TvChannel[]>([]);
   const [moviesCount, setMoviesCount] = useState<number>(0);
   const [seriesCount, setSeriesCount] = useState<number>(0);
+  const [animesCount, setAnimesCount] = useState<number>(0);
+  const [channelsCount, setChannelsCount] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [loadingData, setLoadingData] = useState(true);
   const [tmdbOpen, setTmdbOpen] = useState(false);
@@ -37,28 +42,40 @@ const Admin = () => {
 
   const loadData = async () => {
     setLoadingData(true);
-    const [moviesRes, seriesRes, mCount, sCount] = await Promise.all([
+    const [moviesRes, seriesRes, animesRes, channelsRes, mCount, sCount, aCount, cCount] = await Promise.all([
       supabase.from('movies').select('*').order('created_at', { ascending: false }),
-      supabase.from('series').select('*').order('created_at', { ascending: false }),
+      supabase.from('series').select('*').eq('is_anime', false).order('created_at', { ascending: false }),
+      supabase.from('series').select('*').eq('is_anime', true).order('created_at', { ascending: false }),
+      supabase.from('tv_channels').select('*').order('name'),
       supabase.from('movies').select('id', { count: 'exact', head: true }),
-      supabase.from('series').select('id', { count: 'exact', head: true }),
+      supabase.from('series').select('id', { count: 'exact', head: true }).eq('is_anime', false),
+      supabase.from('series').select('id', { count: 'exact', head: true }).eq('is_anime', true),
+      supabase.from('tv_channels').select('id', { count: 'exact', head: true }),
     ]);
     if (moviesRes.data) setMovies(moviesRes.data as Movie[]);
     if (seriesRes.data) setSeries(seriesRes.data as Series[]);
+    if (animesRes.data) setAnimes(animesRes.data as Series[]);
+    if (channelsRes.data) setChannels(channelsRes.data as TvChannel[]);
     setMoviesCount(mCount.count ?? 0);
     setSeriesCount(sCount.count ?? 0);
+    setAnimesCount(aCount.count ?? 0);
+    setChannelsCount(cCount.count ?? 0);
     setLoadingData(false);
   };
 
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const handleDelete = async (id: string) => {
-    const table = activeTab === "movies" ? "movies" : "series";
+    const table =
+      activeTab === "movies" ? "movies" :
+      activeTab === "channels" ? "tv_channels" : "series";
     const { error } = await supabase.from(table).delete().eq('id', id);
     if (error) { toast.error('Erro ao deletar: ' + error.message); setDeleteConfirm(null); return; }
     toast.success('Removido com sucesso');
-    if (activeTab === "movies") setMovies(movies.filter(m => m.id !== id));
-    else setSeries(series.filter(s => s.id !== id));
+    if (activeTab === "movies") { setMovies(movies.filter(m => m.id !== id)); setMoviesCount(c => Math.max(0, c - 1)); }
+    else if (activeTab === "series") { setSeries(series.filter(s => s.id !== id)); setSeriesCount(c => Math.max(0, c - 1)); }
+    else if (activeTab === "animes") { setAnimes(animes.filter(a => a.id !== id)); setAnimesCount(c => Math.max(0, c - 1)); }
+    else if (activeTab === "channels") { setChannels(channels.filter(ch => ch.id !== id)); setChannelsCount(c => Math.max(0, c - 1)); }
     setDeleteConfirm(null);
   };
 
@@ -71,6 +88,8 @@ const Admin = () => {
     { key: "dashboard" as Tab, label: "Dashboard", icon: LayoutDashboard, count: null },
     { key: "movies" as Tab, label: "Filmes", icon: Film, count: moviesCount },
     { key: "series" as Tab, label: "Séries", icon: Tv, count: seriesCount },
+    { key: "animes" as Tab, label: "Animes", icon: Sparkles, count: animesCount },
+    { key: "channels" as Tab, label: "Canais", icon: Radio, count: channelsCount },
     { key: "reports" as Tab, label: "Reportes", icon: AlertTriangle, count: null },
     { key: "requests" as Tab, label: "Pedidos", icon: Inbox, count: null },
     { key: "contact" as Tab, label: "Contato", icon: MessageSquare, count: null },
@@ -80,8 +99,13 @@ const Admin = () => {
     { key: "ads" as Tab, label: "Anúncios", icon: Megaphone, count: null },
   ];
 
-  const currentItems = activeTab === "movies" ? movies : series;
+  const isContentTab = activeTab === "movies" || activeTab === "series" || activeTab === "animes";
+  const currentItems: (Movie | Series)[] =
+    activeTab === "movies" ? movies :
+    activeTab === "animes" ? animes :
+    activeTab === "series" ? series : [];
   const filteredItems = currentItems.filter(item => item.title.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredChannels = channels.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
     <div className="min-h-screen bg-background">
@@ -136,7 +160,77 @@ const Admin = () => {
             isAdmin ? <CodeManagement /> : null
           ) : activeTab === "ads" ? (
             isAdmin ? <AdsManagement /> : null
-          ) : (
+          ) : activeTab === "channels" ? (
+            <>
+              <div className="flex flex-col sm:flex-row gap-3 mb-6">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input type="text" placeholder="Buscar canais..."
+                    value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                </div>
+                {isAdmin && (
+                  <button onClick={() => setActiveTab("sync")}
+                    className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors">
+                    <RefreshCw className="h-4 w-4" /> Sincronizar canais
+                  </button>
+                )}
+              </div>
+              {loadingData ? (
+                <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 text-primary animate-spin" /></div>
+              ) : (
+                <div className="bg-card border border-border rounded-lg overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-border">
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Logo</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Nome</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Categoria</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                          <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredChannels.map(ch => (
+                          <tr key={ch.id} className="border-b border-border/50 hover:bg-secondary/50 transition-colors">
+                            <td className="px-4 py-2">
+                              <div className="w-10 h-10 rounded bg-secondary flex items-center justify-center p-1">
+                                {ch.logo_url ? <img src={ch.logo_url} alt={ch.name} className="max-w-full max-h-full object-contain" /> : <Radio className="h-4 w-4 text-muted-foreground" />}
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
+                              <p className="text-sm font-medium text-foreground">{ch.name}</p>
+                              <p className="text-xs text-muted-foreground font-mono">{ch.external_id}</p>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-muted-foreground hidden sm:table-cell">{ch.category || '—'}</td>
+                            <td className="px-4 py-3">
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${ch.is_active ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                                {ch.is_active ? 'Ativo' : 'Inativo'}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-right">
+                              {isAdmin && (
+                                <button onClick={() => setDeleteConfirm(ch.id)}
+                                  className="p-1.5 text-muted-foreground hover:text-destructive transition-colors" title="Excluir">
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                        {filteredChannels.length === 0 && (
+                          <tr><td colSpan={5} className="px-4 py-8 text-center text-sm text-muted-foreground">
+                            {channels.length === 0 ? 'Nenhum canal sincronizado. Vá em Sincronização → Canais.' : 'Nenhum canal encontrado.'}
+                          </td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : isContentTab ? (
             <>
               <div className="flex flex-col sm:flex-row gap-3 mb-6">
                 <div className="relative flex-1">
@@ -213,7 +307,7 @@ const Admin = () => {
                 </div>
               )}
             </>
-          )}
+          ) : null}
         </div>
       </div>
 
