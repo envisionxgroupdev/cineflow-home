@@ -112,11 +112,48 @@ const Index = () => {
         {movies.length > 0 && <ContentSection id="filmes" title="FILMES" items={toCardFormat(movies, 'movie')} />}
         <AdBanner page="home" position="middle" />
         {series.length > 0 && <ContentSection id="series" title="SÉRIES" items={toCardFormat(series, 'series')} />}
-        {!isLoading && movies.length === 0 && series.length === 0 && (
+        {animes.length > 0 && <ContentSection id="animes" title="ANIMES" items={toCardFormat(animes, 'series')} />}
+
+        {channels.length > 0 && (
+          <section id="canais" className="py-12">
+            <div className="container mx-auto px-4">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }} transition={{ duration: 0.5 }}
+                className="flex items-center justify-between mb-6"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Radio className="h-5 w-5 text-primary" />
+                  </div>
+                  <h2 className="font-display text-3xl md:text-4xl text-foreground">CANAIS AO VIVO</h2>
+                  <div className="hidden sm:block flex-1 h-px bg-gradient-to-r from-primary/20 to-transparent ml-4 min-w-[60px]" />
+                </div>
+                <Link to="/canais" className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors group">
+                  Ver todos <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+              </motion.div>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-9 gap-3">
+                {channels.map((c, i) => (
+                  <motion.div key={c.id}
+                    initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }} transition={{ delay: i * 0.02, duration: 0.3 }}>
+                    <ChannelCard
+                      id={c.id} externalId={c.external_id} name={c.name}
+                      category={c.category} logoUrl={c.logo_url}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {!isLoading && movies.length === 0 && series.length === 0 && animes.length === 0 && channels.length === 0 && (
           <div className="text-center py-20">
             <p className="text-muted-foreground">Nenhum conteúdo adicionado ainda.</p>
             <p className="text-muted-foreground text-sm mt-2">
-              Acesse o <a href="/admin" className="text-primary hover:underline">painel admin</a> para adicionar filmes e séries.
+              Acesse o <a href="/admin" className="text-primary hover:underline">painel admin</a> para adicionar conteúdo.
             </p>
           </div>
         )}
