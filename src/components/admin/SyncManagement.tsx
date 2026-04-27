@@ -1,11 +1,21 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { RefreshCw, Download, Film, Tv, Loader2, Search, Check, ExternalLink, Zap, Square } from "lucide-react";
+import { RefreshCw, Download, Film, Tv, Loader2, Search, Check, Zap, Square, Sparkles, Radio } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getMovieDetails, getSeriesDetails, getImageUrl } from "@/services/tmdb";
 
 import { toast } from "sonner";
 
-type Category = "movie" | "serie" | "anime";
+type Category = "movie" | "serie" | "anime" | "canais";
+
+interface ChannelItem {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  logo_url: string;
+  embed_url: string;
+  is_active: boolean;
+}
 
 interface TmdbPreview {
   tmdb_id: number;
