@@ -66,12 +66,16 @@ const Admin = () => {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const handleDelete = async (id: string) => {
-    const table = activeTab === "movies" ? "movies" : "series";
+    const table =
+      activeTab === "movies" ? "movies" :
+      activeTab === "channels" ? "tv_channels" : "series";
     const { error } = await supabase.from(table).delete().eq('id', id);
     if (error) { toast.error('Erro ao deletar: ' + error.message); setDeleteConfirm(null); return; }
     toast.success('Removido com sucesso');
-    if (activeTab === "movies") setMovies(movies.filter(m => m.id !== id));
-    else setSeries(series.filter(s => s.id !== id));
+    if (activeTab === "movies") { setMovies(movies.filter(m => m.id !== id)); setMoviesCount(c => Math.max(0, c - 1)); }
+    else if (activeTab === "series") { setSeries(series.filter(s => s.id !== id)); setSeriesCount(c => Math.max(0, c - 1)); }
+    else if (activeTab === "animes") { setAnimes(animes.filter(a => a.id !== id)); setAnimesCount(c => Math.max(0, c - 1)); }
+    else if (activeTab === "channels") { setChannels(channels.filter(ch => ch.id !== id)); setChannelsCount(c => Math.max(0, c - 1)); }
     setDeleteConfirm(null);
   };
 
@@ -84,6 +88,8 @@ const Admin = () => {
     { key: "dashboard" as Tab, label: "Dashboard", icon: LayoutDashboard, count: null },
     { key: "movies" as Tab, label: "Filmes", icon: Film, count: moviesCount },
     { key: "series" as Tab, label: "Séries", icon: Tv, count: seriesCount },
+    { key: "animes" as Tab, label: "Animes", icon: Sparkles, count: animesCount },
+    { key: "channels" as Tab, label: "Canais", icon: Radio, count: channelsCount },
     { key: "reports" as Tab, label: "Reportes", icon: AlertTriangle, count: null },
     { key: "requests" as Tab, label: "Pedidos", icon: Inbox, count: null },
     { key: "contact" as Tab, label: "Contato", icon: MessageSquare, count: null },
@@ -93,8 +99,13 @@ const Admin = () => {
     { key: "ads" as Tab, label: "Anúncios", icon: Megaphone, count: null },
   ];
 
-  const currentItems = activeTab === "movies" ? movies : series;
+  const isContentTab = activeTab === "movies" || activeTab === "series" || activeTab === "animes";
+  const currentItems: (Movie | Series)[] =
+    activeTab === "movies" ? movies :
+    activeTab === "animes" ? animes :
+    activeTab === "series" ? series : [];
   const filteredItems = currentItems.filter(item => item.title.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredChannels = channels.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
     <div className="min-h-screen bg-background">
