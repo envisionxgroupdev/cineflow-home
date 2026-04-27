@@ -13,8 +13,12 @@ import { CookieBanner } from "@/components/CookieBanner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import type { Movie, Series } from "@/types/database";
+import type { TvChannel } from "@/types/channel";
 import { TelegramFloat } from "@/components/TelegramFloat";
-import { Film, Tv, Sparkles } from "lucide-react";
+import { ChannelCard } from "@/components/ChannelCard";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Film, Tv, Sparkles, Radio, ChevronRight } from "lucide-react";
 
 const HOME_LIMIT = 12;
 
@@ -25,19 +29,25 @@ const Index = () => {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['home-content'],
     queryFn: async () => {
-      const [moviesRes, seriesRes] = await Promise.all([
+      const [moviesRes, seriesRes, animesRes, channelsRes] = await Promise.all([
         supabase.from('movies').select('*').order('created_at', { ascending: false }).limit(HOME_LIMIT),
-        supabase.from('series').select('*').order('created_at', { ascending: false }).limit(HOME_LIMIT),
+        supabase.from('series').select('*').eq('is_anime', false).order('created_at', { ascending: false }).limit(HOME_LIMIT),
+        supabase.from('series').select('*').eq('is_anime', true).order('created_at', { ascending: false }).limit(HOME_LIMIT),
+        supabase.from('tv_channels').select('*').eq('is_active', true).order('name').limit(18),
       ]);
       return {
         movies: (moviesRes.data || []) as Movie[],
         series: (seriesRes.data || []) as Series[],
+        animes: (animesRes.data || []) as Series[],
+        channels: (channelsRes.data || []) as TvChannel[],
       };
     },
   });
 
   const movies = data?.movies || [];
   const series = data?.series || [];
+  const animes = data?.animes || [];
+  const channels = data?.channels || [];
 
   const toCardFormat = (items: (Movie | Series)[], type: 'movie' | 'series') =>
     items.map((item) => ({
