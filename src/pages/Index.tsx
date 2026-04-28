@@ -29,11 +29,14 @@ const Index = () => {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['home-content'],
     queryFn: async () => {
+      const MOVIE_FIELDS = 'id,title,year,rating,image_url,genre,is_release,created_at';
+      const SERIES_FIELDS = 'id,title,year,rating,image_url,genre,is_release,is_anime,created_at';
+      const CHANNEL_FIELDS = 'id,external_id,name,category,logo_url,is_active';
       const [moviesRes, seriesRes, animesRes, channelsRes] = await Promise.all([
-        supabase.from('movies').select('*').order('created_at', { ascending: false }).limit(HOME_LIMIT),
-        supabase.from('series').select('*').eq('is_anime', false).order('created_at', { ascending: false }).limit(HOME_LIMIT),
-        supabase.from('series').select('*').eq('is_anime', true).order('created_at', { ascending: false }).limit(HOME_LIMIT),
-        supabase.from('tv_channels').select('*').eq('is_active', true).order('name').limit(18),
+        supabase.from('movies').select(MOVIE_FIELDS).order('created_at', { ascending: false }).limit(HOME_LIMIT),
+        supabase.from('series').select(SERIES_FIELDS).eq('is_anime', false).order('created_at', { ascending: false }).limit(HOME_LIMIT),
+        supabase.from('series').select(SERIES_FIELDS).eq('is_anime', true).order('created_at', { ascending: false }).limit(HOME_LIMIT),
+        supabase.from('tv_channels').select(CHANNEL_FIELDS).eq('is_active', true).order('name').limit(18),
       ]);
       return {
         movies: (moviesRes.data || []) as Movie[],
@@ -42,6 +45,7 @@ const Index = () => {
         channels: (channelsRes.data || []) as TvChannel[],
       };
     },
+    staleTime: 1000 * 60 * 10,
   });
 
   const movies = data?.movies || [];
