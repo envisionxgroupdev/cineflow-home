@@ -57,6 +57,17 @@ export function HeroSection() {
     return () => clearInterval(timer);
   }, [items.length]);
 
+  const go = useCallback(
+    (dir: number) => {
+      if (items.length === 0) return;
+      setCurrent((c) => (c + dir + items.length) % items.length);
+    },
+    [items.length]
+  );
+
+  // Skeleton while loading
+  if (loading) return <HeroSkeleton />;
+
   // Fallback when no data
   if (items.length === 0) {
     return (
@@ -69,6 +80,8 @@ export function HeroSection() {
       </section>
     );
   }
+
+  const item = items[current];
 
   return (
     <section className="relative h-[70vh] min-h-[420px] md:h-[80vh] flex items-end overflow-hidden">
