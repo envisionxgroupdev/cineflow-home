@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { MovieCard } from '@/components/MovieCard';
@@ -14,23 +15,25 @@ import { Helmet } from 'react-helmet-async';
 import type { Movie } from '@/types/database';
 
 const PER_PAGE = 25;
+const LIST_FIELDS = 'id,title,year,rating,image_url,genre,is_release,created_at';
 
 const AllMovies = () => {
   const { isAdmin } = useAuth();
-  const [movies, setMovies] = useState<Movie[]>([]);
-  const [loading, setLoading] = useState(true);
+  const qc = useQueryClient();
   const [search, setSearch] = useState('');
   const [editItem, setEditItem] = useState<Movie | null>(null);
   const [genre, setGenre] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
-  useEffect(() => { loadMovies(); }, []);
+  const { data: movies = [], isLoading: loading } = useQuery({
+    queryKey: ['all-movies'],
+    queryFn: async () => {
+      const { data } = await supabase.from('movies').select(LIST_FIELDS).order('created_at', { ascending: false });
+      return (data || []) as Movie[];
+    },
+  });
 
-  const loadMovies = async () => {
-    const { data } = await supabase.from('movies').select('*').order('created_at', { ascending: false });
-    if (data) setMovies(data as Movie[]);
-    setLoading(false);
-  };
+  const reload = () => qc.invalidateQueries({ queryKey: ['all-movies'] });
 
   const filtered = useMemo(() => movies.filter(m => {
     const matchSearch = m.title.toLowerCase().includes(search.toLowerCase());
@@ -105,7 +108,7 @@ const AllMovies = () => {
       <Footer />
       {editItem && (
         <EditContentModal item={editItem} type="movie" open={!!editItem}
-          onClose={() => setEditItem(null)} onSaved={() => { loadMovies(); setEditItem(null); }} />
+          onClose={() => setEditItem(null)} onSaved={() => { reload(); setEditItem(null); }} />
       )}
     </div>
   );

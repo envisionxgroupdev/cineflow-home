@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { MovieCard } from '@/components/MovieCard';
@@ -14,23 +15,25 @@ import { Helmet } from 'react-helmet-async';
 import type { Series } from '@/types/database';
 
 const PER_PAGE = 25;
+const LIST_FIELDS = 'id,title,year,rating,image_url,genre,is_release,is_anime,created_at';
 
 const AllAnimes = () => {
   const { isAdmin } = useAuth();
-  const [animes, setAnimes] = useState<Series[]>([]);
-  const [loading, setLoading] = useState(true);
+  const qc = useQueryClient();
   const [search, setSearch] = useState('');
   const [editItem, setEditItem] = useState<Series | null>(null);
   const [genre, setGenre] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
-  useEffect(() => { load(); }, []);
+  const { data: animes = [], isLoading: loading } = useQuery({
+    queryKey: ['all-animes'],
+    queryFn: async () => {
+      const { data } = await supabase.from('series').select(LIST_FIELDS).eq('is_anime', true).order('created_at', { ascending: false });
+      return (data || []) as Series[];
+    },
+  });
 
-  const load = async () => {
-    const { data } = await supabase.from('series').select('*').eq('is_anime', true).order('created_at', { ascending: false });
-    if (data) setAnimes(data as Series[]);
-    setLoading(false);
-  };
+  const reload = () => qc.invalidateQueries({ queryKey: ['all-animes'] });
 
   const filtered = useMemo(() => animes.filter(s => {
     const matchSearch = s.title.toLowerCase().includes(search.toLowerCase());
@@ -104,7 +107,7 @@ const AllAnimes = () => {
       <Footer />
       {editItem && (
         <EditContentModal item={editItem} type="series" open={!!editItem}
-          onClose={() => setEditItem(null)} onSaved={() => { load(); setEditItem(null); }} />
+          onClose={() => setEditItem(null)} onSaved={() => { reload(); setEditItem(null); }} />
       )}
     </div>
   );

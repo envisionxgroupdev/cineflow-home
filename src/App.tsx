@@ -1,4 +1,6 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -31,13 +33,18 @@ const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 min — content changes are infrequent
-      gcTime: 1000 * 60 * 30,
+      staleTime: 1000 * 60 * 10, // 10 min — content rarely changes
+      gcTime: 1000 * 60 * 60 * 24, // 24h — keep in memory/storage
       refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
       retry: 1,
     },
   },
 });
+
+const persister = typeof window !== 'undefined'
+  ? createSyncStoragePersister({ storage: window.localStorage, key: 'pipocamax-cache', throttleTime: 1000 })
+  : undefined;
 
 const RouteFallback = () => (
   <div className="min-h-screen bg-background flex items-center justify-center">
@@ -48,7 +55,14 @@ const RouteFallback = () => (
 const App = () => (
   <GoogleReCaptchaProvider reCaptchaKey="6LffhagsAAAAAEeoO_4__DnPycbPuXETkIJYPLRI">
     <HelmetProvider>
-      <QueryClientProvider client={queryClient}>
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={{
+          persister: persister!,
+          maxAge: 1000 * 60 * 60 * 24, // 24h
+          buster: 'v1',
+        }}
+      >
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -78,7 +92,7 @@ const App = () => (
           </BrowserRouter>
           </SiteScripts>
         </TooltipProvider>
-      </QueryClientProvider>
+      </PersistQueryClientProvider>
     </HelmetProvider>
   </GoogleReCaptchaProvider>
 );

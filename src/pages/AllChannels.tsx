@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ChannelCard } from '@/components/ChannelCard';
@@ -11,22 +12,22 @@ import { Helmet } from 'react-helmet-async';
 import type { TvChannel } from '@/types/channel';
 import { toast } from 'sonner';
 
+const LIST_FIELDS = 'id,external_id,name,category,logo_url,is_active';
+
 const AllChannels = () => {
   const { isAdmin } = useAuth();
-  const [channels, setChannels] = useState<TvChannel[]>([]);
-  const [loading, setLoading] = useState(true);
+  const qc = useQueryClient();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<string | null>(null);
   const [confirmDel, setConfirmDel] = useState<TvChannel | null>(null);
 
-  useEffect(() => { load(); }, []);
-
-  const load = async () => {
-    setLoading(true);
-    const { data } = await supabase.from('tv_channels').select('*').eq('is_active', true).order('name');
-    if (data) setChannels(data as TvChannel[]);
-    setLoading(false);
-  };
+  const { data: channels = [], isLoading: loading } = useQuery({
+    queryKey: ['all-channels'],
+    queryFn: async () => {
+      const { data } = await supabase.from('tv_channels').select(LIST_FIELDS).eq('is_active', true).order('name');
+      return (data || []) as TvChannel[];
+    },
+  });
 
   const categories = useMemo(() => {
     const set = new Set<string>();
@@ -44,7 +45,7 @@ const AllChannels = () => {
     const { error } = await supabase.from('tv_channels').delete().eq('id', ch.id);
     if (error) { toast.error(error.message); return; }
     toast.success('Canal removido');
-    setChannels(prev => prev.filter(c => c.id !== ch.id));
+    qc.setQueryData<TvChannel[]>(['all-channels'], prev => (prev || []).filter(c => c.id !== ch.id));
     setConfirmDel(null);
   };
 
