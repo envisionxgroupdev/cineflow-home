@@ -85,25 +85,37 @@ const Index = () => {
 
         {/* Stats strip */}
         {!isLoading && (movies.length > 0 || series.length > 0 || animes.length > 0 || channels.length > 0) && (
-          <section className="container mx-auto px-4 py-4">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <section className="container mx-auto px-4 py-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
               {[
-                { icon: Film, label: "Filmes", value: movies.length, suffix: "+" },
-                { icon: Tv, label: "Séries", value: series.length, suffix: "+" },
-                { icon: Sparkles, label: "Animes", value: animes.length, suffix: "+" },
-                { icon: Radio, label: "Canais TV", value: channels.length, suffix: "+" },
-              ].map(s => (
-                <div key={s.label} className="bg-card/50 backdrop-blur-sm border border-border/60 rounded-xl px-3 py-3 flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                    <s.icon className="h-4 w-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-base md:text-lg font-bold text-foreground tabular-nums leading-none">
-                      {s.value}<span className="text-primary">{s.suffix}</span>
-                    </p>
-                    <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">{s.label}</p>
-                  </div>
-                </div>
+                { icon: Film, label: "Filmes", value: movies.length, suffix: "+", to: "/filmes" },
+                { icon: Tv, label: "Séries", value: series.length, suffix: "+", to: "/series" },
+                { icon: Sparkles, label: "Animes", value: animes.length, suffix: "+", to: "/animes" },
+                { icon: Radio, label: "Canais TV", value: channels.length, suffix: "+", to: "/canais" },
+              ].map((s, i) => (
+                <motion.div
+                  key={s.label}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05, duration: 0.4 }}
+                >
+                  <Link
+                    to={s.to}
+                    className="group relative block bg-gradient-to-br from-card/80 to-card/30 backdrop-blur-sm border border-border/60 hover:border-primary/40 rounded-xl px-3 py-3 md:px-4 md:py-4 flex items-center gap-3 transition-all hover:shadow-[0_0_20px_hsl(var(--primary)/0.2)] overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/0 to-primary/0 group-hover:from-primary/5 group-hover:via-transparent group-hover:to-primary/10 transition-all" />
+                    <div className="relative w-9 h-9 md:w-11 md:h-11 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:bg-primary/20 group-hover:scale-110 transition-all">
+                      <s.icon className="h-4 w-4 md:h-5 md:w-5" />
+                    </div>
+                    <div className="relative min-w-0">
+                      <p className="text-lg md:text-2xl font-bold text-foreground tabular-nums leading-none">
+                        {s.value}<span className="text-primary">{s.suffix}</span>
+                      </p>
+                      <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider mt-1">{s.label}</p>
+                    </div>
+                  </Link>
+                </motion.div>
               ))}
             </div>
           </section>

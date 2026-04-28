@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Loader2, Sparkles, ChevronLeft, ChevronRight, Play, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -19,13 +20,34 @@ interface ReleaseItem {
 }
 
 export function ReleasesSection() {
-  const [items, setItems] = useState<ReleaseItem[]>([]);
-  const [loading, setLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  useEffect(() => { loadReleases(); }, []);
+  const { data: items = [], isLoading: loading } = useQuery({
+    queryKey: ['home-releases'],
+    queryFn: async (): Promise<ReleaseItem[]> => {
+      const [moviesRes, seriesRes] = await Promise.all([
+        supabase.from('movies').select('id,title,year,rating,image_url,backdrop_url,genre,overview').eq('is_release', true).order('created_at', { ascending: false }).limit(20),
+        supabase.from('series').select('id,title,year,rating,image_url,backdrop_url,genre,overview').eq('is_release', true).order('created_at', { ascending: false }).limit(20),
+      ]);
+      const toItem = (arr: Partial<Movie | Series>[], type: 'movie' | 'series'): ReleaseItem[] =>
+        (arr || []).map(i => ({
+          id: i.id!, title: i.title!, year: i.year || '', rating: i.rating ?? 0,
+          imageUrl: i.image_url || '/placeholder.svg',
+          backdrop: i.backdrop_url || null,
+          genre: i.genre || '',
+          overview: i.overview || null,
+          type,
+        }));
+      return [
+        ...toItem(moviesRes.data || [], 'movie'),
+        ...toItem(seriesRes.data || [], 'series'),
+      ];
+    },
+    staleTime: 1000 * 60 * 10,
+  });
+
   useEffect(() => { checkScroll(); }, [items]);
 
   const checkScroll = () => {
@@ -40,27 +62,6 @@ export function ReleasesSection() {
     if (!el) return;
     el.scrollBy({ left: dir === 'left' ? -el.clientWidth * 0.75 : el.clientWidth * 0.75, behavior: 'smooth' });
     setTimeout(checkScroll, 400);
-  };
-
-  const loadReleases = async () => {
-    const [moviesRes, seriesRes] = await Promise.all([
-      supabase.from('movies').select('*').eq('is_release', true).order('created_at', { ascending: false }),
-      supabase.from('series').select('*').eq('is_release', true).order('created_at', { ascending: false }),
-    ]);
-    const toItem = (arr: (Movie | Series)[], type: 'movie' | 'series'): ReleaseItem[] =>
-      (arr || []).map(i => ({
-        id: i.id, title: i.title, year: i.year || '', rating: i.rating,
-        imageUrl: i.image_url || '/placeholder.svg',
-        backdrop: i.backdrop_url || null,
-        genre: i.genre || '',
-        overview: i.overview || null,
-        type,
-      }));
-    setItems([
-      ...toItem((moviesRes.data || []) as Movie[], 'movie'),
-      ...toItem((seriesRes.data || []) as Series[], 'series'),
-    ]);
-    setLoading(false);
   };
 
   if (!loading && items.length === 0) return null;
@@ -142,6 +143,8 @@ function ReleaseCard({ item }: { item: ReleaseItem }) {
         <img
           src={item.imageUrl}
           alt={item.title}
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-110"
         />
 

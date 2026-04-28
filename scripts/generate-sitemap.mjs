@@ -19,6 +19,10 @@ function serieUrl(title) {
   return `${DOMAIN}/serie/assistir-${slugify(title)}-online-gratis`;
 }
 
+function channelUrl(externalId) {
+  return `${DOMAIN}/canal/${externalId}`;
+}
+
 function wrapUrlset(urls) {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>`;
 }
@@ -57,12 +61,17 @@ async function generate() {
   console.log('🗺️  Gerando sitemaps...');
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const [movies, series] = await Promise.all([
+  const [movies, allSeries, channels] = await Promise.all([
     fetchAll(supabase, 'movies', 'id, title'),
-    fetchAll(supabase, 'series', 'id, title'),
+    fetchAll(supabase, 'series', 'id, title, is_anime'),
+    fetchAll(supabase, 'tv_channels', 'external_id, is_active'),
   ]);
 
-  console.log(`  📦 ${movies.length} filmes, ${series.length} séries encontrados no banco`);
+  const series = allSeries.filter(s => !s.is_anime);
+  const animes = allSeries.filter(s => s.is_anime);
+  const activeChannels = channels.filter(c => c.is_active !== false);
+
+  console.log(`  📦 ${movies.length} filmes, ${series.length} séries, ${animes.length} animes, ${activeChannels.length} canais`);
 
   const now = new Date().toISOString().split('T')[0];
   const sitemapEntries = [];
@@ -72,6 +81,10 @@ async function generate() {
     urlEntry(`${DOMAIN}/`),
     urlEntry(`${DOMAIN}/filmes`),
     urlEntry(`${DOMAIN}/series`),
+    urlEntry(`${DOMAIN}/animes`),
+    urlEntry(`${DOMAIN}/canais`),
+    urlEntry(`${DOMAIN}/pedidos`),
+    urlEntry(`${DOMAIN}/contato`),
     urlEntry(`${DOMAIN}/sobre`),
     urlEntry(`${DOMAIN}/dmca`),
     urlEntry(`${DOMAIN}/termos`),
@@ -101,7 +114,26 @@ async function generate() {
     console.log(`  ✅ ${filename} — ${chunk.length} URLs`);
   });
 
-  // 4. Sitemap index
+  // 4. Animes — chunked
+  const animeEntries = animes.map(a => urlEntry(serieUrl(a.title)));
+  const animeChunks = chunkArray(animeEntries, MAX_URLS_PER_SITEMAP);
+  animeChunks.forEach((chunk, i) => {
+    if (chunk.length === 0) return;
+    const filename = `sitemap-animes-${i + 1}.xml`;
+    writeFileSync(`dist/${filename}`, wrapUrlset(chunk), 'utf-8');
+    sitemapEntries.push({ loc: `${DOMAIN}/${filename}`, lastmod: now });
+    console.log(`  ✅ ${filename} — ${chunk.length} URLs`);
+  });
+
+  // 5. TV Channels
+  if (activeChannels.length > 0) {
+    const channelEntries = activeChannels.map(c => urlEntry(channelUrl(c.external_id)));
+    writeFileSync('dist/sitemap-canais.xml', wrapUrlset(channelEntries), 'utf-8');
+    sitemapEntries.push({ loc: `${DOMAIN}/sitemap-canais.xml`, lastmod: now });
+    console.log(`  ✅ sitemap-canais.xml — ${channelEntries.length} URLs`);
+  }
+
+  // 6. Sitemap index
   const indexEntries = sitemapEntries.map(e =>
     `  <sitemap>\n    <loc>${e.loc}</loc>\n    <lastmod>${e.lastmod}</lastmod>\n  </sitemap>`
   ).join('\n');
@@ -109,7 +141,7 @@ async function generate() {
   const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${indexEntries}\n</sitemapindex>`;
 
   writeFileSync('dist/sitemap.xml', sitemapIndex, 'utf-8');
-  const total = pageUrls.length + movieEntries.length + serieEntries.length;
+  const total = pageUrls.length + movieEntries.length + serieEntries.length + animeEntries.length + activeChannels.length;
   console.log(`\n🎬 Sitemap index gerado — ${total} URLs totais em ${sitemapEntries.length} sitemaps`);
 }
 
