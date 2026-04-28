@@ -93,5 +93,8 @@ const App = () => (
           </SiteScripts>
         </TooltipProvider>
       </PersistQueryClientProvider>
+    </HelmetProvider>
+  </GoogleReCaptchaProvider>
+);
 
 export default App;
