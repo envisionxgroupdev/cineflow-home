@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -20,13 +21,34 @@ interface HeroItem {
 }
 
 export function HeroSection() {
-  const [items, setItems] = useState<HeroItem[]>([]);
   const [current, setCurrent] = useState(0);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadFeatured();
-  }, []);
+  const { data: items = [], isLoading: loading } = useQuery({
+    queryKey: ['home-hero'],
+    queryFn: async (): Promise<HeroItem[]> => {
+      const [moviesRes, seriesRes] = await Promise.all([
+        supabase.from("movies").select("id,title,overview,image_url,backdrop_url,rating,year,genre").not("backdrop_url", "is", null).order("created_at", { ascending: false }).limit(5),
+        supabase.from("series").select("id,title,overview,image_url,backdrop_url,rating,year,genre").not("backdrop_url", "is", null).order("created_at", { ascending: false }).limit(5),
+      ]);
+      const toHero = (arr: Partial<Movie | Series>[], type: "movie" | "series"): HeroItem[] =>
+        arr.filter(i => i.backdrop_url).map(i => ({
+          id: i.id!,
+          title: i.title!,
+          overview: i.overview ?? null,
+          backdrop: i.backdrop_url!,
+          poster: i.image_url || "/placeholder.svg",
+          rating: i.rating ?? 0,
+          year: i.year || "",
+          genre: i.genre || "",
+          type,
+        }));
+      return [
+        ...toHero(moviesRes.data || [], "movie"),
+        ...toHero(seriesRes.data || [], "series"),
+      ].slice(0, 8);
+    },
+    staleTime: 1000 * 60 * 10,
+  });
 
   // Auto-advance every 6s
   useEffect(() => {
@@ -34,49 +56,6 @@ export function HeroSection() {
     const timer = setInterval(() => setCurrent((c) => (c + 1) % items.length), 6000);
     return () => clearInterval(timer);
   }, [items.length]);
-
-  const loadFeatured = async () => {
-    const [moviesRes, seriesRes] = await Promise.all([
-      supabase.from("movies").select("*").not("backdrop_url", "is", null).order("created_at", { ascending: false }).limit(5),
-      supabase.from("series").select("*").not("backdrop_url", "is", null).order("created_at", { ascending: false }).limit(5),
-    ]);
-
-    const toHero = (items: (Movie | Series)[], type: "movie" | "series"): HeroItem[] =>
-      items
-        .filter((i) => i.backdrop_url)
-        .map((i) => ({
-          id: i.id,
-          title: i.title,
-          overview: i.overview,
-          backdrop: i.backdrop_url!,
-          poster: i.image_url || "/placeholder.svg",
-          rating: i.rating,
-          year: i.year || "",
-          genre: i.genre || "",
-          type,
-        }));
-
-    const all = [
-      ...toHero((moviesRes.data || []) as Movie[], "movie"),
-      ...toHero((seriesRes.data || []) as Series[], "series"),
-    ].slice(0, 8);
-
-    setItems(all);
-    setLoading(false);
-  };
-
-  const go = useCallback(
-    (dir: number) => {
-      if (items.length === 0) return;
-      setCurrent((c) => (c + dir + items.length) % items.length);
-    },
-    [items.length]
-  );
-
-  const item = items[current];
-
-  // Skeleton while loading
-  if (loading) return <HeroSkeleton />;
 
   // Fallback when no data
   if (items.length === 0) {
