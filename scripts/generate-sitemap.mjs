@@ -114,7 +114,26 @@ async function generate() {
     console.log(`  ✅ ${filename} — ${chunk.length} URLs`);
   });
 
-  // 4. Sitemap index
+  // 4. Animes — chunked
+  const animeEntries = animes.map(a => urlEntry(serieUrl(a.title)));
+  const animeChunks = chunkArray(animeEntries, MAX_URLS_PER_SITEMAP);
+  animeChunks.forEach((chunk, i) => {
+    if (chunk.length === 0) return;
+    const filename = `sitemap-animes-${i + 1}.xml`;
+    writeFileSync(`dist/${filename}`, wrapUrlset(chunk), 'utf-8');
+    sitemapEntries.push({ loc: `${DOMAIN}/${filename}`, lastmod: now });
+    console.log(`  ✅ ${filename} — ${chunk.length} URLs`);
+  });
+
+  // 5. TV Channels
+  if (activeChannels.length > 0) {
+    const channelEntries = activeChannels.map(c => urlEntry(channelUrl(c.external_id)));
+    writeFileSync('dist/sitemap-canais.xml', wrapUrlset(channelEntries), 'utf-8');
+    sitemapEntries.push({ loc: `${DOMAIN}/sitemap-canais.xml`, lastmod: now });
+    console.log(`  ✅ sitemap-canais.xml — ${channelEntries.length} URLs`);
+  }
+
+  // 6. Sitemap index
   const indexEntries = sitemapEntries.map(e =>
     `  <sitemap>\n    <loc>${e.loc}</loc>\n    <lastmod>${e.lastmod}</lastmod>\n  </sitemap>`
   ).join('\n');
@@ -122,7 +141,7 @@ async function generate() {
   const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${indexEntries}\n</sitemapindex>`;
 
   writeFileSync('dist/sitemap.xml', sitemapIndex, 'utf-8');
-  const total = pageUrls.length + movieEntries.length + serieEntries.length;
+  const total = pageUrls.length + movieEntries.length + serieEntries.length + animeEntries.length + activeChannels.length;
   console.log(`\n🎬 Sitemap index gerado — ${total} URLs totais em ${sitemapEntries.length} sitemaps`);
 }
 
