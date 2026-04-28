@@ -19,6 +19,10 @@ function serieUrl(title) {
   return `${DOMAIN}/serie/assistir-${slugify(title)}-online-gratis`;
 }
 
+function channelUrl(externalId) {
+  return `${DOMAIN}/canal/${externalId}`;
+}
+
 function wrapUrlset(urls) {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>`;
 }
@@ -57,12 +61,17 @@ async function generate() {
   console.log('🗺️  Gerando sitemaps...');
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const [movies, series] = await Promise.all([
+  const [movies, allSeries, channels] = await Promise.all([
     fetchAll(supabase, 'movies', 'id, title'),
-    fetchAll(supabase, 'series', 'id, title'),
+    fetchAll(supabase, 'series', 'id, title, is_anime'),
+    fetchAll(supabase, 'tv_channels', 'external_id, is_active'),
   ]);
 
-  console.log(`  📦 ${movies.length} filmes, ${series.length} séries encontrados no banco`);
+  const series = allSeries.filter(s => !s.is_anime);
+  const animes = allSeries.filter(s => s.is_anime);
+  const activeChannels = channels.filter(c => c.is_active !== false);
+
+  console.log(`  📦 ${movies.length} filmes, ${series.length} séries, ${animes.length} animes, ${activeChannels.length} canais`);
 
   const now = new Date().toISOString().split('T')[0];
   const sitemapEntries = [];
@@ -72,6 +81,10 @@ async function generate() {
     urlEntry(`${DOMAIN}/`),
     urlEntry(`${DOMAIN}/filmes`),
     urlEntry(`${DOMAIN}/series`),
+    urlEntry(`${DOMAIN}/animes`),
+    urlEntry(`${DOMAIN}/canais`),
+    urlEntry(`${DOMAIN}/pedidos`),
+    urlEntry(`${DOMAIN}/contato`),
     urlEntry(`${DOMAIN}/sobre`),
     urlEntry(`${DOMAIN}/dmca`),
     urlEntry(`${DOMAIN}/termos`),
