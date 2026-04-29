@@ -3,6 +3,7 @@ import { X, AlertTriangle, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+import { checkCooldown, markSubmitted } from '@/lib/antiSpam';
 
 interface ReportModalProps {
   contentId: string;
@@ -30,6 +31,8 @@ export function ReportModal({ contentId, contentType, contentTitle, open, onClos
 
   const handleSend = useCallback(async () => {
     if (!reason) { toast.error('Selecione um motivo'); return; }
+    const guard = checkCooldown('report', 30_000);
+    if (!guard.ok) { toast.error(guard.reason); return; }
     if (!executeRecaptcha) { toast.error('reCAPTCHA não carregou'); return; }
     setSending(true);
     try {
@@ -45,6 +48,7 @@ export function ReportModal({ contentId, contentType, contentTitle, open, onClos
       if (error) {
         toast.error('Erro ao enviar: ' + error.message);
       } else {
+        markSubmitted('report');
         toast.success('Reporte enviado! Obrigado.');
         setReason('');
         setDetails('');
