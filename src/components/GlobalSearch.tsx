@@ -3,7 +3,14 @@ import { Search, X, Film, Tv, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { contentUrl } from '@/lib/utils';
+import { throttleQuery } from '@/lib/antiSpam';
 import type { Movie, Series } from '@/types/database';
+
+const MIN_QUERY_LEN = 2;
+const DEBOUNCE_MS = 500;
+const SEARCH_FIELDS = 'id,title,year,rating,image_url';
+const searchCache = new Map<string, { movies: Movie[]; series: Series[]; t: number }>();
+const CACHE_TTL = 60_000;
 
 export function GlobalSearch() {
   const [open, setOpen] = useState(false);
@@ -20,18 +27,31 @@ export function GlobalSearch() {
   }, [open]);
 
   useEffect(() => {
-    if (!query.trim()) { setMovies([]); setSeries([]); return; }
+    const q = query.trim();
+    if (q.length < MIN_QUERY_LEN) { setMovies([]); setSeries([]); setLoading(false); return; }
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
+      const key = q.toLowerCase();
+      const cached = searchCache.get(key);
+      if (cached && Date.now() - cached.t < CACHE_TTL) {
+        setMovies(cached.movies); setSeries(cached.series); setLoading(false); return;
+      }
+      if (!throttleQuery('global-search', { minIntervalMs: 400, maxPerWindow: 12, windowMs: 10_000 })) {
+        return;
+      }
       setLoading(true);
       const [m, s] = await Promise.all([
-        supabase.from('movies').select('*').ilike('title', `%${query}%`).limit(5),
-        supabase.from('series').select('*').ilike('title', `%${query}%`).limit(5),
+        supabase.from('movies').select(SEARCH_FIELDS).ilike('title', `%${q}%`).limit(5),
+        supabase.from('series').select(SEARCH_FIELDS).ilike('title', `%${q}%`).limit(5),
       ]);
-      setMovies((m.data as Movie[]) || []);
-      setSeries((s.data as Series[]) || []);
+      const mv = (m.data as Movie[]) || [];
+      const sv = (s.data as Series[]) || [];
+      searchCache.set(key, { movies: mv, series: sv, t: Date.now() });
+      setMovies(mv);
+      setSeries(sv);
       setLoading(false);
-    }, 300);
+    }, DEBOUNCE_MS);
+    return () => clearTimeout(debounceRef.current);
   }, [query]);
 
   const go = (path: string) => { setOpen(false); setQuery(''); navigate(path); };
