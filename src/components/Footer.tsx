@@ -117,7 +117,7 @@ export function Footer() {
           {/* Brand + Bottom */}
           <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <Link to="/" className="flex items-center gap-2">
-              <img src="/favicon.png" alt="PipocaMax" width={24} height={24} className="h-6 w-6 object-contain" loading="lazy" />
+              <img src="/logo-pipocamax.png" alt="PipocaMax" width={28} height={28} className="h-7 w-7 object-contain" loading="lazy" />
               <span className="font-display text-xl tracking-wider text-foreground">
                 PIPOCA<span className="text-gradient-cinema">MAX</span>
               </span>
