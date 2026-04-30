@@ -80,8 +80,6 @@ export function Dashboard() {
     { label: "Mensagens", value: stats.newMessages, icon: MessageSquare, alert: stats.newMessages > 0 },
   ];
 
-  const totalContent = stats.movies + stats.series + stats.animes;
-
   return (
     <div className="space-y-6">
       {/* Stats grid */}
@@ -104,81 +102,13 @@ export function Dashboard() {
         ))}
       </div>
 
-      {/* Insights row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 rounded-lg p-4">
-          <div className="flex items-center gap-2 mb-1 text-muted-foreground text-xs">
-            <Activity className="h-3.5 w-3.5" /> Acervo total
-          </div>
-          <p className="text-2xl font-bold text-foreground tabular-nums">{totalContent.toLocaleString('pt-BR')}</p>
-          <p className="text-[10px] text-muted-foreground">títulos disponíveis</p>
-        </div>
-        <div className="bg-card border border-border rounded-lg p-4">
-          <div className="flex items-center gap-2 mb-1 text-muted-foreground text-xs">
-            <PlusCircle className="h-3.5 w-3.5" /> Hoje
-          </div>
-          <p className="text-2xl font-bold text-foreground tabular-nums">+{stats.addedToday}</p>
-          <p className="text-[10px] text-muted-foreground">títulos adicionados</p>
-        </div>
-        <div className="bg-card border border-border rounded-lg p-4">
-          <div className="flex items-center gap-2 mb-1 text-muted-foreground text-xs">
-            <Calendar className="h-3.5 w-3.5" /> Últimos 7 dias
-          </div>
-          <p className="text-2xl font-bold text-foreground tabular-nums">+{stats.addedWeek}</p>
-          <p className="text-[10px] text-muted-foreground">títulos adicionados</p>
-        </div>
-        <div className="bg-card border border-border rounded-lg p-4">
-          <div className="flex items-center gap-2 mb-1 text-muted-foreground text-xs">
-            <Clock className="h-3.5 w-3.5" /> Atualização
-          </div>
-          <p className="text-base font-semibold text-foreground">
-            {lastCheck ? lastCheck.toLocaleTimeString("pt-BR") : "—"}
-          </p>
-          <button onClick={loadAll} className="text-[10px] text-primary hover:underline inline-flex items-center gap-1 mt-0.5">
-            <RefreshCw className="h-3 w-3" /> Atualizar
-          </button>
-        </div>
-      </div>
-
-      {/* Recent activity */}
-      <div className="bg-card border border-border rounded-lg p-5">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Eye className="h-4 w-4 text-primary" />
-            <h3 className="font-display text-lg text-foreground tracking-wider">ÚLTIMOS ADICIONADOS</h3>
-          </div>
-          <span className="text-[11px] text-muted-foreground">Atualiza a cada {REFRESH_MS / 1000}s</span>
-        </div>
-        {recent.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-6 text-center">Nenhum conteúdo recente.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {recent.map(item => (
-              <Link
-                key={`${item.type}-${item.id}`}
-                to={contentUrl(item.type, item.id, item.title)}
-                target="_blank"
-                className="flex items-center gap-3 p-2 rounded-md bg-secondary/30 hover:bg-secondary/60 transition-colors group"
-              >
-                <img
-                  src={item.image_url || '/placeholder.svg'}
-                  alt={item.title}
-                  className="w-10 h-14 object-cover rounded shrink-0 bg-secondary"
-                  loading="lazy"
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm text-foreground truncate group-hover:text-primary transition-colors">{item.title}</p>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-primary/10 text-primary">
-                      {item.type === 'movie' ? 'Filme' : item.is_anime ? 'Anime' : 'Série'}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground">{timeAgo(item.created_at)}</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
+      {/* Update bar */}
+      <div className="flex items-center justify-end gap-3 text-xs text-muted-foreground">
+        <Clock className="h-3.5 w-3.5" />
+        <span>Última atualização: {lastCheck ? lastCheck.toLocaleTimeString("pt-BR") : "—"}</span>
+        <button onClick={loadAll} className="text-primary hover:underline inline-flex items-center gap-1">
+          <RefreshCw className="h-3 w-3" /> Atualizar
+        </button>
       </div>
     </div>
   );
