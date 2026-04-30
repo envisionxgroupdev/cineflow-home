@@ -2,11 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import {
   Film, Tv, AlertTriangle, Inbox, MessageSquare, Loader2,
   Users, TrendingUp, RefreshCw, Sparkles, Radio, Clock,
-  PlusCircle, Calendar, Eye, Activity,
 } from "lucide-react";
-import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { contentUrl } from "@/lib/utils";
 
 interface Stats {
   movies: number;
@@ -18,48 +15,20 @@ interface Stats {
   newMessages: number;
   totalUsers: number;
   releases: number;
-  addedToday: number;
-  addedWeek: number;
-}
-
-interface RecentItem {
-  id: string;
-  title: string;
-  type: 'movie' | 'series';
-  image_url: string | null;
-  created_at: string;
-  is_anime?: boolean;
 }
 
 const REFRESH_MS = 60_000;
 
-function timeAgo(iso: string): string {
-  const ms = Date.now() - new Date(iso).getTime();
-  const m = Math.floor(ms / 60000);
-  if (m < 1) return "agora";
-  if (m < 60) return `${m}min atrás`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h atrás`;
-  const d = Math.floor(h / 24);
-  return `${d}d atrás`;
-}
-
 export function Dashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
-  const [recent, setRecent] = useState<RecentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastCheck, setLastCheck] = useState<Date | null>(null);
 
   const loadAll = useCallback(async () => {
-    const dayAgo = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
-    const weekAgo = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
-
     const [
       moviesRes, seriesRes, animesRes, channelsRes,
       reportsRes, requestsRes, messagesRes, usersRes,
       releasesMRes, releasesSRes,
-      todayMRes, todaySRes, weekMRes, weekSRes,
-      recentMRes, recentSRes,
     ] = await Promise.all([
       supabase.from('movies').select('id', { count: 'exact', head: true }),
       supabase.from('series').select('id', { count: 'exact', head: true }).eq('is_anime', false),
@@ -71,12 +40,6 @@ export function Dashboard() {
       supabase.from('user_roles').select('user_id', { count: 'exact', head: true }),
       supabase.from('movies').select('id', { count: 'exact', head: true }).eq('is_release', true),
       supabase.from('series').select('id', { count: 'exact', head: true }).eq('is_release', true),
-      supabase.from('movies').select('id', { count: 'exact', head: true }).gte('created_at', dayAgo),
-      supabase.from('series').select('id', { count: 'exact', head: true }).gte('created_at', dayAgo),
-      supabase.from('movies').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo),
-      supabase.from('series').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo),
-      supabase.from('movies').select('id, title, image_url, created_at').order('created_at', { ascending: false }).limit(5),
-      supabase.from('series').select('id, title, image_url, created_at, is_anime').order('created_at', { ascending: false }).limit(5),
     ]);
 
     const next: Stats = {
@@ -89,19 +52,9 @@ export function Dashboard() {
       newMessages: messagesRes.count ?? 0,
       totalUsers: usersRes.count ?? 0,
       releases: (releasesMRes.count ?? 0) + (releasesSRes.count ?? 0),
-      addedToday: (todayMRes.count ?? 0) + (todaySRes.count ?? 0),
-      addedWeek: (weekMRes.count ?? 0) + (weekSRes.count ?? 0),
     };
 
-    type RawSerie = { id: string; title: string; image_url: string | null; created_at: string; is_anime?: boolean };
-    type RawMovie = { id: string; title: string; image_url: string | null; created_at: string };
-    const recentList: RecentItem[] = [
-      ...((recentMRes.data || []) as RawMovie[]).map(m => ({ ...m, type: 'movie' as const })),
-      ...((recentSRes.data || []) as RawSerie[]).map(s => ({ ...s, type: 'series' as const })),
-    ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 8);
-
     setStats(next);
-    setRecent(recentList);
     setLastCheck(new Date());
     setLoading(false);
   }, []);
