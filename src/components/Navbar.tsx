@@ -22,8 +22,8 @@ export function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2">
-          <img src="/favicon.png" alt="PipocaMax" width={32} height={32} className="h-8 w-8 object-contain" />
+        <Link to="/" className="flex items-center gap-2 group">
+          <img src="/logo-pipocamax.png" alt="PipocaMax" width={36} height={36} className="h-9 w-9 object-contain drop-shadow-[0_0_12px_hsl(var(--primary)/0.5)] group-hover:scale-110 transition-transform" />
           <span className="font-display text-2xl tracking-wider text-foreground">
             PIPOCA<span className="text-gradient-cinema">MAX</span>
           </span>
