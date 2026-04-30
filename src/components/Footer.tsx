@@ -46,9 +46,6 @@ export function Footer() {
                 <Link to="/sobre" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
                   <Info className="h-3.5 w-3.5" /> Sobre
                 </Link>
-                <Link to="/sobre" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
-                  <Info className="h-3.5 w-3.5" /> Sobre
-                </Link>
               </div>
             </div>
 
