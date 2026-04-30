@@ -2,11 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import {
   Film, Tv, AlertTriangle, Inbox, MessageSquare, Loader2,
   Users, TrendingUp, RefreshCw, Sparkles, Radio, Clock,
-  PlusCircle, Calendar, Eye, Activity,
 } from "lucide-react";
-import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { contentUrl } from "@/lib/utils";
 
 interface Stats {
   movies: number;
@@ -18,48 +15,20 @@ interface Stats {
   newMessages: number;
   totalUsers: number;
   releases: number;
-  addedToday: number;
-  addedWeek: number;
-}
-
-interface RecentItem {
-  id: string;
-  title: string;
-  type: 'movie' | 'series';
-  image_url: string | null;
-  created_at: string;
-  is_anime?: boolean;
 }
 
 const REFRESH_MS = 60_000;
 
-function timeAgo(iso: string): string {
-  const ms = Date.now() - new Date(iso).getTime();
-  const m = Math.floor(ms / 60000);
-  if (m < 1) return "agora";
-  if (m < 60) return `${m}min atrás`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h atrás`;
-  const d = Math.floor(h / 24);
-  return `${d}d atrás`;
-}
-
 export function Dashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
-  const [recent, setRecent] = useState<RecentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastCheck, setLastCheck] = useState<Date | null>(null);
 
   const loadAll = useCallback(async () => {
-    const dayAgo = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
-    const weekAgo = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
-
     const [
       moviesRes, seriesRes, animesRes, channelsRes,
       reportsRes, requestsRes, messagesRes, usersRes,
       releasesMRes, releasesSRes,
-      todayMRes, todaySRes, weekMRes, weekSRes,
-      recentMRes, recentSRes,
     ] = await Promise.all([
       supabase.from('movies').select('id', { count: 'exact', head: true }),
       supabase.from('series').select('id', { count: 'exact', head: true }).eq('is_anime', false),
@@ -71,12 +40,6 @@ export function Dashboard() {
       supabase.from('user_roles').select('user_id', { count: 'exact', head: true }),
       supabase.from('movies').select('id', { count: 'exact', head: true }).eq('is_release', true),
       supabase.from('series').select('id', { count: 'exact', head: true }).eq('is_release', true),
-      supabase.from('movies').select('id', { count: 'exact', head: true }).gte('created_at', dayAgo),
-      supabase.from('series').select('id', { count: 'exact', head: true }).gte('created_at', dayAgo),
-      supabase.from('movies').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo),
-      supabase.from('series').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo),
-      supabase.from('movies').select('id, title, image_url, created_at').order('created_at', { ascending: false }).limit(5),
-      supabase.from('series').select('id, title, image_url, created_at, is_anime').order('created_at', { ascending: false }).limit(5),
     ]);
 
     const next: Stats = {
@@ -89,19 +52,9 @@ export function Dashboard() {
       newMessages: messagesRes.count ?? 0,
       totalUsers: usersRes.count ?? 0,
       releases: (releasesMRes.count ?? 0) + (releasesSRes.count ?? 0),
-      addedToday: (todayMRes.count ?? 0) + (todaySRes.count ?? 0),
-      addedWeek: (weekMRes.count ?? 0) + (weekSRes.count ?? 0),
     };
 
-    type RawSerie = { id: string; title: string; image_url: string | null; created_at: string; is_anime?: boolean };
-    type RawMovie = { id: string; title: string; image_url: string | null; created_at: string };
-    const recentList: RecentItem[] = [
-      ...((recentMRes.data || []) as RawMovie[]).map(m => ({ ...m, type: 'movie' as const })),
-      ...((recentSRes.data || []) as RawSerie[]).map(s => ({ ...s, type: 'series' as const })),
-    ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 8);
-
     setStats(next);
-    setRecent(recentList);
     setLastCheck(new Date());
     setLoading(false);
   }, []);
@@ -127,8 +80,6 @@ export function Dashboard() {
     { label: "Mensagens", value: stats.newMessages, icon: MessageSquare, alert: stats.newMessages > 0 },
   ];
 
-  const totalContent = stats.movies + stats.series + stats.animes;
-
   return (
     <div className="space-y-6">
       {/* Stats grid */}
@@ -151,81 +102,13 @@ export function Dashboard() {
         ))}
       </div>
 
-      {/* Insights row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 rounded-lg p-4">
-          <div className="flex items-center gap-2 mb-1 text-muted-foreground text-xs">
-            <Activity className="h-3.5 w-3.5" /> Acervo total
-          </div>
-          <p className="text-2xl font-bold text-foreground tabular-nums">{totalContent.toLocaleString('pt-BR')}</p>
-          <p className="text-[10px] text-muted-foreground">títulos disponíveis</p>
-        </div>
-        <div className="bg-card border border-border rounded-lg p-4">
-          <div className="flex items-center gap-2 mb-1 text-muted-foreground text-xs">
-            <PlusCircle className="h-3.5 w-3.5" /> Hoje
-          </div>
-          <p className="text-2xl font-bold text-foreground tabular-nums">+{stats.addedToday}</p>
-          <p className="text-[10px] text-muted-foreground">títulos adicionados</p>
-        </div>
-        <div className="bg-card border border-border rounded-lg p-4">
-          <div className="flex items-center gap-2 mb-1 text-muted-foreground text-xs">
-            <Calendar className="h-3.5 w-3.5" /> Últimos 7 dias
-          </div>
-          <p className="text-2xl font-bold text-foreground tabular-nums">+{stats.addedWeek}</p>
-          <p className="text-[10px] text-muted-foreground">títulos adicionados</p>
-        </div>
-        <div className="bg-card border border-border rounded-lg p-4">
-          <div className="flex items-center gap-2 mb-1 text-muted-foreground text-xs">
-            <Clock className="h-3.5 w-3.5" /> Atualização
-          </div>
-          <p className="text-base font-semibold text-foreground">
-            {lastCheck ? lastCheck.toLocaleTimeString("pt-BR") : "—"}
-          </p>
-          <button onClick={loadAll} className="text-[10px] text-primary hover:underline inline-flex items-center gap-1 mt-0.5">
-            <RefreshCw className="h-3 w-3" /> Atualizar
-          </button>
-        </div>
-      </div>
-
-      {/* Recent activity */}
-      <div className="bg-card border border-border rounded-lg p-5">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Eye className="h-4 w-4 text-primary" />
-            <h3 className="font-display text-lg text-foreground tracking-wider">ÚLTIMOS ADICIONADOS</h3>
-          </div>
-          <span className="text-[11px] text-muted-foreground">Atualiza a cada {REFRESH_MS / 1000}s</span>
-        </div>
-        {recent.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-6 text-center">Nenhum conteúdo recente.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {recent.map(item => (
-              <Link
-                key={`${item.type}-${item.id}`}
-                to={contentUrl(item.type, item.id, item.title)}
-                target="_blank"
-                className="flex items-center gap-3 p-2 rounded-md bg-secondary/30 hover:bg-secondary/60 transition-colors group"
-              >
-                <img
-                  src={item.image_url || '/placeholder.svg'}
-                  alt={item.title}
-                  className="w-10 h-14 object-cover rounded shrink-0 bg-secondary"
-                  loading="lazy"
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm text-foreground truncate group-hover:text-primary transition-colors">{item.title}</p>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-primary/10 text-primary">
-                      {item.type === 'movie' ? 'Filme' : item.is_anime ? 'Anime' : 'Série'}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground">{timeAgo(item.created_at)}</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
+      {/* Update bar */}
+      <div className="flex items-center justify-end gap-3 text-xs text-muted-foreground">
+        <Clock className="h-3.5 w-3.5" />
+        <span>Última atualização: {lastCheck ? lastCheck.toLocaleTimeString("pt-BR") : "—"}</span>
+        <button onClick={loadAll} className="text-primary hover:underline inline-flex items-center gap-1">
+          <RefreshCw className="h-3 w-3" /> Atualizar
+        </button>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { Home, Clapperboard, Tv, Star, Info, FileText, Shield, Lock, Send, Globe, ExternalLink, Mail } from "lucide-react";
+import { Home, Clapperboard, Tv, Star, Info, FileText, Shield, Lock, Send, Globe, ExternalLink, Mail, ShieldAlert } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useSiteCodes } from "./SiteScripts";
 
@@ -84,6 +84,23 @@ export function Footer() {
               </h3>
               <div className="flex flex-col gap-2.5 text-sm">
                 <p className="text-muted-foreground/60 text-xs italic">Em breve...</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Legal disclaimer */}
+          <div className="relative overflow-hidden rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 via-card/40 to-transparent p-5 md:p-6">
+            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.08),transparent_60%)]" />
+            <div className="relative flex items-start gap-4">
+              <div className="shrink-0 w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                <ShieldAlert className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-1.5">Aviso Legal</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Este site <span className="text-foreground font-medium">não hospeda</span> e <span className="text-foreground font-medium">não armazena</span> nenhum arquivo em seus servidores.
+                  Indexamos apenas mídia hospedada em serviços de terceiros.
+                </p>
               </div>
             </div>
           </div>
