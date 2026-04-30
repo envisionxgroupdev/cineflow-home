@@ -100,14 +100,14 @@ const Index = () => {
         <AdBanner page="home" position="top" />
 
         {/* Stats strip */}
-        {!isLoading && (movies.length > 0 || series.length > 0 || animes.length > 0 || channels.length > 0) && (
+        {!isLoading && (counts.movies > 0 || counts.series > 0 || counts.animes > 0 || counts.channels > 0) && (
           <section className="container mx-auto px-4 py-6">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
               {[
-                { icon: Film, label: "Filmes", value: movies.length, suffix: "+", to: "/filmes" },
-                { icon: Tv, label: "Séries", value: series.length, suffix: "+", to: "/series" },
-                { icon: Sparkles, label: "Animes", value: animes.length, suffix: "+", to: "/animes" },
-                { icon: Radio, label: "Canais TV", value: channels.length, suffix: "+", to: "/canais" },
+                { icon: Film, label: "Filmes", value: counts.movies, suffix: "", to: "/filmes" },
+                { icon: Tv, label: "Séries", value: counts.series, suffix: "", to: "/series" },
+                { icon: Sparkles, label: "Animes", value: counts.animes, suffix: "", to: "/animes" },
+                { icon: Radio, label: "Canais TV", value: counts.channels, suffix: "", to: "/canais" },
               ].map((s, i) => (
                 <motion.div
                   key={s.label}
