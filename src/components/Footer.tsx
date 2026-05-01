@@ -113,11 +113,16 @@ export function Footer() {
 
           {/* Brand + Bottom */}
           <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <Link to="/" className="flex items-center gap-2">
-              <img src="/logo-pipocamax.png" alt="PipocaMax" width={28} height={28} className="h-7 w-7 object-contain" loading="lazy" />
-              <span className="font-display text-xl tracking-wider text-foreground">
-                PIPOCA<span className="text-gradient-cinema">MAX</span>
-              </span>
+            <Link to="/" className="flex items-center gap-2.5 group">
+              <img src="/logo-pipocamax.png" alt="PipocaMax" width={28} height={28} className="h-7 w-7 object-contain drop-shadow-[0_0_10px_hsl(var(--primary)/0.45)] group-hover:scale-110 transition-transform" loading="lazy" />
+              <div className="flex flex-col leading-none">
+                <span className="font-display text-xl font-bold tracking-[0.18em] text-foreground">
+                  PIPOCA<span className="text-gradient-cinema">MAX</span>
+                </span>
+                <span className="text-[8px] font-semibold tracking-[0.3em] uppercase text-muted-foreground/70 mt-1">
+                  Sua sessão favorita
+                </span>
+              </div>
             </Link>
             <p className="text-center text-xs text-muted-foreground">
               © 2026 PipocaMax. Todos os direitos reservados.
