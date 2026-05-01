@@ -211,21 +211,60 @@ const SeriesDetails = () => {
         </div>
 
         {/* Player */}
-        {playingEpisode && (
+        {playingEpisode && (() => {
+          const currentSeasonInfo = seasons.find(s => s.season_number === playingEpisode.season);
+          const currentSeasonEpCount = currentSeasonInfo?.episode_count ?? episodes.length;
+          const seasonIdx = seasons.findIndex(s => s.season_number === playingEpisode.season);
+          const prevSeason = seasonIdx > 0 ? seasons[seasonIdx - 1] : null;
+          const nextSeason = seasonIdx >= 0 && seasonIdx < seasons.length - 1 ? seasons[seasonIdx + 1] : null;
+
+          const hasPrev = playingEpisode.episode > 1 || !!prevSeason;
+          const hasNext = playingEpisode.episode < currentSeasonEpCount || !!nextSeason;
+
+          const goPrev = () => {
+            if (playingEpisode.episode > 1) {
+              setPlayingEpisode({ season: playingEpisode.season, episode: playingEpisode.episode - 1 });
+            } else if (prevSeason) {
+              setSelectedSeason(prevSeason.season_number);
+              setPlayingEpisode({ season: prevSeason.season_number, episode: prevSeason.episode_count });
+            }
+          };
+          const goNext = () => {
+            if (playingEpisode.episode < currentSeasonEpCount) {
+              setPlayingEpisode({ season: playingEpisode.season, episode: playingEpisode.episode + 1 });
+            } else if (nextSeason) {
+              setSelectedSeason(nextSeason.season_number);
+              setPlayingEpisode({ season: nextSeason.season_number, episode: 1 });
+            }
+          };
+
+          return (
           <div className="mt-8 mb-4">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
               <h3 className="font-display text-xl text-foreground">ASSISTINDO — T{playingEpisode.season} E{playingEpisode.episode}</h3>
               <button onClick={() => setPlayingEpisode(null)} className="text-sm text-muted-foreground hover:text-foreground">Fechar Player</button>
             </div>
-            <div className="flex gap-2 mb-3">
-              <button onClick={() => setActivePlayer('warezcdn')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${activePlayer === 'warezcdn' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}>
-                Player 1 — WarezCDN
-              </button>
-              <button onClick={() => setActivePlayer('embedmovies')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${activePlayer === 'embedmovies' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}>
-                Player 2 — EmbedMovies
-              </button>
+            <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+              <div className="flex gap-2">
+                <button onClick={() => setActivePlayer('warezcdn')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${activePlayer === 'warezcdn' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}>
+                  Player 1 — WarezCDN
+                </button>
+                <button onClick={() => setActivePlayer('embedmovies')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${activePlayer === 'embedmovies' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}>
+                  Player 2 — EmbedMovies
+                </button>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={goPrev} disabled={!hasPrev}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-secondary text-foreground hover:bg-primary/20 hover:text-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-secondary disabled:hover:text-foreground">
+                  <SkipBack className="h-3.5 w-3.5" /> Anterior
+                </button>
+                <button onClick={goNext} disabled={!hasNext}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                  Próximo Episódio <SkipForward className="h-3.5 w-3.5" />
+                </button>
+              </div>
             </div>
             <div className="rounded-xl overflow-hidden border border-border bg-black">
               <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
@@ -235,7 +274,8 @@ const SeriesDetails = () => {
               </div>
             </div>
           </div>
-        )}
+          );
+        })()}
 
         {/* Seasons & Episodes */}
         {seasons.length > 0 && tmdbId && (
