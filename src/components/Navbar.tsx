@@ -22,11 +22,16 @@ export function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 group">
-          <img src="/logo-pipocamax.png" alt="PipocaMax" width={36} height={36} className="h-9 w-9 object-contain drop-shadow-[0_0_12px_hsl(var(--primary)/0.5)] group-hover:scale-110 transition-transform" />
-          <span className="font-display text-2xl tracking-wider text-foreground">
-            PIPOCA<span className="text-gradient-cinema">MAX</span>
-          </span>
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <img src="/logo-pipocamax.png" alt="PipocaMax" width={36} height={36} className="h-9 w-9 object-contain drop-shadow-[0_0_14px_hsl(var(--primary)/0.55)] group-hover:scale-110 group-hover:rotate-[-4deg] transition-transform duration-300" />
+          <div className="flex flex-col leading-none">
+            <span className="font-display text-2xl font-bold tracking-[0.18em] text-foreground">
+              PIPOCA<span className="text-gradient-cinema">MAX</span>
+            </span>
+            <span className="hidden sm:block text-[9px] font-semibold tracking-[0.32em] uppercase text-muted-foreground/70 mt-0.5">
+              Cinema · Séries · Animes
+            </span>
+          </div>
         </Link>
 
         {/* Desktop nav */}
