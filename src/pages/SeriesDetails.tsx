@@ -252,7 +252,11 @@ const SeriesDetails = () => {
                     </h3>
                   </div>
                 </div>
-                <button onClick={() => setPlayingEpisode(null)}
+                <button onClick={() => {
+                    if (window.confirm('Deseja realmente fechar o player? Você perderá o progresso atual deste episódio.')) {
+                      setPlayingEpisode(null);
+                    }
+                  }}
                   className="text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-md hover:bg-secondary/60 transition-colors shrink-0">
                   Fechar
                 </button>
