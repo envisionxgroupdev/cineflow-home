@@ -180,34 +180,38 @@ const MovieDetails = () => {
             {(hasPlayer1 || hasPlayer2) && (
               <div className="flex flex-col gap-3 mb-6">
                 <button onClick={() => setShowPlayer(!showPlayer)}
-                  className="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-xl text-sm font-bold hover:bg-primary/90 transition-colors w-fit">
-                  <Play className="h-5 w-5 fill-current" />
+                  className="group inline-flex items-center gap-2.5 bg-primary text-primary-foreground px-7 py-3.5 rounded-full text-sm font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:brightness-110 transition-all w-fit">
+                  <Play className="h-5 w-5 fill-current transition-transform group-hover:scale-110" />
                   {showPlayer ? 'Fechar Player' : 'Assistir Agora'}
                 </button>
-                {showPlayer && (
-                  <div className="flex gap-2">
-                    {hasPlayer1 && (
-                      <button onClick={() => setActivePlayer('warezcdn')}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${activePlayer === 'warezcdn' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}>
-                        Player 1 — WarezCDN
-                      </button>
-                    )}
-                    {hasPlayer2 && (
-                      <button onClick={() => setActivePlayer('embedmovies')}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${activePlayer === 'embedmovies' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}>
-                        Player 2 — EmbedMovies
-                      </button>
-                    )}
-                  </div>
-                )}
               </div>
             )}
 
             {showPlayer && playerSrc && (
-              <div className="mb-8 rounded-xl overflow-hidden border border-border bg-black">
-                <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
-                  <iframe src={playerSrc} className="absolute inset-0 w-full h-full" allowFullScreen
-                    allow="autoplay; encrypted-media" referrerPolicy="origin" />
+              <div className="mb-8 rounded-2xl border border-border/60 bg-gradient-to-b from-card/80 to-card/40 backdrop-blur-sm shadow-2xl shadow-primary/5 overflow-hidden">
+                <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-border/50 bg-background/40">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="flex h-2 w-2 rounded-full bg-primary shadow-[0_0_10px] shadow-primary animate-pulse shrink-0" />
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Assistindo agora</p>
+                  </div>
+                  {(hasPlayer1 && hasPlayer2) && (
+                    <div className="inline-flex items-center p-1 rounded-full bg-secondary/60 border border-border/50">
+                      <button onClick={() => setActivePlayer('warezcdn')}
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${activePlayer === 'warezcdn' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'text-muted-foreground hover:text-foreground'}`}>
+                        Player 1
+                      </button>
+                      <button onClick={() => setActivePlayer('embedmovies')}
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${activePlayer === 'embedmovies' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'text-muted-foreground hover:text-foreground'}`}>
+                        Player 2
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div className="bg-black">
+                  <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
+                    <iframe src={playerSrc} className="absolute inset-0 w-full h-full" allowFullScreen
+                      allow="autoplay; encrypted-media" referrerPolicy="origin" />
+                  </div>
                 </div>
               </div>
             )}
