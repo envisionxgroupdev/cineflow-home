@@ -240,37 +240,60 @@ const SeriesDetails = () => {
 
           return (
           <div className="mt-8 mb-4">
-            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-              <h3 className="font-display text-xl text-foreground">ASSISTINDO — T{playingEpisode.season} E{playingEpisode.episode}</h3>
-              <button onClick={() => setPlayingEpisode(null)} className="text-sm text-muted-foreground hover:text-foreground">Fechar Player</button>
-            </div>
-            <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
-              <div className="flex gap-2">
-                <button onClick={() => setActivePlayer('warezcdn')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${activePlayer === 'warezcdn' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}>
-                  Player 1 — WarezCDN
-                </button>
-                <button onClick={() => setActivePlayer('embedmovies')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${activePlayer === 'embedmovies' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}>
-                  Player 2 — EmbedMovies
-                </button>
-              </div>
-              <div className="flex gap-2">
-                <button onClick={goPrev} disabled={!hasPrev}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-secondary text-foreground hover:bg-primary/20 hover:text-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-secondary disabled:hover:text-foreground">
-                  <SkipBack className="h-3.5 w-3.5" /> Anterior
-                </button>
-                <button onClick={goNext} disabled={!hasNext}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
-                  Próximo Episódio <SkipForward className="h-3.5 w-3.5" />
+            <div className="rounded-2xl border border-border/60 bg-gradient-to-b from-card/80 to-card/40 backdrop-blur-sm shadow-2xl shadow-primary/5 overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-border/50 bg-background/40">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="flex h-2 w-2 rounded-full bg-primary shadow-[0_0_10px] shadow-primary animate-pulse shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Assistindo agora</p>
+                    <h3 className="font-display text-sm sm:text-base text-foreground truncate">
+                      Temporada {playingEpisode.season} · Episódio {playingEpisode.episode}
+                    </h3>
+                  </div>
+                </div>
+                <button onClick={() => setPlayingEpisode(null)}
+                  className="text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-md hover:bg-secondary/60 transition-colors shrink-0">
+                  Fechar
                 </button>
               </div>
-            </div>
-            <div className="rounded-xl overflow-hidden border border-border bg-black">
-              <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
-                <iframe src={getEpisodePlayerUrl(playingEpisode.season, playingEpisode.episode, activePlayer)}
-                  className="absolute inset-0 w-full h-full" allowFullScreen
-                  allow="autoplay; encrypted-media" referrerPolicy="origin" />
+
+              {/* Player */}
+              <div className="bg-black">
+                <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
+                  <iframe src={getEpisodePlayerUrl(playingEpisode.season, playingEpisode.episode, activePlayer)}
+                    className="absolute inset-0 w-full h-full" allowFullScreen
+                    allow="autoplay; encrypted-media" referrerPolicy="origin" />
+                </div>
+              </div>
+
+              {/* Controls */}
+              <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5 flex-wrap bg-background/40 border-t border-border/50">
+                {/* Player switcher */}
+                <div className="inline-flex items-center p-1 rounded-full bg-secondary/60 border border-border/50">
+                  <button onClick={() => setActivePlayer('warezcdn')}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${activePlayer === 'warezcdn' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'text-muted-foreground hover:text-foreground'}`}>
+                    Player 1
+                  </button>
+                  <button onClick={() => setActivePlayer('embedmovies')}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${activePlayer === 'embedmovies' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'text-muted-foreground hover:text-foreground'}`}>
+                    Player 2
+                  </button>
+                </div>
+
+                {/* Episode nav */}
+                <div className="flex items-center gap-2">
+                  <button onClick={goPrev} disabled={!hasPrev}
+                    className="group flex items-center gap-1.5 h-9 px-3.5 rounded-full text-xs font-semibold border border-border/60 bg-secondary/40 text-foreground hover:bg-secondary hover:border-border transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+                    <SkipBack className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5 group-disabled:!translate-x-0" />
+                    <span className="hidden sm:inline">Anterior</span>
+                  </button>
+                  <button onClick={goNext} disabled={!hasNext}
+                    className="group flex items-center gap-1.5 h-9 px-4 rounded-full text-xs font-semibold bg-primary text-primary-foreground shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:brightness-110 transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none">
+                    Próximo Episódio
+                    <SkipForward className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-disabled:!translate-x-0" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
