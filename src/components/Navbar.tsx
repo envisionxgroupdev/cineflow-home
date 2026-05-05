@@ -67,6 +67,7 @@ export function Navbar() {
         {/* Mobile */}
         <div className="flex md:hidden items-center gap-3">
           <GlobalSearch />
+          <NotificationsBell />
           <button className="text-foreground" onClick={() => setMobileOpen(!mobileOpen)}>
             {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
