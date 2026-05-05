@@ -10,6 +10,7 @@ import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import { lazy, Suspense } from "react";
 import Index from "./pages/Index.tsx";
 import { SiteScripts } from "./components/SiteScripts.tsx";
+import { NotificationsToast } from "./components/NotificationsToast.tsx";
 import { Loader2 } from "lucide-react";
 
 // Lazy-loaded routes — keeps initial bundle small
