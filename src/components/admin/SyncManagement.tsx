@@ -143,7 +143,7 @@ export function SyncManagement() {
       slice.map(async (tmdbId) => {
         try {
           if (tmdbType === "movie") {
-            const d = await getMovieDetails(tmdbId);
+            const d = await withRetry(() => getMovieDetails(tmdbId));
             results.push({
               tmdb_id: d.id, title: d.title, original_title: d.original_title,
               year: d.release_date?.slice(0, 4) || "",
@@ -155,7 +155,7 @@ export function SyncManagement() {
               alreadyImported: importedIds.has(d.id),
             });
           } else {
-            const d = await getSeriesDetails(tmdbId);
+            const d = await withRetry(() => getSeriesDetails(tmdbId));
             results.push({
               tmdb_id: d.id, title: d.name, original_title: d.original_name,
               year: d.first_air_date?.slice(0, 4) || "",
@@ -269,7 +269,7 @@ export function SyncManagement() {
       const results = await Promise.allSettled(batch.map(async (tmdbId) => {
         let payload: any;
         if (tmdbType === "movie") {
-          const d = await getMovieDetails(tmdbId);
+          const d = await withRetry(() => getMovieDetails(tmdbId));
           payload = {
             title: d.title, original_title: d.original_title, overview: d.overview,
             year: d.release_date?.slice(0, 4) || "",
@@ -280,7 +280,7 @@ export function SyncManagement() {
             tmdb_id: d.id, is_release: false, release_date: d.release_date || null,
           };
         } else {
-          const d = await getSeriesDetails(tmdbId);
+          const d = await withRetry(() => getSeriesDetails(tmdbId));
           payload = {
             title: d.name, original_title: d.original_name, overview: d.overview,
             year: d.first_air_date?.slice(0, 4) || "",
