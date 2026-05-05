@@ -3,6 +3,19 @@ import { RefreshCw, Download, Film, Tv, Loader2, Search, Check, Zap, Square, Spa
 import { supabase } from "@/integrations/supabase/client";
 import { getMovieDetails, getSeriesDetails, getImageUrl } from "@/services/tmdb";
 import { toast } from "sonner";
+import { fetchJsonResilient } from "@/lib/resilientFetch";
+
+// Retry helper for TMDB calls (avoids transient failures during bulk import)
+async function withRetry<T>(fn: () => Promise<T>, retries = 2, delayMs = 500): Promise<T> {
+  let lastErr: unknown;
+  for (let i = 0; i <= retries; i++) {
+    try { return await fn(); } catch (e) {
+      lastErr = e;
+      if (i < retries) await new Promise(r => setTimeout(r, delayMs * (i + 1)));
+    }
+  }
+  throw lastErr;
+}
 
 type Category = "movie" | "serie" | "anime" | "canais";
 
@@ -97,25 +110,21 @@ export function SyncManagement() {
     setPage(0);
     try {
       if (isChannels) {
-        const targetUrl = encodeURIComponent(`https://warezcdn.site/lista?category=canais&format=json`);
-        const res = await fetch(`https://api.codetabs.com/v1/proxy/?quest=${targetUrl}`);
-        const json = await res.json();
+        const json: any = await fetchJsonResilient(`https://warezcdn.site/lista?category=canais&format=json`, { timeoutMs: 20_000, retries: 2 });
         const list: ChannelItem[] = (json.data || []).filter((c: any) => c.is_active);
         const importedSet = await loadImportedChannels();
         setChannels(list.map((c) => ({ ...c, alreadyImported: importedSet.has(c.id) })));
         toast.success(`${list.length} canais encontrados no WarezCDN`);
       } else {
         const apiCat = isAnime ? "anime" : category;
-        const targetUrl = encodeURIComponent(`https://warezcdn.site/lista?category=${apiCat}&type=tmdb&format=json`);
-        const res = await fetch(`https://api.codetabs.com/v1/proxy/?quest=${targetUrl}`);
-        const data = await res.json();
+        const data: any = await fetchJsonResilient(`https://warezcdn.site/lista?category=${apiCat}&type=tmdb&format=json`, { timeoutMs: 20_000, retries: 2 });
         const ids: number[] = Array.isArray(data) ? data.map((id: any) => Number(id)).filter(Boolean) : [];
         setWarezIds(ids);
         await loadImported();
         toast.success(`${ids.length} IDs encontrados no WarezCDN`);
       }
-    } catch (err) {
-      toast.error("Erro ao buscar lista do WarezCDN");
+    } catch (err: any) {
+      toast.error(`Erro ao buscar lista: ${err?.message || 'falha de rede'}. Tente novamente.`);
       setWarezIds([]);
       setChannels([]);
     }
@@ -134,7 +143,7 @@ export function SyncManagement() {
       slice.map(async (tmdbId) => {
         try {
           if (tmdbType === "movie") {
-            const d = await getMovieDetails(tmdbId);
+            const d = await withRetry(() => getMovieDetails(tmdbId));
             results.push({
               tmdb_id: d.id, title: d.title, original_title: d.original_title,
               year: d.release_date?.slice(0, 4) || "",
@@ -146,7 +155,7 @@ export function SyncManagement() {
               alreadyImported: importedIds.has(d.id),
             });
           } else {
-            const d = await getSeriesDetails(tmdbId);
+            const d = await withRetry(() => getSeriesDetails(tmdbId));
             results.push({
               tmdb_id: d.id, title: d.name, original_title: d.original_name,
               year: d.first_air_date?.slice(0, 4) || "",
@@ -260,7 +269,7 @@ export function SyncManagement() {
       const results = await Promise.allSettled(batch.map(async (tmdbId) => {
         let payload: any;
         if (tmdbType === "movie") {
-          const d = await getMovieDetails(tmdbId);
+          const d = await withRetry(() => getMovieDetails(tmdbId));
           payload = {
             title: d.title, original_title: d.original_title, overview: d.overview,
             year: d.release_date?.slice(0, 4) || "",
@@ -271,7 +280,7 @@ export function SyncManagement() {
             tmdb_id: d.id, is_release: false, release_date: d.release_date || null,
           };
         } else {
-          const d = await getSeriesDetails(tmdbId);
+          const d = await withRetry(() => getSeriesDetails(tmdbId));
           payload = {
             title: d.name, original_title: d.original_name, overview: d.overview,
             year: d.first_air_date?.slice(0, 4) || "",

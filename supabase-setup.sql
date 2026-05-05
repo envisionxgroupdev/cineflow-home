@@ -189,3 +189,36 @@ create policy "Admins can delete requests"
 
 create index if not exists idx_requests_status on public.requests(status);
 create index if not exists idx_requests_created_at on public.requests(created_at desc);
+
+-- =============================================
+-- NOTIFICATIONS (announcements popup + bell)
+-- =============================================
+create table if not exists public.notifications (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  message text,
+  type text not null default 'release', -- 'release' | 'update' | 'info'
+  content_type text,                    -- 'movie' | 'series' | null
+  content_slug text,                    -- slug to navigate to
+  image_url text,
+  is_active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+alter table public.notifications enable row level security;
+
+-- Public can read active notifications
+drop policy if exists "Public can read active notifications" on public.notifications;
+create policy "Public can read active notifications"
+  on public.notifications for select
+  using (is_active = true);
+
+-- Only admins can insert/update/delete
+drop policy if exists "Admins manage notifications" on public.notifications;
+create policy "Admins manage notifications"
+  on public.notifications for all
+  to authenticated
+  using (public.has_role(auth.uid(), 'admin'))
+  with check (public.has_role(auth.uid(), 'admin'));
+
+create index if not exists notifications_created_idx on public.notifications (created_at desc);

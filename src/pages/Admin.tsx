@@ -6,11 +6,12 @@ import { UserManagement } from "@/components/admin/UserManagement";
 import { ReportsManagement } from "@/components/admin/ReportsManagement";
 import { RequestsManagement } from "@/components/admin/RequestsManagement";
 import { ContactMessagesManagement } from "@/components/admin/ContactMessagesManagement";
-import { Film, Tv, Plus, Search, Trash2, Pencil, ArrowLeft, LogOut, Loader2, Users, AlertTriangle, Sparkles, LayoutDashboard, RefreshCw, Code2, Megaphone, Inbox, MessageSquare, Radio } from "lucide-react";
+import { Film, Tv, Plus, Search, Trash2, Pencil, ArrowLeft, LogOut, Loader2, Users, AlertTriangle, Sparkles, LayoutDashboard, RefreshCw, Code2, Megaphone, Inbox, MessageSquare, Radio, Bell } from "lucide-react";
 import { Dashboard } from "@/components/admin/Dashboard";
 import { SyncManagement } from "@/components/admin/SyncManagement";
 import { CodeManagement } from "@/components/admin/CodeManagement";
 import { AdsManagement } from "@/components/admin/AdsManagement";
+import { NotificationsManagement } from "@/components/admin/NotificationsManagement";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +19,7 @@ import { toast } from "sonner";
 import type { Movie, Series } from "@/types/database";
 import type { TvChannel } from "@/types/channel";
 
-type Tab = "dashboard" | "movies" | "series" | "animes" | "channels" | "users" | "reports" | "requests" | "contact" | "sync" | "codes" | "ads";
+type Tab = "dashboard" | "movies" | "series" | "animes" | "channels" | "users" | "reports" | "requests" | "contact" | "sync" | "codes" | "ads" | "notifications";
 
 const Admin = () => {
   const { user, isAdmin, loading: authLoading, signOut } = useAuth();
@@ -97,6 +98,7 @@ const Admin = () => {
     { key: "sync" as Tab, label: "Sincronização", icon: RefreshCw, count: null },
     { key: "codes" as Tab, label: "Códigos", icon: Code2, count: null },
     { key: "ads" as Tab, label: "Anúncios", icon: Megaphone, count: null },
+    { key: "notifications" as Tab, label: "Notificações", icon: Bell, count: null },
   ];
 
   const isContentTab = activeTab === "movies" || activeTab === "series" || activeTab === "animes";
@@ -160,6 +162,8 @@ const Admin = () => {
             isAdmin ? <CodeManagement /> : null
           ) : activeTab === "ads" ? (
             isAdmin ? <AdsManagement /> : null
+          ) : activeTab === "notifications" ? (
+            isAdmin ? <NotificationsManagement /> : null
           ) : activeTab === "channels" ? (
             <>
               <div className="flex flex-col sm:flex-row gap-3 mb-6">
