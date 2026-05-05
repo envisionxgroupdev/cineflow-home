@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Menu, X, LogIn, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlobalSearch } from "./GlobalSearch";
-import { NotificationsBell } from "./NotificationsBell";
+
 import { useAuth } from "@/hooks/useAuth";
 
 const navLinks = [
@@ -44,7 +44,6 @@ export function Navbar() {
             </a>
           ))}
           <GlobalSearch />
-          <NotificationsBell />
           {isAdmin && (
             <Link to="/admin"
               className="flex items-center gap-1.5 text-sm font-medium bg-primary/10 text-primary px-3 py-1.5 rounded-md hover:bg-primary/20 transition-colors">
@@ -67,7 +66,6 @@ export function Navbar() {
         {/* Mobile */}
         <div className="flex md:hidden items-center gap-3">
           <GlobalSearch />
-          <NotificationsBell />
           <button className="text-foreground" onClick={() => setMobileOpen(!mobileOpen)}>
             {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
