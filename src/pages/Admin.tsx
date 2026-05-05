@@ -98,6 +98,7 @@ const Admin = () => {
     { key: "sync" as Tab, label: "Sincronização", icon: RefreshCw, count: null },
     { key: "codes" as Tab, label: "Códigos", icon: Code2, count: null },
     { key: "ads" as Tab, label: "Anúncios", icon: Megaphone, count: null },
+    { key: "notifications" as Tab, label: "Notificações", icon: Bell, count: null },
   ];
 
   const isContentTab = activeTab === "movies" || activeTab === "series" || activeTab === "animes";
