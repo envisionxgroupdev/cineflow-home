@@ -90,8 +90,8 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
+            <NotificationsToast />
           </BrowserRouter>
-          <NotificationsToast />
           </SiteScripts>
         </TooltipProvider>
       </PersistQueryClientProvider>
