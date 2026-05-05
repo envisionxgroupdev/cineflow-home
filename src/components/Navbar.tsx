@@ -44,6 +44,7 @@ export function Navbar() {
             </a>
           ))}
           <GlobalSearch />
+          <NotificationsBell />
           {isAdmin && (
             <Link to="/admin"
               className="flex items-center gap-1.5 text-sm font-medium bg-primary/10 text-primary px-3 py-1.5 rounded-md hover:bg-primary/20 transition-colors">
