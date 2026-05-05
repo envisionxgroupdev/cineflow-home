@@ -162,6 +162,8 @@ const Admin = () => {
             isAdmin ? <CodeManagement /> : null
           ) : activeTab === "ads" ? (
             isAdmin ? <AdsManagement /> : null
+          ) : activeTab === "notifications" ? (
+            isAdmin ? <NotificationsManagement /> : null
           ) : activeTab === "channels" ? (
             <>
               <div className="flex flex-col sm:flex-row gap-3 mb-6">
