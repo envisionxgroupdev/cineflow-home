@@ -91,6 +91,7 @@ const App = () => (
               </Routes>
             </Suspense>
           </BrowserRouter>
+          <NotificationsToast />
           </SiteScripts>
         </TooltipProvider>
       </PersistQueryClientProvider>
