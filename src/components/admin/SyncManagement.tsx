@@ -110,25 +110,21 @@ export function SyncManagement() {
     setPage(0);
     try {
       if (isChannels) {
-        const targetUrl = encodeURIComponent(`https://warezcdn.site/lista?category=canais&format=json`);
-        const res = await fetch(`https://api.codetabs.com/v1/proxy/?quest=${targetUrl}`);
-        const json = await res.json();
+        const json: any = await fetchJsonResilient(`https://warezcdn.site/lista?category=canais&format=json`, { timeoutMs: 20_000, retries: 2 });
         const list: ChannelItem[] = (json.data || []).filter((c: any) => c.is_active);
         const importedSet = await loadImportedChannels();
         setChannels(list.map((c) => ({ ...c, alreadyImported: importedSet.has(c.id) })));
         toast.success(`${list.length} canais encontrados no WarezCDN`);
       } else {
         const apiCat = isAnime ? "anime" : category;
-        const targetUrl = encodeURIComponent(`https://warezcdn.site/lista?category=${apiCat}&type=tmdb&format=json`);
-        const res = await fetch(`https://api.codetabs.com/v1/proxy/?quest=${targetUrl}`);
-        const data = await res.json();
+        const data: any = await fetchJsonResilient(`https://warezcdn.site/lista?category=${apiCat}&type=tmdb&format=json`, { timeoutMs: 20_000, retries: 2 });
         const ids: number[] = Array.isArray(data) ? data.map((id: any) => Number(id)).filter(Boolean) : [];
         setWarezIds(ids);
         await loadImported();
         toast.success(`${ids.length} IDs encontrados no WarezCDN`);
       }
-    } catch (err) {
-      toast.error("Erro ao buscar lista do WarezCDN");
+    } catch (err: any) {
+      toast.error(`Erro ao buscar lista: ${err?.message || 'falha de rede'}. Tente novamente.`);
       setWarezIds([]);
       setChannels([]);
     }
