@@ -3,6 +3,19 @@ import { RefreshCw, Download, Film, Tv, Loader2, Search, Check, Zap, Square, Spa
 import { supabase } from "@/integrations/supabase/client";
 import { getMovieDetails, getSeriesDetails, getImageUrl } from "@/services/tmdb";
 import { toast } from "sonner";
+import { fetchJsonResilient } from "@/lib/resilientFetch";
+
+// Retry helper for TMDB calls (avoids transient failures during bulk import)
+async function withRetry<T>(fn: () => Promise<T>, retries = 2, delayMs = 500): Promise<T> {
+  let lastErr: unknown;
+  for (let i = 0; i <= retries; i++) {
+    try { return await fn(); } catch (e) {
+      lastErr = e;
+      if (i < retries) await new Promise(r => setTimeout(r, delayMs * (i + 1)));
+    }
+  }
+  throw lastErr;
+}
 
 type Category = "movie" | "serie" | "anime" | "canais";
 
