@@ -19,7 +19,7 @@ import { toast } from "sonner";
 import type { Movie, Series } from "@/types/database";
 import type { TvChannel } from "@/types/channel";
 
-type Tab = "dashboard" | "movies" | "series" | "animes" | "channels" | "users" | "reports" | "requests" | "contact" | "sync" | "codes" | "ads";
+type Tab = "dashboard" | "movies" | "series" | "animes" | "channels" | "users" | "reports" | "requests" | "contact" | "sync" | "codes" | "ads" | "notifications";
 
 const Admin = () => {
   const { user, isAdmin, loading: authLoading, signOut } = useAuth();
