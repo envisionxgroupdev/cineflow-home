@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Menu, X, LogIn, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlobalSearch } from "./GlobalSearch";
+import { NotificationsBell } from "./NotificationsBell";
 import { useAuth } from "@/hooks/useAuth";
 
 const navLinks = [
