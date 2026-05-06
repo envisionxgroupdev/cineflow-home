@@ -130,7 +130,7 @@ export function ContentSection({ id, title, items }: ContentSectionProps) {
                   transition={{ delay: Math.min(index * 0.03, 0.3), duration: 0.4 }}
                   className="snap-start shrink-0 w-[42vw] xs:w-[40vw] sm:w-[200px] md:w-[210px] lg:w-[220px] xl:w-[230px] max-w-[230px]"
                 >
-                  <MovieCard {...item} />
+                  <MovieCard {...item} priority={index < 4} />
                 </motion.div>
               ))}
             </div>
