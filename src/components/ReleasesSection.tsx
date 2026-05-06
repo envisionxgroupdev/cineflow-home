@@ -119,10 +119,10 @@ export function ReleasesSection() {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.05, duration: 0.4 }}
+                  transition={{ delay: Math.min(i * 0.05, 0.3), duration: 0.4 }}
                   className="snap-start shrink-0 w-[200px] sm:w-[220px] md:w-[240px]"
                 >
-                  <ReleaseCard item={item} />
+                  <ReleaseCard item={item} priority={i < 4} />
                 </motion.div>
               ))}
             </div>
@@ -133,7 +133,7 @@ export function ReleasesSection() {
   );
 }
 
-function ReleaseCard({ item }: { item: ReleaseItem }) {
+function ReleaseCard({ item, priority = false }: { item: ReleaseItem; priority?: boolean }) {
   const href = contentUrl(item.type, item.id, item.title);
 
   return (
@@ -143,8 +143,11 @@ function ReleaseCard({ item }: { item: ReleaseItem }) {
         <img
           src={item.imageUrl}
           alt={item.title}
-          loading="lazy"
+          loading={priority ? "eager" : "lazy"}
           decoding="async"
+          // @ts-expect-error fetchpriority is valid HTML, React types lag
+          fetchpriority={priority ? "high" : "low"}
+          sizes="(max-width: 640px) 200px, (max-width: 1024px) 220px, 240px"
           className="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-110"
         />
 
