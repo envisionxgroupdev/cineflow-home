@@ -19,6 +19,7 @@ interface NotificationRow {
 const READ_KEY = 'pipocamax-read-notifications';
 const TOAST_SHOWN_KEY = 'pipocamax-toast-shown';
 const POLL_MS = 60_000;
+const DISPLAY_MS = 5000;
 
 function getReadIds(): Set<string> {
   try { return new Set(JSON.parse(localStorage.getItem(READ_KEY) || '[]')); } catch { return new Set(); }
@@ -75,8 +76,10 @@ export function NotificationsToast() {
     setQueue(q => q.slice(1));
     setCurrent(next);
     const shown = getToastShown(); shown.add(next.id); saveToastShown(shown);
+    // mark as read immediately so it never appears again, even across sessions
+    const r = getReadIds(); r.add(next.id); saveReadIds(r);
     if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => setCurrent(null), 8000);
+    timer.current = setTimeout(() => setCurrent(null), DISPLAY_MS);
     return () => { if (timer.current) clearTimeout(timer.current); };
   }, [queue, current]);
 
