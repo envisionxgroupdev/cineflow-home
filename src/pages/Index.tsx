@@ -120,8 +120,8 @@ const Index = () => {
 
         {/* Stats strip */}
         {!isLoading && (counts.movies > 0 || counts.series > 0 || counts.animes > 0 || counts.channels > 0) && (
-          <section className="container mx-auto px-4 py-6">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
+          <section className="container mx-auto px-3 sm:px-4 py-4 md:py-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
               {[
                 { icon: Film, label: "Filmes", value: counts.movies, suffix: "", to: "/filmes" },
                 { icon: Tv, label: "Séries", value: counts.series, suffix: "", to: "/series" },
@@ -137,17 +137,17 @@ const Index = () => {
                 >
                   <Link
                     to={s.to}
-                    className="group relative block bg-gradient-to-br from-card/80 to-card/30 backdrop-blur-sm border border-border/60 hover:border-primary/40 rounded-xl px-3 py-3 md:px-4 md:py-4 flex items-center gap-3 transition-all hover:shadow-[0_0_20px_hsl(var(--primary)/0.2)] overflow-hidden"
+                    className="group relative block bg-gradient-to-br from-card/80 to-card/30 backdrop-blur-sm border border-border/60 hover:border-primary/40 rounded-xl px-2.5 py-2.5 md:px-4 md:py-4 flex items-center gap-2 md:gap-3 transition-all hover:shadow-[0_0_20px_hsl(var(--primary)/0.2)] overflow-hidden"
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/0 to-primary/0 group-hover:from-primary/5 group-hover:via-transparent group-hover:to-primary/10 transition-all" />
-                    <div className="relative w-9 h-9 md:w-11 md:h-11 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:bg-primary/20 group-hover:scale-110 transition-all">
+                    <div className="relative w-8 h-8 md:w-11 md:h-11 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:bg-primary/20 group-hover:scale-110 transition-all">
                       <s.icon className="h-4 w-4 md:h-5 md:w-5" />
                     </div>
                     <div className="relative min-w-0">
-                      <p className="text-lg md:text-2xl font-bold text-foreground tabular-nums leading-none">
+                      <p className="text-base md:text-2xl font-bold text-foreground tabular-nums leading-none">
                         {s.value}<span className="text-primary">{s.suffix}</span>
                       </p>
-                      <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider mt-1">{s.label}</p>
+                      <p className="text-[9px] md:text-xs text-muted-foreground uppercase tracking-wider mt-1 truncate">{s.label}</p>
                     </div>
                   </Link>
                 </motion.div>
@@ -163,29 +163,29 @@ const Index = () => {
         {animes.length > 0 && <ContentSection id="animes" title="ANIMES" items={toCardFormat(animes, 'series')} />}
 
         {channels.length > 0 && (
-          <section id="canais" className="py-12">
-            <div className="container mx-auto px-4">
+          <section id="canais" className="py-8 md:py-12">
+            <div className="container mx-auto px-3 sm:px-4">
               <motion.div
                 initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }} transition={{ duration: 0.5 }}
-                className="flex items-center justify-between mb-6"
+                className="flex items-center justify-between mb-4 md:mb-6 gap-3"
               >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Radio className="h-5 w-5 text-primary" />
+                <div className="flex items-center gap-2 md:gap-3 min-w-0">
+                  <div className="p-2 rounded-lg bg-primary/10 shrink-0">
+                    <Radio className="h-4 w-4 md:h-5 md:w-5 text-primary" />
                   </div>
-                  <h2 className="font-display text-3xl md:text-4xl text-foreground">CANAIS AO VIVO</h2>
-                  <div className="hidden sm:block flex-1 h-px bg-gradient-to-r from-primary/20 to-transparent ml-4 min-w-[60px]" />
+                  <h2 className="font-display text-2xl md:text-4xl text-foreground truncate">CANAIS AO VIVO</h2>
+                  <div className="hidden md:block flex-1 h-px bg-gradient-to-r from-primary/20 to-transparent ml-4 min-w-[60px]" />
                 </div>
-                <Link to="/canais" className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors group">
+                <Link to="/canais" className="flex items-center gap-1 text-xs sm:text-sm text-primary hover:text-primary/80 transition-colors group shrink-0">
                   Ver todos <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
               </motion.div>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-9 gap-3">
+              <div className="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-9 gap-2 sm:gap-3">
                 {channels.map((c, i) => (
                   <motion.div key={c.id}
                     initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }} transition={{ delay: i * 0.02, duration: 0.3 }}>
+                    viewport={{ once: true }} transition={{ delay: Math.min(i * 0.02, 0.3), duration: 0.3 }}>
                     <ChannelCard
                       id={c.id} externalId={c.external_id} name={c.name}
                       category={c.category} logoUrl={c.logo_url}
