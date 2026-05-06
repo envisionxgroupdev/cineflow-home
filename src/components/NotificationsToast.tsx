@@ -67,7 +67,39 @@ export function NotificationsToast() {
     };
     load();
     const id = setInterval(load, POLL_MS);
-    return () => { cancelled = true; clearInterval(id); };
+
+    // Realtime: novas notificações aparecem na hora; updates (ex: is_active=false) somem na hora
+    const channel = supabase
+      .channel('notifications-realtime')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications' }, (payload) => {
+        const n = payload.new as NotificationRow;
+        if (!n.is_active) return;
+        const read = getReadIds();
+        const shown = getToastShown();
+        if (read.has(n.id) || shown.has(n.id)) return;
+        setQueue(q => [...q, n]);
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'notifications' }, (payload) => {
+        const n = payload.new as NotificationRow;
+        if (!n.is_active) {
+          // remove da fila e fecha se estiver visível
+          setQueue(q => q.filter(x => x.id !== n.id));
+          setCurrent(c => (c && c.id === n.id ? null : c));
+        }
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'notifications' }, (payload) => {
+        const oldId = (payload.old as { id?: string })?.id;
+        if (!oldId) return;
+        setQueue(q => q.filter(x => x.id !== oldId));
+        setCurrent(c => (c && c.id === oldId ? null : c));
+      })
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   useEffect(() => {
