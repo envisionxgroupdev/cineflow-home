@@ -38,8 +38,12 @@ const Admin = () => {
   const [tmdbOpen, setTmdbOpen] = useState(false);
   const [editItem, setEditItem] = useState<(Movie | Series) | null>(null);
 
-  useEffect(() => { if (!authLoading && !user) navigate('/login'); }, [authLoading, user, navigate]);
-  useEffect(() => { if (user) loadData(); }, [user]);
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) { navigate('/login'); return; }
+    if (!isAdmin) { navigate('/'); }
+  }, [authLoading, user, isAdmin, navigate]);
+  useEffect(() => { if (user && isAdmin) loadData(); }, [user, isAdmin]);
 
   const loadData = async () => {
     setLoadingData(true);
