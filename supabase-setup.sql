@@ -45,8 +45,9 @@ create table public.profiles (
 
 alter table public.profiles enable row level security;
 
-create policy "Public profiles readable"
-  on public.profiles for select using (true);
+create policy "Users can read own profile"
+  on public.profiles for select to authenticated
+  using (auth.uid() = id or public.has_role(auth.uid(), 'admin'));
 
 create policy "Users can update own profile"
   on public.profiles for update to authenticated
