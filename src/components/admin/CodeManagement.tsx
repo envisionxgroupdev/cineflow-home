@@ -101,11 +101,17 @@ export function CodeManagement() {
 
 ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
 
+-- Public can READ settings (needed to inject scripts on every page load)
+CREATE POLICY "Public can read settings"
+  ON public.site_settings FOR SELECT
+  USING (true);
+
+-- Only admins can INSERT/UPDATE/DELETE
 CREATE POLICY "Admins can manage settings"
   ON public.site_settings FOR ALL
   TO authenticated
-  USING (true)
-  WITH CHECK (true);`}
+  USING (public.has_role(auth.uid(), 'admin'))
+  WITH CHECK (public.has_role(auth.uid(), 'admin'));`}
         </pre>
         <button onClick={loadCodes} className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
           Verificar novamente
