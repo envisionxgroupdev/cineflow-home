@@ -1,6 +1,8 @@
-const TMDB_API_KEY = 'c3303b4812a831ae634e26763a65644e';
-const TMDB_BASE = 'https://api.themoviedb.org/3';
+import { supabase } from '@/integrations/supabase/client';
+
 const TMDB_IMG = 'https://image.tmdb.org/t/p';
+const SUPABASE_URL = 'https://qqyldlfexibvvnykklee.supabase.co';
+const PROXY_URL = `${SUPABASE_URL}/functions/v1/tmdb-proxy`;
 
 export interface TmdbMovie {
   id: number;
@@ -89,6 +91,19 @@ interface TmdbGenre {
   name: string;
 }
 
+// Call the secure tmdb-proxy edge function. The proxy holds the API key server-side.
+async function tmdbFetch<T>(path: string, params: Record<string, string | number | undefined> = {}): Promise<T> {
+  const qs = new URLSearchParams();
+  qs.set('path', path);
+  qs.set('language', 'pt-BR');
+  for (const [k, v] of Object.entries(params)) {
+    if (v !== undefined && v !== null && v !== '') qs.set(k, String(v));
+  }
+  const res = await fetch(`${PROXY_URL}?${qs.toString()}`);
+  if (!res.ok) throw new Error(`TMDB proxy error ${res.status}`);
+  return res.json() as Promise<T>;
+}
+
 let movieGenresCache: TmdbGenre[] = [];
 let tvGenresCache: TmdbGenre[] = [];
 
@@ -96,8 +111,7 @@ async function fetchGenres(type: 'movie' | 'tv'): Promise<TmdbGenre[]> {
   const cache = type === 'movie' ? movieGenresCache : tvGenresCache;
   if (cache.length > 0) return cache;
 
-  const res = await fetch(`${TMDB_BASE}/genre/${type}/list?api_key=${TMDB_API_KEY}&language=pt-BR`);
-  const data = await res.json();
+  const data = await tmdbFetch<{ genres: TmdbGenre[] }>(`genre/${type}/list`);
   const genres = data.genres || [];
 
   if (type === 'movie') movieGenresCache = genres;
@@ -121,85 +135,64 @@ function mapGenreIds(ids: number[], genres: TmdbGenre[]): string {
 
 export async function searchMovies(query: string, year?: number): Promise<TmdbMovie[]> {
   if (!query.trim() && year) {
-    // Discover by year only
-    const res = await fetch(`${TMDB_BASE}/discover/movie?api_key=${TMDB_API_KEY}&language=pt-BR&primary_release_year=${year}&sort_by=popularity.desc`);
-    const data = await res.json();
+    const data = await tmdbFetch<{ results: TmdbMovie[] }>('discover/movie', {
+      primary_release_year: year,
+      sort_by: 'popularity.desc',
+    });
     return data.results || [];
   }
-  let url = `${TMDB_BASE}/search/movie?api_key=${TMDB_API_KEY}&language=pt-BR&query=${encodeURIComponent(query)}`;
-  if (year) url += `&primary_release_year=${year}`;
-  const res = await fetch(url);
-  const data = await res.json();
+  const data = await tmdbFetch<{ results: TmdbMovie[] }>('search/movie', {
+    query,
+    primary_release_year: year,
+  });
   return data.results || [];
 }
 
 export async function searchSeries(query: string, year?: number): Promise<TmdbSeries[]> {
   if (!query.trim() && year) {
-    // Discover by year only
-    const res = await fetch(`${TMDB_BASE}/discover/tv?api_key=${TMDB_API_KEY}&language=pt-BR&first_air_date_year=${year}&sort_by=popularity.desc`);
-    const data = await res.json();
+    const data = await tmdbFetch<{ results: TmdbSeries[] }>('discover/tv', {
+      first_air_date_year: year,
+      sort_by: 'popularity.desc',
+    });
     return data.results || [];
   }
-  let url = `${TMDB_BASE}/search/tv?api_key=${TMDB_API_KEY}&language=pt-BR&query=${encodeURIComponent(query)}`;
-  if (year) url += `&first_air_date_year=${year}`;
-  const res = await fetch(url);
-  const data = await res.json();
+  const data = await tmdbFetch<{ results: TmdbSeries[] }>('search/tv', {
+    query,
+    first_air_date_year: year,
+  });
   return data.results || [];
 }
 
 export async function getTrendingMovies(): Promise<TmdbMovie[]> {
-  const res = await fetch(
-    `${TMDB_BASE}/movie/now_playing?api_key=${TMDB_API_KEY}&language=pt-BR&page=1`
-  );
-  const data = await res.json();
+  const data = await tmdbFetch<{ results: TmdbMovie[] }>('movie/now_playing', { page: 1 });
   return data.results || [];
 }
 
 export async function getTrendingSeries(): Promise<TmdbSeries[]> {
-  const res = await fetch(
-    `${TMDB_BASE}/tv/on_the_air?api_key=${TMDB_API_KEY}&language=pt-BR&page=1`
-  );
-  const data = await res.json();
+  const data = await tmdbFetch<{ results: TmdbSeries[] }>('tv/on_the_air', { page: 1 });
   return data.results || [];
 }
 
-
-
 export async function getMovieDetails(tmdbId: number): Promise<TmdbMovieDetails> {
-  const res = await fetch(
-    `${TMDB_BASE}/movie/${tmdbId}?api_key=${TMDB_API_KEY}&language=pt-BR`
-  );
-  return res.json();
+  return tmdbFetch<TmdbMovieDetails>(`movie/${tmdbId}`);
 }
 
 export async function getSeriesDetails(tmdbId: number): Promise<TmdbSeriesDetails> {
-  const res = await fetch(
-    `${TMDB_BASE}/tv/${tmdbId}?api_key=${TMDB_API_KEY}&language=pt-BR`
-  );
-  return res.json();
+  return tmdbFetch<TmdbSeriesDetails>(`tv/${tmdbId}`);
 }
 
 export async function getMovieCredits(tmdbId: number): Promise<TmdbCastMember[]> {
-  const res = await fetch(
-    `${TMDB_BASE}/movie/${tmdbId}/credits?api_key=${TMDB_API_KEY}&language=pt-BR`
-  );
-  const data = await res.json();
+  const data = await tmdbFetch<{ cast: TmdbCastMember[] }>(`movie/${tmdbId}/credits`);
   return (data.cast || []).slice(0, 12);
 }
 
 export async function getSeriesCredits(tmdbId: number): Promise<TmdbCastMember[]> {
-  const res = await fetch(
-    `${TMDB_BASE}/tv/${tmdbId}/credits?api_key=${TMDB_API_KEY}&language=pt-BR`
-  );
-  const data = await res.json();
+  const data = await tmdbFetch<{ cast: TmdbCastMember[] }>(`tv/${tmdbId}/credits`);
   return (data.cast || []).slice(0, 12);
 }
 
 export async function getSeasonEpisodes(tmdbId: number, seasonNumber: number): Promise<TmdbEpisode[]> {
-  const res = await fetch(
-    `${TMDB_BASE}/tv/${tmdbId}/season/${seasonNumber}?api_key=${TMDB_API_KEY}&language=pt-BR`
-  );
-  const data = await res.json();
+  const data = await tmdbFetch<{ episodes: TmdbEpisode[] }>(`tv/${tmdbId}/season/${seasonNumber}`);
   return data.episodes || [];
 }
 
@@ -237,28 +230,19 @@ export async function tmdbSeriesToDb(series: TmdbSeries) {
 
 // WarezCDN player URLs
 export function getWarezPlayerUrl(type: 'filme' | 'serie', tmdbId: number, season?: number, episode?: number): string {
-  if (type === 'filme') {
-    return `https://warezcdn.site/filme/${tmdbId}`;
-  }
-  if (season !== undefined && episode !== undefined) {
-    return `https://warezcdn.site/serie/${tmdbId}/${season}/${episode}`;
-  }
-  if (season !== undefined) {
-    return `https://warezcdn.site/serie/${tmdbId}/${season}`;
-  }
+  if (type === 'filme') return `https://warezcdn.site/filme/${tmdbId}`;
+  if (season !== undefined && episode !== undefined) return `https://warezcdn.site/serie/${tmdbId}/${season}/${episode}`;
+  if (season !== undefined) return `https://warezcdn.site/serie/${tmdbId}/${season}`;
   return `https://warezcdn.site/serie/${tmdbId}`;
 }
 
 // MyEmbed player URLs
 export function getEmbedMoviesUrl(type: 'filme' | 'serie', tmdbId: number, season?: number, episode?: number): string {
-  if (type === 'filme') {
-    return `https://myembed.biz/filme/${tmdbId}`;
-  }
-  if (season !== undefined && episode !== undefined) {
-    return `https://myembed.biz/serie/${tmdbId}/${season}/${episode}`;
-  }
-  if (season !== undefined) {
-    return `https://myembed.biz/serie/${tmdbId}/${season}`;
-  }
+  if (type === 'filme') return `https://myembed.biz/filme/${tmdbId}`;
+  if (season !== undefined && episode !== undefined) return `https://myembed.biz/serie/${tmdbId}/${season}/${episode}`;
+  if (season !== undefined) return `https://myembed.biz/serie/${tmdbId}/${season}`;
   return `https://myembed.biz/serie/${tmdbId}`;
 }
+
+// Unused import suppression — keeps supabase import for potential future auth headers
+void supabase;
