@@ -1,5 +1,3 @@
-import { supabase } from '@/integrations/supabase/client';
-
 const TMDB_IMG = 'https://image.tmdb.org/t/p';
 const SUPABASE_URL = 'https://qqyldlfexibvvnykklee.supabase.co';
 const PROXY_URL = `${SUPABASE_URL}/functions/v1/tmdb-proxy`;
@@ -244,5 +242,3 @@ export function getEmbedMoviesUrl(type: 'filme' | 'serie', tmdbId: number, seaso
   return `https://myembed.biz/serie/${tmdbId}`;
 }
 
-// Unused import suppression — keeps supabase import for potential future auth headers
-void supabase;
