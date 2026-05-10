@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, ArrowLeft, Radio, Tv, ExternalLink, RefreshCw } from 'lucide-react';
+import { Loader2, ArrowLeft, Radio, Tv, ShieldAlert } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import type { TvChannel } from '@/types/channel';
 
@@ -11,10 +11,6 @@ const ChannelPlayer = () => {
   const { externalId } = useParams<{ externalId: string }>();
   const [channel, setChannel] = useState<TvChannel | null>(null);
   const [loading, setLoading] = useState(true);
-  const [iframeLoaded, setIframeLoaded] = useState(false);
-  const [showFallback, setShowFallback] = useState(false);
-  const [reloadKey, setReloadKey] = useState(0);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     if (!externalId) return;
@@ -24,17 +20,6 @@ const ChannelPlayer = () => {
       setLoading(false);
     })();
   }, [externalId]);
-
-  // Fallback: se iframe não disparar onLoad em 10s, oferece abrir em nova aba
-  useEffect(() => {
-    if (!channel) return;
-    setIframeLoaded(false);
-    setShowFallback(false);
-    const t = setTimeout(() => {
-      if (!iframeLoaded) setShowFallback(true);
-    }, 10000);
-    return () => clearTimeout(t);
-  }, [channel, reloadKey]);
 
   return (
     <div className="min-h-screen bg-background">
