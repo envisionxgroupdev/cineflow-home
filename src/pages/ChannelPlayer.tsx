@@ -66,9 +66,9 @@ const ChannelPlayer = () => {
                 <iframe
                   src={channel.embed_url}
                   className="absolute inset-0 w-full h-full"
-                  allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+                  allow="autoplay; encrypted-media"
                   allowFullScreen
-                  referrerPolicy="no-referrer"
+                  referrerPolicy="origin"
                   title={channel.name}
                 />
               </div>
