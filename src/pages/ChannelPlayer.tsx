@@ -62,13 +62,16 @@ const ChannelPlayer = () => {
                 </div>
               </div>
 
+              {/* channel player v2 */}
               <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-border">
                 <iframe
+                  key={channel.embed_url}
                   src={channel.embed_url}
                   className="absolute inset-0 w-full h-full"
-                  allow="autoplay; encrypted-media"
+                  allow="autoplay; encrypted-media; fullscreen"
                   allowFullScreen
                   referrerPolicy="origin"
+                  loading="eager"
                   title={channel.name}
                 />
               </div>
