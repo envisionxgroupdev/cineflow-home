@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, ArrowLeft, Radio, Tv } from 'lucide-react';
+import { Loader2, ArrowLeft, Radio, Tv, ExternalLink, RefreshCw } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import type { TvChannel } from '@/types/channel';
 
@@ -11,6 +11,10 @@ const ChannelPlayer = () => {
   const { externalId } = useParams<{ externalId: string }>();
   const [channel, setChannel] = useState<TvChannel | null>(null);
   const [loading, setLoading] = useState(true);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [showFallback, setShowFallback] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     if (!externalId) return;
@@ -20,6 +24,17 @@ const ChannelPlayer = () => {
       setLoading(false);
     })();
   }, [externalId]);
+
+  // Fallback: se iframe não disparar onLoad em 10s, oferece abrir em nova aba
+  useEffect(() => {
+    if (!channel) return;
+    setIframeLoaded(false);
+    setShowFallback(false);
+    const t = setTimeout(() => {
+      if (!iframeLoaded) setShowFallback(true);
+    }, 10000);
+    return () => clearTimeout(t);
+  }, [channel, reloadKey]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -62,19 +77,52 @@ const ChannelPlayer = () => {
                 </div>
               </div>
 
-              {/* channel player v2 */}
+              {/* channel player v3 */}
               <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-border">
                 <iframe
-                  key={channel.embed_url}
+                  ref={iframeRef}
+                  key={`${channel.embed_url}-${reloadKey}`}
                   src={channel.embed_url}
                   className="absolute inset-0 w-full h-full"
-                  allow="autoplay; encrypted-media; fullscreen"
+                  allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
                   allowFullScreen
                   referrerPolicy="origin"
                   loading="eager"
                   title={channel.name}
+                  onLoad={() => setIframeLoaded(true)}
                 />
+                {!iframeLoaded && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm pointer-events-none">
+                    <Loader2 className="h-8 w-8 text-primary animate-spin mb-3" />
+                    <p className="text-xs text-muted-foreground">Carregando player...</p>
+                  </div>
+                )}
               </div>
+
+              {showFallback && !iframeLoaded && (
+                <div className="mt-4 p-4 rounded-xl bg-card border border-border">
+                  <p className="text-sm text-foreground mb-1 font-medium">O player demorou para carregar</p>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Pode ser bloqueio do navegador (Chrome Lite Mode, bloqueador de anúncios) ou do provedor. Tente recarregar ou abrir em nova aba.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => { setReloadKey(k => k + 1); }}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-secondary text-foreground hover:bg-secondary/80 transition-colors"
+                    >
+                      <RefreshCw className="h-3.5 w-3.5" /> Recarregar player
+                    </button>
+                    <a
+                      href={channel.embed_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" /> Abrir em nova aba
+                    </a>
+                  </div>
+                </div>
+              )}
 
               {channel.description && (
                 <p className="mt-6 text-sm text-muted-foreground max-w-3xl">{channel.description}</p>
