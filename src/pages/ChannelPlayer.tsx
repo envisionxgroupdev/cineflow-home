@@ -99,30 +99,28 @@ const ChannelPlayer = () => {
                 )}
               </div>
 
-              {showFallback && !iframeLoaded && (
-                <div className="mt-4 p-4 rounded-xl bg-card border border-border">
-                  <p className="text-sm text-foreground mb-1 font-medium">O player demorou para carregar</p>
-                  <p className="text-xs text-muted-foreground mb-3">
-                    Pode ser bloqueio do navegador (Chrome Lite Mode, bloqueador de anúncios) ou do provedor. Tente recarregar ou abrir em nova aba.
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={() => { setReloadKey(k => k + 1); }}
-                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-secondary text-foreground hover:bg-secondary/80 transition-colors"
-                    >
-                      <RefreshCw className="h-3.5 w-3.5" /> Recarregar player
-                    </button>
-                    <a
-                      href={channel.embed_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                    >
-                      <ExternalLink className="h-3.5 w-3.5" /> Abrir em nova aba
-                    </a>
-                  </div>
+              <div className="mt-4 p-4 rounded-xl bg-card border border-border">
+                <p className="text-sm text-foreground mb-1 font-medium">Player não carregou ou está travado?</p>
+                <p className="text-xs text-muted-foreground mb-3">
+                  No Chrome Mobile alguns embeds são bloqueados (Lite Mode, bloqueadores de anúncio). Recarregue ou abra o player em nova aba.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => { setReloadKey(k => k + 1); }}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-secondary text-foreground hover:bg-secondary/80 transition-colors"
+                  >
+                    <RefreshCw className="h-3.5 w-3.5" /> Recarregar player
+                  </button>
+                  <a
+                    href={channel.embed_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" /> Abrir em nova aba
+                  </a>
                 </div>
-              )}
+              </div>
 
               {channel.description && (
                 <p className="mt-6 text-sm text-muted-foreground max-w-3xl">{channel.description}</p>
