@@ -62,11 +62,10 @@ const ChannelPlayer = () => {
                 </div>
               </div>
 
-              {/* channel player v3 */}
+              {/* channel player */}
               <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-border">
                 <iframe
-                  ref={iframeRef}
-                  key={`${channel.embed_url}-${reloadKey}`}
+                  key={channel.embed_url}
                   src={channel.embed_url}
                   className="absolute inset-0 w-full h-full"
                   allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
@@ -74,37 +73,14 @@ const ChannelPlayer = () => {
                   referrerPolicy="origin"
                   loading="eager"
                   title={channel.name}
-                  onLoad={() => setIframeLoaded(true)}
                 />
-                {!iframeLoaded && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm pointer-events-none">
-                    <Loader2 className="h-8 w-8 text-primary animate-spin mb-3" />
-                    <p className="text-xs text-muted-foreground">Carregando player...</p>
-                  </div>
-                )}
               </div>
 
-              <div className="mt-4 p-4 rounded-xl bg-card border border-border">
-                <p className="text-sm text-foreground mb-1 font-medium">Player não carregou ou está travado?</p>
-                <p className="text-xs text-muted-foreground mb-3">
-                  No Chrome Mobile alguns embeds são bloqueados (Lite Mode, bloqueadores de anúncio). Recarregue ou abra o player em nova aba.
+              <div className="mt-4 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/40 flex items-start gap-3">
+                <ShieldAlert className="h-5 w-5 text-yellow-400 shrink-0 mt-0.5" />
+                <p className="text-sm text-yellow-200">
+                  <span className="font-semibold">Aviso:</span> se o player travar ou não carregar, use uma <span className="font-semibold">VPN</span> e tente novamente.
                 </p>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => { setReloadKey(k => k + 1); }}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-secondary text-foreground hover:bg-secondary/80 transition-colors"
-                  >
-                    <RefreshCw className="h-3.5 w-3.5" /> Recarregar player
-                  </button>
-                  <a
-                    href={channel.embed_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                  >
-                    <ExternalLink className="h-3.5 w-3.5" /> Abrir em nova aba
-                  </a>
-                </div>
               </div>
 
               {channel.description && (
