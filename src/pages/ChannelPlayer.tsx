@@ -11,7 +11,19 @@ const ChannelPlayer = () => {
   const { externalId } = useParams<{ externalId: string }>();
   const [channel, setChannel] = useState<TvChannel | null>(null);
   const [loading, setLoading] = useState(true);
-  const [adultConfirmed, setAdultConfirmed] = useState(false);
+  const ADULT_KEY = 'adult_confirmed_until';
+  const ADULT_DAYS = 7;
+  const [adultConfirmed, setAdultConfirmed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const until = Number(localStorage.getItem(ADULT_KEY) || 0);
+    return until > Date.now();
+  });
+
+  const confirmAdult = () => {
+    const until = Date.now() + ADULT_DAYS * 24 * 60 * 60 * 1000;
+    try { localStorage.setItem(ADULT_KEY, String(until)); } catch {}
+    setAdultConfirmed(true);
+  };
 
   useEffect(() => {
     if (!externalId) return;
