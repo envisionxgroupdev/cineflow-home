@@ -52,7 +52,8 @@ interface ChannelItem {
 }
 
 const PAGE_SIZE = 20;
-const BULK_BATCH_SIZE = 5;
+const BULK_BATCH_SIZE = 3;
+const BATCH_DELAY_MS = 350;
 
 export function SyncManagement() {
   const [category, setCategory] = useState<Category>("movie");
