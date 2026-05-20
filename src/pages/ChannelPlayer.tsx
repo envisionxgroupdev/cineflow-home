@@ -11,6 +11,7 @@ const ChannelPlayer = () => {
   const { externalId } = useParams<{ externalId: string }>();
   const [channel, setChannel] = useState<TvChannel | null>(null);
   const [loading, setLoading] = useState(true);
+  const [adultConfirmed, setAdultConfirmed] = useState(false);
 
   useEffect(() => {
     if (!externalId) return;
@@ -20,6 +21,11 @@ const ChannelPlayer = () => {
       setLoading(false);
     })();
   }, [externalId]);
+
+  const isAdult = !!channel && /adult|adulto|\+18|18\+|xxx|ero|porn/i.test(
+    `${channel.name} ${channel.category ?? ''}`
+  );
+  const showAdultGate = isAdult && !adultConfirmed;
 
   return (
     <div className="min-h-screen bg-background">
