@@ -70,24 +70,55 @@ const ChannelPlayer = () => {
 
               {/* channel player */}
               <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-border">
-                <iframe
-                  key={channel.embed_url}
-                  src={channel.embed_url}
-                  className="absolute inset-0 w-full h-full"
-                  allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-                  allowFullScreen
-                  referrerPolicy="origin"
-                  loading="eager"
-                  title={channel.name}
-                />
+                {showAdultGate ? (
+                  <div className="absolute inset-0 flex items-center justify-center p-6 bg-gradient-to-br from-background via-background to-destructive/20">
+                    <div className="max-w-md text-center">
+                      <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-destructive/15 border border-destructive/40 flex items-center justify-center">
+                        <ShieldAlert className="h-8 w-8 text-destructive" />
+                      </div>
+                      <p className="text-[10px] font-bold tracking-[0.3em] text-destructive uppercase mb-2">Conteúdo adulto • +18</p>
+                      <h2 className="font-display text-xl md:text-2xl text-foreground mb-3">Aviso de Conteúdo Adulto</h2>
+                      <p className="text-sm text-muted-foreground mb-6">
+                        Este canal contém conteúdo destinado exclusivamente a maiores de 18 anos. Ao continuar, você declara ter idade legal para visualizá-lo e assume total responsabilidade pelo acesso.
+                      </p>
+                      <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                        <Link
+                          to="/canais"
+                          className="px-5 py-2.5 rounded-lg border border-border bg-card text-sm text-foreground hover:bg-muted transition-colors"
+                        >
+                          Sair
+                        </Link>
+                        <button
+                          onClick={() => setAdultConfirmed(true)}
+                          className="px-5 py-2.5 rounded-lg bg-destructive text-destructive-foreground text-sm font-semibold hover:bg-destructive/90 transition-colors"
+                        >
+                          Sou maior de 18 anos
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <iframe
+                    key={channel.embed_url}
+                    src={channel.embed_url}
+                    className="absolute inset-0 w-full h-full"
+                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                    allowFullScreen
+                    referrerPolicy="origin"
+                    loading="eager"
+                    title={channel.name}
+                  />
+                )}
               </div>
 
-              <div className="mt-4 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/40 flex items-start gap-3">
-                <ShieldAlert className="h-5 w-5 text-yellow-400 shrink-0 mt-0.5" />
-                <p className="text-sm text-yellow-200">
-                  <span className="font-semibold">Aviso:</span> se o player travar ou não carregar, use uma <span className="font-semibold">VPN</span> e tente novamente.
-                </p>
-              </div>
+              {!showAdultGate && (
+                <div className="mt-4 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/40 flex items-start gap-3">
+                  <ShieldAlert className="h-5 w-5 text-yellow-400 shrink-0 mt-0.5" />
+                  <p className="text-sm text-yellow-200">
+                    <span className="font-semibold">Aviso:</span> se o player travar ou não carregar, use uma <span className="font-semibold">VPN</span> e tente novamente.
+                  </p>
+                </div>
+              )}
 
               {channel.description && (
                 <p className="mt-6 text-sm text-muted-foreground max-w-3xl">{channel.description}</p>
