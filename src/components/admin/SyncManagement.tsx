@@ -6,16 +6,22 @@ import { toast } from "sonner";
 import { fetchJsonResilient } from "@/lib/resilientFetch";
 
 // Retry helper for TMDB calls (avoids transient failures during bulk import)
-async function withRetry<T>(fn: () => Promise<T>, retries = 2, delayMs = 500): Promise<T> {
+async function withRetry<T>(fn: () => Promise<T>, retries = 4, delayMs = 800): Promise<T> {
   let lastErr: unknown;
   for (let i = 0; i <= retries; i++) {
     try { return await fn(); } catch (e) {
       lastErr = e;
-      if (i < retries) await new Promise(r => setTimeout(r, delayMs * (i + 1)));
+      if (i < retries) {
+        // exponential backoff with jitter
+        const wait = delayMs * Math.pow(2, i) + Math.random() * 300;
+        await new Promise(r => setTimeout(r, wait));
+      }
     }
   }
   throw lastErr;
 }
+
+const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 type Category = "movie" | "serie" | "anime" | "canais";
 
