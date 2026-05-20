@@ -269,45 +269,82 @@ export function SyncManagement() {
     setBulkImporting(true);
     setBulkProgress({ done: 0, total: idsToImport.length, failed: 0 });
     let done = 0, failed = 0;
+    const failedIds: number[] = [];
+
+    const importOne = async (tmdbId: number) => {
+      let payload: any;
+      if (tmdbType === "movie") {
+        const d = await withRetry(() => getMovieDetails(tmdbId));
+        if (!d || !d.id) throw new Error("TMDB vazio");
+        payload = {
+          title: d.title, original_title: d.original_title, overview: d.overview,
+          year: d.release_date?.slice(0, 4) || "",
+          genre: d.genres?.map(g => g.name).slice(0, 3).join(", ") || "",
+          rating: Math.round((d.vote_average || 0) * 10) / 10,
+          image_url: getImageUrl(d.poster_path),
+          backdrop_url: getImageUrl(d.backdrop_path, "w1280"),
+          tmdb_id: d.id, is_release: false, release_date: d.release_date || null,
+        };
+      } else {
+        const d = await withRetry(() => getSeriesDetails(tmdbId));
+        if (!d || !d.id) throw new Error("TMDB vazio");
+        payload = {
+          title: d.name, original_title: d.original_name, overview: d.overview,
+          year: d.first_air_date?.slice(0, 4) || "",
+          genre: d.genres?.map(g => g.name).slice(0, 3).join(", ") || "",
+          rating: Math.round((d.vote_average || 0) * 10) / 10,
+          image_url: getImageUrl(d.poster_path),
+          backdrop_url: getImageUrl(d.backdrop_path, "w1280"),
+          tmdb_id: d.id, is_release: false,
+          first_air_date: d.first_air_date || null, is_anime: isAnime,
+        };
+      }
+      const { error } = await supabase.from(dbTable).upsert(payload, { onConflict: 'tmdb_id' });
+      if (error) throw error;
+      setImportedIds((prev) => new Set([...prev, tmdbId]));
+    };
 
     for (let i = 0; i < idsToImport.length; i += BULK_BATCH_SIZE) {
       if (cancelBulkRef.current) break;
       const batch = idsToImport.slice(i, i + BULK_BATCH_SIZE);
-      const results = await Promise.allSettled(batch.map(async (tmdbId) => {
-        let payload: any;
-        if (tmdbType === "movie") {
-          const d = await withRetry(() => getMovieDetails(tmdbId));
-          payload = {
-            title: d.title, original_title: d.original_title, overview: d.overview,
-            year: d.release_date?.slice(0, 4) || "",
-            genre: d.genres?.map(g => g.name).slice(0, 3).join(", ") || "",
-            rating: Math.round(d.vote_average * 10) / 10,
-            image_url: getImageUrl(d.poster_path),
-            backdrop_url: getImageUrl(d.backdrop_path, "w1280"),
-            tmdb_id: d.id, is_release: false, release_date: d.release_date || null,
-          };
-        } else {
-          const d = await withRetry(() => getSeriesDetails(tmdbId));
-          payload = {
-            title: d.name, original_title: d.original_name, overview: d.overview,
-            year: d.first_air_date?.slice(0, 4) || "",
-            genre: d.genres?.map(g => g.name).slice(0, 3).join(", ") || "",
-            rating: Math.round(d.vote_average * 10) / 10,
-            image_url: getImageUrl(d.poster_path),
-            backdrop_url: getImageUrl(d.backdrop_path, "w1280"),
-            tmdb_id: d.id, is_release: false,
-            first_air_date: d.first_air_date || null, is_anime: isAnime,
-          };
+      const results = await Promise.allSettled(batch.map(importOne));
+      results.forEach((r, idx) => {
+        done++;
+        if (r.status === "rejected") {
+          failed++;
+          failedIds.push(batch[idx]);
+          console.warn(`[Sync] Falha TMDB ${batch[idx]}:`, (r as PromiseRejectedResult).reason);
         }
-        const { error } = await supabase.from(dbTable).upsert(payload, { onConflict: 'tmdb_id' });
-        if (error) throw error;
-        setImportedIds((prev) => new Set([...prev, tmdbId]));
-      }));
-      results.forEach((r) => { done++; if (r.status === "rejected") failed++; });
+      });
       setBulkProgress({ done, total: idsToImport.length, failed });
+      if (i + BULK_BATCH_SIZE < idsToImport.length) await sleep(BATCH_DELAY_MS);
     }
+
+    // Second pass: retry failures sequentially with longer waits
+    if (failedIds.length > 0 && !cancelBulkRef.current) {
+      toast.info(`Tentando novamente ${failedIds.length} falhas...`);
+      const stillFailed: number[] = [];
+      for (const tmdbId of failedIds) {
+        if (cancelBulkRef.current) break;
+        try {
+          await importOne(tmdbId);
+          failed--;
+          setBulkProgress({ done, total: idsToImport.length, failed });
+        } catch (e) {
+          stillFailed.push(tmdbId);
+          console.warn(`[Sync] Retry falhou ${tmdbId}:`, e);
+        }
+        await sleep(500);
+      }
+      if (stillFailed.length > 0) {
+        console.warn(`[Sync] IDs com falha permanente:`, stillFailed);
+      }
+    }
+
     setBulkImporting(false);
-    toast.success(`Concluído! ${done - failed} importados, ${failed} falhas.`);
+    const ok = done - failed;
+    if (failed === 0) toast.success(`Concluído! ${ok} importados com sucesso.`);
+    else toast.warning(`Concluído: ${ok} importados, ${failed} falhas (veja console).`);
     await loadImported();
   };
 
