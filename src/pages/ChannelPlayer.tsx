@@ -11,7 +11,19 @@ const ChannelPlayer = () => {
   const { externalId } = useParams<{ externalId: string }>();
   const [channel, setChannel] = useState<TvChannel | null>(null);
   const [loading, setLoading] = useState(true);
-  const [adultConfirmed, setAdultConfirmed] = useState(false);
+  const ADULT_KEY = 'adult_confirmed_until';
+  const ADULT_DAYS = 7;
+  const [adultConfirmed, setAdultConfirmed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const until = Number(localStorage.getItem(ADULT_KEY) || 0);
+    return until > Date.now();
+  });
+
+  const confirmAdult = () => {
+    const until = Date.now() + ADULT_DAYS * 24 * 60 * 60 * 1000;
+    try { localStorage.setItem(ADULT_KEY, String(until)); } catch {}
+    setAdultConfirmed(true);
+  };
 
   useEffect(() => {
     if (!externalId) return;
@@ -69,35 +81,38 @@ const ChannelPlayer = () => {
               </div>
 
               {/* channel player */}
-              <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-border">
-                {showAdultGate ? (
-                  <div className="absolute inset-0 flex items-center justify-center p-6 bg-gradient-to-br from-background via-background to-destructive/20">
-                    <div className="max-w-md text-center">
-                      <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-destructive/15 border border-destructive/40 flex items-center justify-center">
-                        <ShieldAlert className="h-8 w-8 text-destructive" />
-                      </div>
-                      <p className="text-[10px] font-bold tracking-[0.3em] text-destructive uppercase mb-2">Conteúdo adulto • +18</p>
-                      <h2 className="font-display text-xl md:text-2xl text-foreground mb-3">Aviso de Conteúdo Adulto</h2>
-                      <p className="text-sm text-muted-foreground mb-6">
-                        Este canal contém conteúdo destinado exclusivamente a maiores de 18 anos. Ao continuar, você declara ter idade legal para visualizá-lo e assume total responsabilidade pelo acesso.
-                      </p>
-                      <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                        <Link
-                          to="/canais"
-                          className="px-5 py-2.5 rounded-lg border border-border bg-card text-sm text-foreground hover:bg-muted transition-colors"
-                        >
-                          Sair
-                        </Link>
-                        <button
-                          onClick={() => setAdultConfirmed(true)}
-                          className="px-5 py-2.5 rounded-lg bg-destructive text-destructive-foreground text-sm font-semibold hover:bg-destructive/90 transition-colors"
-                        >
-                          Sou maior de 18 anos
-                        </button>
-                      </div>
+              {showAdultGate ? (
+                <div className="w-full rounded-xl border border-destructive/40 bg-gradient-to-br from-background via-background to-destructive/20 p-5 sm:p-8">
+                  <div className="max-w-md mx-auto text-center">
+                    <div className="mx-auto mb-4 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-destructive/15 border border-destructive/40 flex items-center justify-center">
+                      <ShieldAlert className="h-7 w-7 sm:h-8 sm:w-8 text-destructive" />
                     </div>
+                    <p className="text-[10px] font-bold tracking-[0.3em] text-destructive uppercase mb-2">Conteúdo adulto • +18</p>
+                    <h2 className="font-display text-xl md:text-2xl text-foreground mb-3">Aviso de Conteúdo Adulto</h2>
+                    <p className="text-sm text-muted-foreground mb-6">
+                      Este canal contém conteúdo destinado exclusivamente a maiores de 18 anos. Ao continuar, você declara ter idade legal para visualizá-lo e assume total responsabilidade pelo acesso.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-2 sm:justify-center">
+                      <button
+                        onClick={confirmAdult}
+                        className="w-full sm:w-auto px-5 py-3 rounded-lg bg-destructive text-destructive-foreground text-sm font-semibold hover:bg-destructive/90 transition-colors"
+                      >
+                        Sou maior de 18 anos
+                      </button>
+                      <Link
+                        to="/canais"
+                        className="w-full sm:w-auto px-5 py-3 rounded-lg border border-border bg-card text-sm text-foreground hover:bg-muted transition-colors text-center"
+                      >
+                        Sair
+                      </Link>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-4">
+                      Sua confirmação será lembrada neste dispositivo por {ADULT_DAYS} dias.
+                    </p>
                   </div>
-                ) : (
+                </div>
+              ) : (
+                <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-border">
                   <iframe
                     key={channel.embed_url}
                     src={channel.embed_url}
@@ -108,8 +123,8 @@ const ChannelPlayer = () => {
                     loading="eager"
                     title={channel.name}
                   />
-                )}
-              </div>
+                </div>
+              )}
 
               {!showAdultGate && (
                 <div className="mt-4 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/40 flex items-start gap-3">
