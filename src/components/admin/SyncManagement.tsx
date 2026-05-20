@@ -6,16 +6,22 @@ import { toast } from "sonner";
 import { fetchJsonResilient } from "@/lib/resilientFetch";
 
 // Retry helper for TMDB calls (avoids transient failures during bulk import)
-async function withRetry<T>(fn: () => Promise<T>, retries = 2, delayMs = 500): Promise<T> {
+async function withRetry<T>(fn: () => Promise<T>, retries = 4, delayMs = 800): Promise<T> {
   let lastErr: unknown;
   for (let i = 0; i <= retries; i++) {
     try { return await fn(); } catch (e) {
       lastErr = e;
-      if (i < retries) await new Promise(r => setTimeout(r, delayMs * (i + 1)));
+      if (i < retries) {
+        // exponential backoff with jitter
+        const wait = delayMs * Math.pow(2, i) + Math.random() * 300;
+        await new Promise(r => setTimeout(r, wait));
+      }
     }
   }
   throw lastErr;
 }
+
+const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 type Category = "movie" | "serie" | "anime" | "canais";
 
@@ -46,7 +52,8 @@ interface ChannelItem {
 }
 
 const PAGE_SIZE = 20;
-const BULK_BATCH_SIZE = 5;
+const BULK_BATCH_SIZE = 3;
+const BATCH_DELAY_MS = 350;
 
 export function SyncManagement() {
   const [category, setCategory] = useState<Category>("movie");
@@ -262,45 +269,82 @@ export function SyncManagement() {
     setBulkImporting(true);
     setBulkProgress({ done: 0, total: idsToImport.length, failed: 0 });
     let done = 0, failed = 0;
+    const failedIds: number[] = [];
+
+    const importOne = async (tmdbId: number) => {
+      let payload: any;
+      if (tmdbType === "movie") {
+        const d = await withRetry(() => getMovieDetails(tmdbId));
+        if (!d || !d.id) throw new Error("TMDB vazio");
+        payload = {
+          title: d.title, original_title: d.original_title, overview: d.overview,
+          year: d.release_date?.slice(0, 4) || "",
+          genre: d.genres?.map(g => g.name).slice(0, 3).join(", ") || "",
+          rating: Math.round((d.vote_average || 0) * 10) / 10,
+          image_url: getImageUrl(d.poster_path),
+          backdrop_url: getImageUrl(d.backdrop_path, "w1280"),
+          tmdb_id: d.id, is_release: false, release_date: d.release_date || null,
+        };
+      } else {
+        const d = await withRetry(() => getSeriesDetails(tmdbId));
+        if (!d || !d.id) throw new Error("TMDB vazio");
+        payload = {
+          title: d.name, original_title: d.original_name, overview: d.overview,
+          year: d.first_air_date?.slice(0, 4) || "",
+          genre: d.genres?.map(g => g.name).slice(0, 3).join(", ") || "",
+          rating: Math.round((d.vote_average || 0) * 10) / 10,
+          image_url: getImageUrl(d.poster_path),
+          backdrop_url: getImageUrl(d.backdrop_path, "w1280"),
+          tmdb_id: d.id, is_release: false,
+          first_air_date: d.first_air_date || null, is_anime: isAnime,
+        };
+      }
+      const { error } = await supabase.from(dbTable).upsert(payload, { onConflict: 'tmdb_id' });
+      if (error) throw error;
+      setImportedIds((prev) => new Set([...prev, tmdbId]));
+    };
 
     for (let i = 0; i < idsToImport.length; i += BULK_BATCH_SIZE) {
       if (cancelBulkRef.current) break;
       const batch = idsToImport.slice(i, i + BULK_BATCH_SIZE);
-      const results = await Promise.allSettled(batch.map(async (tmdbId) => {
-        let payload: any;
-        if (tmdbType === "movie") {
-          const d = await withRetry(() => getMovieDetails(tmdbId));
-          payload = {
-            title: d.title, original_title: d.original_title, overview: d.overview,
-            year: d.release_date?.slice(0, 4) || "",
-            genre: d.genres?.map(g => g.name).slice(0, 3).join(", ") || "",
-            rating: Math.round(d.vote_average * 10) / 10,
-            image_url: getImageUrl(d.poster_path),
-            backdrop_url: getImageUrl(d.backdrop_path, "w1280"),
-            tmdb_id: d.id, is_release: false, release_date: d.release_date || null,
-          };
-        } else {
-          const d = await withRetry(() => getSeriesDetails(tmdbId));
-          payload = {
-            title: d.name, original_title: d.original_name, overview: d.overview,
-            year: d.first_air_date?.slice(0, 4) || "",
-            genre: d.genres?.map(g => g.name).slice(0, 3).join(", ") || "",
-            rating: Math.round(d.vote_average * 10) / 10,
-            image_url: getImageUrl(d.poster_path),
-            backdrop_url: getImageUrl(d.backdrop_path, "w1280"),
-            tmdb_id: d.id, is_release: false,
-            first_air_date: d.first_air_date || null, is_anime: isAnime,
-          };
+      const results = await Promise.allSettled(batch.map(importOne));
+      results.forEach((r, idx) => {
+        done++;
+        if (r.status === "rejected") {
+          failed++;
+          failedIds.push(batch[idx]);
+          console.warn(`[Sync] Falha TMDB ${batch[idx]}:`, (r as PromiseRejectedResult).reason);
         }
-        const { error } = await supabase.from(dbTable).upsert(payload, { onConflict: 'tmdb_id' });
-        if (error) throw error;
-        setImportedIds((prev) => new Set([...prev, tmdbId]));
-      }));
-      results.forEach((r) => { done++; if (r.status === "rejected") failed++; });
+      });
       setBulkProgress({ done, total: idsToImport.length, failed });
+      if (i + BULK_BATCH_SIZE < idsToImport.length) await sleep(BATCH_DELAY_MS);
     }
+
+    // Second pass: retry failures sequentially with longer waits
+    if (failedIds.length > 0 && !cancelBulkRef.current) {
+      toast.info(`Tentando novamente ${failedIds.length} falhas...`);
+      const stillFailed: number[] = [];
+      for (const tmdbId of failedIds) {
+        if (cancelBulkRef.current) break;
+        try {
+          await importOne(tmdbId);
+          failed--;
+          setBulkProgress({ done, total: idsToImport.length, failed });
+        } catch (e) {
+          stillFailed.push(tmdbId);
+          console.warn(`[Sync] Retry falhou ${tmdbId}:`, e);
+        }
+        await sleep(500);
+      }
+      if (stillFailed.length > 0) {
+        console.warn(`[Sync] IDs com falha permanente:`, stillFailed);
+      }
+    }
+
     setBulkImporting(false);
-    toast.success(`Concluído! ${done - failed} importados, ${failed} falhas.`);
+    const ok = done - failed;
+    if (failed === 0) toast.success(`Concluído! ${ok} importados com sucesso.`);
+    else toast.warning(`Concluído: ${ok} importados, ${failed} falhas (veja console).`);
     await loadImported();
   };
 
