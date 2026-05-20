@@ -7,11 +7,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { HelmetProvider } from "react-helmet-async";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
-import { lazy, Suspense } from "react";
+import { Component, lazy, Suspense, type ReactNode } from "react";
 import Index from "./pages/Index.tsx";
 import { SiteScripts } from "./components/SiteScripts.tsx";
 import { NotificationsToast } from "./components/NotificationsToast.tsx";
-import { Loader2 } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 
 // Lazy-loaded routes — keeps initial bundle small
 const Admin = lazy(() => import("./pages/Admin.tsx"));
@@ -53,6 +53,62 @@ const RouteFallback = () => (
   </div>
 );
 
+const CHUNK_RELOAD_KEY = 'pipocamax-chunk-reload-attempted';
+
+class ChunkErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    const isChunkError = /Importing a module script failed|Failed to fetch dynamically imported module|Loading chunk/i.test(message);
+
+    if (isChunkError && sessionStorage.getItem(CHUNK_RELOAD_KEY) !== '1') {
+      sessionStorage.setItem(CHUNK_RELOAD_KEY, '1');
+      window.location.reload();
+      return;
+    }
+
+    console.error(error);
+  }
+
+  handleReload = () => {
+    sessionStorage.removeItem(CHUNK_RELOAD_KEY);
+    window.location.reload();
+  };
+
+  render() {
+    if (!this.state.hasError) return this.props.children;
+
+    return (
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-4">
+        <div className="w-full max-w-sm text-center space-y-4">
+          <div className="mx-auto h-12 w-12 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+            <RefreshCw className="h-6 w-6" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-xl font-semibold">Atualize para continuar</h1>
+            <p className="text-sm text-muted-foreground">
+              O app recebeu uma nova versão e precisa recarregar os arquivos desta página.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={this.handleReload}
+            className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Recarregar
+          </button>
+        </div>
+      </div>
+    );
+  }
+}
+
 const App = () => (
   <GoogleReCaptchaProvider reCaptchaKey="6LffhagsAAAAAEeoO_4__DnPycbPuXETkIJYPLRI">
     <HelmetProvider>
@@ -69,27 +125,30 @@ const App = () => (
           <Sonner />
           <SiteScripts>
           <BrowserRouter>
-            <Suspense fallback={<RouteFallback />}>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/filme/:slug" element={<MovieDetails />} />
-                <Route path="/serie/:slug" element={<SeriesDetails />} />
-                <Route path="/filmes" element={<AllMovies />} />
-                <Route path="/series" element={<AllSeries />} />
-                <Route path="/animes" element={<AllAnimes />} />
-                <Route path="/canais" element={<AllChannels />} />
-                <Route path="/canal/:externalId" element={<ChannelPlayer />} />
-                <Route path="/dmca" element={<DMCA />} />
-                <Route path="/termos" element={<Terms />} />
-                <Route path="/privacidade" element={<Privacy />} />
-                <Route path="/sobre" element={<About />} />
-                <Route path="/pedidos" element={<Requests />} />
-                <Route path="/contato" element={<Contact />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
+            <ChunkErrorBoundary>
+              <Suspense fallback={<RouteFallback />}>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/index" element={<Index />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/admin" element={<Admin />} />
+                  <Route path="/filme/:slug" element={<MovieDetails />} />
+                  <Route path="/serie/:slug" element={<SeriesDetails />} />
+                  <Route path="/filmes" element={<AllMovies />} />
+                  <Route path="/series" element={<AllSeries />} />
+                  <Route path="/animes" element={<AllAnimes />} />
+                  <Route path="/canais" element={<AllChannels />} />
+                  <Route path="/canal/:externalId" element={<ChannelPlayer />} />
+                  <Route path="/dmca" element={<DMCA />} />
+                  <Route path="/termos" element={<Terms />} />
+                  <Route path="/privacidade" element={<Privacy />} />
+                  <Route path="/sobre" element={<About />} />
+                  <Route path="/pedidos" element={<Requests />} />
+                  <Route path="/contato" element={<Contact />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+            </ChunkErrorBoundary>
             <NotificationsToast />
           </BrowserRouter>
           </SiteScripts>
