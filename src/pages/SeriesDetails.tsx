@@ -18,7 +18,7 @@ import { ShareButtons } from '@/components/ShareButtons';
 import { AdBanner } from '@/components/AdBanner';
 import { VizerHero } from '@/components/vizer/VizerHero';
 import { YouMayLike } from '@/components/vizer/YouMayLike';
-import { SeasonsModal } from '@/components/vizer/SeasonsModal';
+
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 
 import type { Series } from '@/types/database';
