@@ -6,6 +6,7 @@ import { HeroSection } from "@/components/HeroSection";
 import { ContentSection } from "@/components/ContentSection";
 import { ReleasesSection } from "@/components/ReleasesSection";
 import { Top10Section } from "@/components/Top10Section";
+import { BrandsRow } from "@/components/BrandsRow";
 import { Footer } from "@/components/Footer";
 import { EditContentModal } from "@/components/EditContentModal";
 import { AdBanner } from "@/components/AdBanner";
