@@ -118,88 +118,15 @@ const Index = () => {
       <Navbar />
       <HeroSection />
       <div className="cinema-gradient">
+        <BrandsRow />
         <AdBanner page="home" position="top" />
 
-        {/* Stats strip */}
-        {!isLoading && (counts.movies > 0 || counts.series > 0 || counts.animes > 0 || counts.channels > 0) && (
-          <section className="border-y border-border/40 bg-card/40 backdrop-blur-sm">
-            <div className="container mx-auto px-4 py-5 md:py-6">
-              <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-border/40">
-                {[
-                  { icon: Film, label: "Filmes", value: counts.movies, to: "/filmes" },
-                  { icon: Tv, label: "Séries", value: counts.series, to: "/series" },
-                  { icon: Sparkles, label: "Animes", value: counts.animes, to: "/animes" },
-                  { icon: Radio, label: "Canais TV", value: counts.channels, to: "/canais" },
-                ].map((s, i) => (
-                  <motion.div
-                    key={s.label}
-                    initial={{ opacity: 0, y: 8 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.05, duration: 0.4 }}
-                  >
-                    <Link
-                      to={s.to}
-                      className="group block px-4 md:px-6 py-2 hover:bg-primary/5 transition-colors"
-                    >
-                      <div className="flex items-baseline gap-2">
-                        <span className="font-display text-2xl md:text-4xl text-foreground tabular-nums leading-none group-hover:text-primary transition-colors">
-                          {s.value.toLocaleString("pt-BR")}
-                        </span>
-                        <s.icon className="h-3 w-3 text-primary/60" />
-                      </div>
-                      <p className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] text-primary font-bold mt-1">
-                        {s.label}
-                      </p>
-                    </Link>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-        <ReleasesSection />
         <Top10Section />
+        <ReleasesSection />
         {movies.length > 0 && <ContentSection id="filmes" title="FILMES" items={toCardFormat(movies, 'movie')} />}
         <AdBanner page="home" position="middle" />
         {series.length > 0 && <ContentSection id="series" title="SÉRIES" items={toCardFormat(series, 'series')} />}
         {animes.length > 0 && <ContentSection id="animes" title="ANIMES" items={toCardFormat(animes, 'series')} />}
-
-        {channels.length > 0 && (
-          <section id="canais" className="py-8 md:py-12">
-            <div className="container mx-auto px-3 sm:px-4">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }} transition={{ duration: 0.5 }}
-                className="flex items-center justify-between mb-4 md:mb-6 gap-3"
-              >
-                <div className="flex items-center gap-2 md:gap-3 min-w-0">
-                  <div className="p-2 rounded-lg bg-primary/10 shrink-0">
-                    <Radio className="h-4 w-4 md:h-5 md:w-5 text-primary" />
-                  </div>
-                  <h2 className="font-display text-2xl md:text-4xl text-foreground truncate">CANAIS AO VIVO</h2>
-                  <div className="hidden md:block flex-1 h-px bg-gradient-to-r from-primary/20 to-transparent ml-4 min-w-[60px]" />
-                </div>
-                <Link to="/canais" className="flex items-center gap-1 text-xs sm:text-sm text-primary hover:text-primary/80 transition-colors group shrink-0">
-                  Ver todos <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
-              </motion.div>
-              <div className="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-9 gap-2 sm:gap-3">
-                {channels.map((c, i) => (
-                  <motion.div key={c.id}
-                    initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }} transition={{ delay: Math.min(i * 0.02, 0.3), duration: 0.3 }}>
-                    <ChannelCard
-                      id={c.id} externalId={c.external_id} name={c.name}
-                      category={c.category} logoUrl={c.logo_url}
-                    />
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
 
         {!isLoading && movies.length === 0 && series.length === 0 && animes.length === 0 && channels.length === 0 && (
           <div className="text-center py-20">
