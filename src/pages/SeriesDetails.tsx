@@ -324,51 +324,59 @@ const SeriesDetails = () => {
                 </div>
               </aside>
 
-              {/* Episodes list (right) */}
+              {/* Episodes list (right) — only after selecting a season */}
               <div>
-                <div className="flex items-baseline justify-between mb-4">
-                  <h4 className="font-display text-lg text-foreground">EPISÓDIOS · T{selectedSeason}</h4>
-                  <span className="text-xs text-muted-foreground">{episodes.length} episódios</span>
-                </div>
-
-                {loadingEpisodes ? (
-                  <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 text-primary animate-spin" /></div>
+                {selectedSeason === null ? (
+                  <div className="rounded-2xl border border-dashed border-border/50 bg-card/20 py-16 px-6 text-center">
+                    <p className="text-sm text-muted-foreground">Selecione uma temporada para ver os episódios</p>
+                  </div>
                 ) : (
-                  <div className="space-y-3">
-                    {episodes.map(ep => (
-                      <div key={ep.id}
-                        className={`group flex items-start gap-4 p-3 sm:p-4 rounded-xl border transition-all cursor-pointer ${
-                          playingEpisode?.season === ep.season_number && playingEpisode?.episode === ep.episode_number
-                            ? 'border-primary bg-primary/10' : 'border-border/40 bg-card/40 hover:bg-secondary/60 hover:border-border'
-                        }`}
-                        onClick={() => setPlayingEpisode({ season: ep.season_number, episode: ep.episode_number })}>
-                        <div className="relative shrink-0 w-32 sm:w-44 aspect-video rounded-lg overflow-hidden bg-secondary">
-                          {ep.still_path ? (
-                            <img src={getImageUrl(ep.still_path, 'w300')} alt={ep.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-muted-foreground"><Play className="h-6 w-6" /></div>
-                          )}
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="bg-primary/90 rounded-full p-2.5">
-                              <Play className="h-5 w-5 text-primary-foreground fill-current" />
+                  <>
+                    <div className="flex items-baseline justify-between mb-4">
+                      <h4 className="font-display text-lg text-foreground">EPISÓDIOS · T{selectedSeason}</h4>
+                      <span className="text-xs text-muted-foreground">{episodes.length} episódios</span>
+                    </div>
+
+                    {loadingEpisodes ? (
+                      <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 text-primary animate-spin" /></div>
+                    ) : (
+                      <div className="space-y-3">
+                        {episodes.map(ep => (
+                          <div key={ep.id}
+                            className={`group flex items-start gap-4 p-3 sm:p-4 rounded-xl border transition-all cursor-pointer ${
+                              playingEpisode?.season === ep.season_number && playingEpisode?.episode === ep.episode_number
+                                ? 'border-primary bg-primary/10' : 'border-border/40 bg-card/40 hover:bg-secondary/60 hover:border-border'
+                            }`}
+                            onClick={() => setPlayingEpisode({ season: ep.season_number, episode: ep.episode_number })}>
+                            <div className="relative shrink-0 w-32 sm:w-44 aspect-video rounded-lg overflow-hidden bg-secondary">
+                              {ep.still_path ? (
+                                <img src={getImageUrl(ep.still_path, 'w300')} alt={ep.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-muted-foreground"><Play className="h-6 w-6" /></div>
+                              )}
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="bg-primary/90 rounded-full p-2.5">
+                                  <Play className="h-5 w-5 text-primary-foreground fill-current" />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-xs font-bold text-primary">E{ep.episode_number}</span>
+                                <h4 className="text-sm font-semibold text-foreground truncate">{ep.name}</h4>
+                              </div>
+                              {ep.overview && <p className="text-xs text-muted-foreground line-clamp-2">{ep.overview}</p>}
+                              <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                                {ep.vote_average > 0 && <span className="flex items-center gap-1"><Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />{ep.vote_average.toFixed(1)}</span>}
+                                {ep.runtime && <span>{ep.runtime} min</span>}
+                                {ep.air_date && <span>{ep.air_date}</span>}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xs font-bold text-primary">E{ep.episode_number}</span>
-                            <h4 className="text-sm font-semibold text-foreground truncate">{ep.name}</h4>
-                          </div>
-                          {ep.overview && <p className="text-xs text-muted-foreground line-clamp-2">{ep.overview}</p>}
-                          <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                            {ep.vote_average > 0 && <span className="flex items-center gap-1"><Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />{ep.vote_average.toFixed(1)}</span>}
-                            {ep.runtime && <span>{ep.runtime} min</span>}
-                            {ep.air_date && <span>{ep.air_date}</span>}
-                          </div>
-                        </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
