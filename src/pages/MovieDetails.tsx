@@ -178,9 +178,20 @@ const MovieDetails = () => {
             <li className="text-foreground truncate max-w-[200px]" aria-current="page">{movie.title}</li>
           </ol>
         </nav>
-        <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm mb-6">
+        <button
+          type="button"
+          onClick={() => {
+            if (showPlayer) {
+              setShowPlayer(false);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+              window.history.length > 1 ? window.history.back() : (window.location.href = '/filmes');
+            }
+          }}
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm mb-6"
+        >
           <ArrowLeft className="h-4 w-4" /> Voltar
-        </Link>
+        </button>
 
         {showPlayer && playerSrc && (
           <div id="player" className="mb-8 rounded-2xl border border-border/60 bg-gradient-to-b from-card/80 to-card/40 backdrop-blur-sm shadow-2xl shadow-primary/5 overflow-hidden">
