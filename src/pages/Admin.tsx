@@ -164,6 +164,12 @@ const Admin = () => {
 
   return (
     <SidebarProvider>
+      <Helmet>
+        <title>Painel Admin — PipocaMax</title>
+        <meta name="description" content="Painel administrativo restrito do PipocaMax." />
+        <meta name="robots" content="noindex, nofollow" />
+        <link rel="canonical" href="https://pipocamax.com/admin" />
+      </Helmet>
       <div className="min-h-screen flex w-full bg-background">
         <AdminSidebar
           groups={groups}
