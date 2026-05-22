@@ -196,7 +196,7 @@ export function HeroSection() {
               />
             ))}
           </div>
-          <span className="text-[10px] uppercase font-bold text-foreground/40 tracking-widest">
+          <span className="text-[10px] uppercase font-bold text-foreground/40 tracking-widest whitespace-nowrap">
             {String(current + 1).padStart(2, "0")} / {String(items.length).padStart(2, "0")}
           </span>
           <div className="flex-1" />
