@@ -57,8 +57,6 @@ const SeriesDetails = () => {
       if (found.tmdb_id) {
         const [det, cre] = await Promise.all([getSeriesDetails(found.tmdb_id), getSeriesCredits(found.tmdb_id)]);
         setDetails(det); setCast(cre);
-        const firstSeason = det.seasons?.find((s: TmdbSeason) => s.season_number > 0);
-        if (firstSeason) setSelectedSeason(firstSeason.season_number);
       }
     }
 
