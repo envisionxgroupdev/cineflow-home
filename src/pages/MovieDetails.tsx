@@ -109,8 +109,8 @@ const MovieDetails = () => {
     <div className="min-h-screen bg-background">
       <Helmet>
         <html lang="pt-BR" />
-        <title>{`Assistir ${movie.title}${movie.year ? ` (${movie.year})` : ''} Online Grátis Dublado HD - PipocaMax`}</title>
-        <meta name="description" content={`Assistir ${movie.title}${movie.year ? ` (${movie.year})` : ''} online grátis em HD dublado e legendado. ${overview?.slice(0, 120)}`} />
+        <title>{`${movie.title}${movie.year ? ` (${movie.year})` : ''} Online HD — PipocaMax`}</title>
+        <meta name="description" content={`Assista ${movie.title}${movie.year ? ` (${movie.year})` : ''} online grátis em HD dublado e legendado. ${overview?.slice(0, 80) || ''}`.slice(0, 158)} />
         <meta name="keywords" content={`${movie.title}, assistir ${movie.title}, ${movie.title} online, ${movie.title} dublado, ${movie.title} legendado, filme ${movie.year || ''}, ${genres}`} />
         <link rel="canonical" href={canonicalUrl} />
         <link rel="alternate" hrefLang="pt-BR" href={canonicalUrl} />

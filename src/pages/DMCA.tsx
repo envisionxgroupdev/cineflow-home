@@ -5,8 +5,15 @@ import { Footer } from "@/components/Footer";
 const DMCA = () => (
   <div className="min-h-screen bg-background">
     <Helmet>
-      <title>DMCA — PipocaMax</title>
-      <meta name="description" content="Política DMCA do PipocaMax. Saiba como reportar violações de direitos autorais." />
+      <title>Política DMCA — PipocaMax</title>
+      <meta name="description" content="Política DMCA do PipocaMax. Saiba como reportar violações de direitos autorais e solicitar a remoção de conteúdo." />
+      <link rel="canonical" href="https://pipocamax.com/dmca" />
+      <meta property="og:title" content="Política DMCA — PipocaMax" />
+      <meta property="og:description" content="Como reportar violações de direitos autorais no PipocaMax." />
+      <meta property="og:url" content="https://pipocamax.com/dmca" />
+      <meta property="og:type" content="website" />
+      <meta name="twitter:title" content="Política DMCA — PipocaMax" />
+      <meta name="twitter:description" content="Como reportar violações de direitos autorais no PipocaMax." />
     </Helmet>
     <Navbar />
     <div className="container mx-auto px-4 pt-24 pb-16 max-w-3xl">

@@ -165,8 +165,8 @@ const Admin = () => {
   return (
     <SidebarProvider>
       <Helmet>
-        <title>Painel Admin — PipocaMax</title>
-        <meta name="description" content="Painel administrativo restrito do PipocaMax." />
+        <title>Painel Administrativo — PipocaMax</title>
+        <meta name="description" content="Painel administrativo restrito do PipocaMax para gerenciar filmes, séries, animes, canais de TV, usuários, anúncios e configurações do site." />
         <meta name="robots" content="noindex, nofollow" />
         <link rel="canonical" href="https://pipocamax.com/admin" />
       </Helmet>
