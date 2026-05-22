@@ -13,11 +13,13 @@ import {
   getSeriesDetails, getSeriesCredits, getSeasonEpisodes, getImageUrl, getWarezPlayerUrl, getEmbedMoviesUrl,
   type TmdbSeriesDetails, type TmdbCastMember, type TmdbEpisode, type TmdbSeason,
 } from '@/services/tmdb';
-import { ArrowLeft, Star, Calendar, Play, Loader2, ChevronDown, AlertTriangle, Pencil, SkipBack, SkipForward, Bookmark } from 'lucide-react';
+import { ArrowLeft, Star, Calendar, Play, Loader2, ChevronDown, AlertTriangle, Pencil, SkipBack, SkipForward, Bookmark, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ShareButtons } from '@/components/ShareButtons';
 import { AdBanner } from '@/components/AdBanner';
 import { VizerHero } from '@/components/vizer/VizerHero';
 import { YouMayLike } from '@/components/vizer/YouMayLike';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { useRef } from 'react';
 import type { Series } from '@/types/database';
 
 type PlayerSource = 'warezcdn' | 'embedmovies';
