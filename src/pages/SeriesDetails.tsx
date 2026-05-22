@@ -36,6 +36,7 @@ const SeriesDetails = () => {
   const [activePlayer, setActivePlayer] = useState<PlayerSource>('warezcdn');
   const [reportOpen, setReportOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [showSeasons, setShowSeasons] = useState(false);
 
   useEffect(() => { if (slug) loadSeries(slug); }, [slug]);
 
@@ -157,10 +158,15 @@ const SeriesDetails = () => {
         cast={cast}
         actions={
           <>
-            <a href="#temporadas"
+            <button
+              type="button"
+              onClick={() => {
+                setShowSeasons(true);
+                setTimeout(() => document.getElementById('temporadas')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+              }}
               className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-full text-sm font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:brightness-110 transition-all">
               <Play className="h-4 w-4 fill-current" /> Temporadas
-            </a>
+            </button>
             <button className="inline-flex items-center gap-2 bg-foreground/10 text-foreground px-5 py-3 rounded-full text-sm font-semibold border border-foreground/15 hover:bg-foreground/15 transition-all">
               <Bookmark className="h-4 w-4" /> Listar
             </button>
@@ -292,8 +298,8 @@ const SeriesDetails = () => {
           );
         })()}
 
-        {/* Seasons & Episodes (Vizer-style two-column layout) */}
-        {seasons.length > 0 && tmdbId && (
+        {/* Seasons & Episodes (Vizer-style two-column layout) — hidden until user clicks Temporadas */}
+        {showSeasons && seasons.length > 0 && tmdbId && (
           <div className="mt-12">
             <h3 className="font-display text-2xl text-foreground mb-6">TEMPORADAS & EPISÓDIOS</h3>
 
