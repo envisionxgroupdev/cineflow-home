@@ -18,7 +18,7 @@ import { ShareButtons } from '@/components/ShareButtons';
 import { AdBanner } from '@/components/AdBanner';
 import { VizerHero } from '@/components/vizer/VizerHero';
 import { YouMayLike } from '@/components/vizer/YouMayLike';
-import { SeasonsModal } from '@/components/vizer/SeasonsModal';
+
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 
 import type { Series } from '@/types/database';
@@ -163,7 +163,10 @@ const SeriesDetails = () => {
           <>
             <button
               type="button"
-              onClick={() => { setShowSeasons(true); setSelectedSeason(null); }}
+              onClick={() => {
+                setShowSeasons(true);
+                setTimeout(() => document.getElementById('temporadas')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+              }}
               className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-full text-sm font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:brightness-110 transition-all">
               <Play className="h-4 w-4 fill-current" /> Temporadas
             </button>
@@ -298,18 +301,100 @@ const SeriesDetails = () => {
           );
         })()}
 
-        {/* Seasons modal (Vizer-style popup) */}
-        <SeasonsModal
-          open={showSeasons}
-          onClose={() => setShowSeasons(false)}
-          seasons={seasons}
-          selectedSeason={selectedSeason}
-          setSelectedSeason={(n) => { setSelectedSeason(n); setPlayingEpisode(null); }}
-          episodes={episodes}
-          loadingEpisodes={loadingEpisodes}
-          onPickEpisode={(s, e) => { setPlayingEpisode({ season: s, episode: e }); setShowSeasons(false); }}
-          playingEpisode={playingEpisode}
-        />
+        {/* Seasons + Episodes (inline, Vizer-style) */}
+        {showSeasons && seasons.length > 0 && tmdbId && (
+          <div className="mt-10">
+            <div className="flex items-baseline justify-between mb-4">
+              <h3 className="font-display text-2xl text-foreground">TEMPORADAS</h3>
+              <span className="text-xs text-muted-foreground">{seasons.length} temporada{seasons.length > 1 ? 's' : ''}</span>
+            </div>
+
+            {/* Square small season chips */}
+            <div className="flex flex-wrap gap-2 mb-8">
+              {seasons.map(s => {
+                const active = selectedSeason === s.season_number;
+                return (
+                  <button
+                    key={s.season_number}
+                    onClick={() => { setSelectedSeason(s.season_number); setPlayingEpisode(null); }}
+                    title={`Temporada ${s.season_number}`}
+                    className={`w-14 h-14 rounded-lg text-sm font-bold transition-all flex items-center justify-center ${
+                      active
+                        ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30 scale-105'
+                        : 'bg-foreground/10 text-foreground hover:bg-foreground/20 border border-foreground/10'
+                    }`}
+                  >
+                    T{s.season_number}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Episodes horizontal carousel */}
+            {selectedSeason !== null && (
+              <div>
+                <div className="flex items-baseline justify-between mb-3">
+                  <h4 className="font-display text-lg text-foreground">EPISÓDIOS · T{selectedSeason}</h4>
+                  <span className="text-xs text-muted-foreground">{episodes.length} eps</span>
+                </div>
+
+                {loadingEpisodes ? (
+                  <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 text-primary animate-spin" /></div>
+                ) : (
+                  <div
+                    className="flex gap-4 overflow-x-auto overflow-y-hidden pb-4 -mx-4 px-4 snap-x"
+                    style={{ scrollbarWidth: 'thin', WebkitOverflowScrolling: 'touch' }}
+                  >
+                    {episodes.map(ep => {
+                      const active = playingEpisode?.season === ep.season_number && playingEpisode?.episode === ep.episode_number;
+                      return (
+                        <button
+                          key={ep.id}
+                          onClick={() => setPlayingEpisode({ season: ep.season_number, episode: ep.episode_number })}
+                          className={`group snap-start shrink-0 w-[260px] sm:w-[300px] text-left rounded-2xl border transition-all overflow-hidden flex flex-col ${
+                            active ? 'border-primary bg-primary/10' : 'border-border/40 bg-card/40 hover:bg-secondary/60 hover:border-border'
+                          }`}
+                        >
+                          <div className="relative w-full aspect-video bg-secondary overflow-hidden">
+                            {ep.still_path ? (
+                              <img src={getImageUrl(ep.still_path, 'w500')} alt={ep.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-muted-foreground"><Play className="h-8 w-8" /></div>
+                            )}
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="bg-primary/90 rounded-full p-3">
+                                <Play className="h-5 w-5 text-primary-foreground fill-current" />
+                              </div>
+                            </div>
+                            <span className="absolute top-2 left-2 text-[10px] font-bold uppercase tracking-wider bg-background/80 backdrop-blur text-foreground px-2 py-0.5 rounded-full">
+                              E{ep.episode_number}
+                            </span>
+                          </div>
+                          <div className="p-3 flex-1 flex flex-col">
+                            <h5 className="text-sm font-semibold text-foreground line-clamp-1 mb-1">{ep.name}</h5>
+                            <p className="text-xs text-muted-foreground line-clamp-3 mb-2 flex-1">
+                              {ep.overview && ep.overview.trim() ? ep.overview : 'Sinopse não disponível para este episódio.'}
+                            </p>
+                            <div className="flex items-center gap-3 text-[11px] text-muted-foreground mt-auto">
+                              {ep.vote_average > 0 && (
+                                <span className="flex items-center gap-1">
+                                  <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                                  {ep.vote_average.toFixed(1)}
+                                </span>
+                              )}
+                              {ep.runtime ? <span>{ep.runtime} min</span> : null}
+                              {ep.air_date ? <span>{ep.air_date}</span> : null}
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {tmdbId && <YouMayLike type="tv" tmdbId={tmdbId} />}
 
