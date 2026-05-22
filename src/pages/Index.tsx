@@ -5,6 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { ContentSection } from "@/components/ContentSection";
 import { ReleasesSection } from "@/components/ReleasesSection";
+import { Top10Section } from "@/components/Top10Section";
 import { Footer } from "@/components/Footer";
 import { EditContentModal } from "@/components/EditContentModal";
 import { AdBanner } from "@/components/AdBanner";
@@ -158,6 +159,7 @@ const Index = () => {
         )}
 
         <ReleasesSection />
+        <Top10Section />
         {movies.length > 0 && <ContentSection id="filmes" title="FILMES" items={toCardFormat(movies, 'movie')} />}
         <AdBanner page="home" position="middle" />
         {series.length > 0 && <ContentSection id="series" title="SÉRIES" items={toCardFormat(series, 'series')} />}
