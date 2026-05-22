@@ -19,7 +19,7 @@ import { AdBanner } from '@/components/AdBanner';
 import { VizerHero } from '@/components/vizer/VizerHero';
 import { YouMayLike } from '@/components/vizer/YouMayLike';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { useRef } from 'react';
+
 import type { Series } from '@/types/database';
 
 type PlayerSource = 'warezcdn' | 'embedmovies';
