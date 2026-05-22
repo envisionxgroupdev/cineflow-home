@@ -318,13 +318,13 @@ const SeriesDetails = () => {
                     key={s.season_number}
                     onClick={() => { setSelectedSeason(s.season_number); setPlayingEpisode(null); }}
                     title={`Temporada ${s.season_number}`}
-                    className={`w-14 h-14 rounded-lg text-sm font-bold transition-all flex items-center justify-center ${
+                    className={`px-4 h-11 rounded-lg text-sm font-semibold transition-all inline-flex items-center justify-center whitespace-nowrap ${
                       active
-                        ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30 scale-105'
+                        ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30'
                         : 'bg-foreground/10 text-foreground hover:bg-foreground/20 border border-foreground/10'
                     }`}
                   >
-                    T{s.season_number}
+                    Temporada {s.season_number}
                   </button>
                 );
               })}
