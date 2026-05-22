@@ -58,11 +58,22 @@ export function VizerHero({
               {year && <span>{year}</span>}
               {runtimeLabel && <span className="flex items-center gap-1">• {runtimeLabel}</span>}
               {!!rating && (
-                <span className="flex items-center gap-0.5">
-                  {[0,1,2,3,4].map(i => (
-                    <Star key={i} className={`h-4 w-4 ${i < fullStars ? 'text-yellow-400 fill-yellow-400' : 'text-foreground/20 fill-foreground/20'}`} />
-                  ))}
-                  <span className="ml-1.5 text-xs text-foreground/60">{rating.toFixed(1)}</span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="relative inline-flex">
+                    <span className="flex gap-0.5 text-foreground/15">
+                      {[0,1,2,3,4].map(i => <Star key={i} className="h-4 w-4 fill-current" />)}
+                    </span>
+                    <span
+                      className="absolute inset-y-0 left-0 overflow-hidden text-yellow-400 pointer-events-none"
+                      style={{ width: `${Math.max(0, Math.min(100, (rating / 10) * 100))}%` }}
+                      aria-hidden
+                    >
+                      <span className="flex gap-0.5 w-max">
+                        {[0,1,2,3,4].map(i => <Star key={i} className="h-4 w-4 fill-current shrink-0" />)}
+                      </span>
+                    </span>
+                  </span>
+                  <span className="ml-1 text-xs text-foreground/60">{rating.toFixed(1)}</span>
                 </span>
               )}
             </div>
