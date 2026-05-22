@@ -48,10 +48,6 @@ export function MovieCard({ id, title, year, rating, imageUrl, type, isAdmin, on
             </div>
           </div>
         </div>
-        <div className="mt-2 px-0.5">
-          <h3 className="text-[13px] font-medium text-foreground truncate group-hover:text-primary transition-colors">{title}</h3>
-          <p className="text-[11px] text-muted-foreground">{year}</p>
-        </div>
       </Link>
 
       {isAdmin && onEdit && (
