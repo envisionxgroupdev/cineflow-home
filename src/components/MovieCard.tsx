@@ -1,4 +1,4 @@
-import { Star, Pencil } from "lucide-react";
+import { Star, Pencil, Play } from "lucide-react";
 import { Link } from "react-router-dom";
 import { contentUrl } from "@/lib/utils";
 
@@ -15,13 +15,13 @@ interface MovieCardProps {
   priority?: boolean;
 }
 
-export function MovieCard({ id, title, year, rating, imageUrl, genre, type, isAdmin, onEdit, priority = false }: MovieCardProps) {
+export function MovieCard({ id, title, year, rating, imageUrl, type, isAdmin, onEdit, priority = false }: MovieCardProps) {
   const href = contentUrl(type, id, title);
 
   return (
     <div className="group relative">
-      <Link to={href} className="cinema-card-hover block">
-        <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-secondary">
+      <Link to={href} className="block">
+        <div className="relative aspect-[2/3] rounded-md overflow-hidden bg-secondary ring-1 ring-border/40 group-hover:ring-primary/60 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_12px_30px_-10px_hsl(var(--primary)/0.55)]">
           <img
             src={imageUrl}
             alt={title}
@@ -30,31 +30,33 @@ export function MovieCard({ id, title, year, rating, imageUrl, genre, type, isAd
             // @ts-expect-error fetchpriority is valid HTML, React types lag
             fetchpriority={priority ? "high" : "low"}
             sizes="(max-width: 640px) 42vw, (max-width: 1024px) 220px, 230px"
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <span className="absolute top-2 left-2 bg-primary/90 text-primary-foreground text-[10px] font-bold uppercase px-2 py-0.5 rounded">
-            {type === "movie" ? "Filme" : "Série"}
-          </span>
-          <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-            <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
-              <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+
+          {/* Rating badge (Vizer-style: always visible, top-right) */}
+          {rating > 0 && (
+            <div className="absolute top-1.5 right-1.5 flex items-center gap-1 bg-background/85 backdrop-blur-sm px-1.5 py-0.5 rounded text-[10px] font-semibold text-foreground">
+              <Star className="h-2.5 w-2.5 text-primary fill-primary" />
               {rating.toFixed(1)}
-              <span className="mx-1">•</span>
-              {year}
             </div>
-            <p className="text-xs text-muted-foreground">{genre}</p>
+          )}
+
+          {/* Play overlay on hover */}
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
+            <div className="flex items-center justify-center w-11 h-11 rounded-full bg-primary text-primary-foreground shadow-[0_0_24px_hsl(var(--primary)/0.65)] scale-75 group-hover:scale-100 transition-transform duration-300">
+              <Play className="h-5 w-5 fill-current ml-0.5" />
+            </div>
           </div>
         </div>
-        <div className="mt-2">
-          <h3 className="text-sm font-medium text-foreground truncate">{title}</h3>
-          <p className="text-xs text-muted-foreground">{year}</p>
+        <div className="mt-2 px-0.5">
+          <h3 className="text-[13px] font-medium text-foreground truncate group-hover:text-primary transition-colors">{title}</h3>
+          <p className="text-[11px] text-muted-foreground">{year}</p>
         </div>
       </Link>
 
       {isAdmin && onEdit && (
         <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(); }}
-          className="absolute top-2 right-2 z-10 p-1.5 bg-background/80 backdrop-blur-sm border border-border rounded-lg text-muted-foreground hover:text-primary hover:border-primary transition-colors opacity-0 group-hover:opacity-100"
+          className="absolute top-1.5 left-1.5 z-10 p-1.5 bg-background/80 backdrop-blur-sm border border-border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors opacity-0 group-hover:opacity-100"
           title="Editar">
           <Pencil className="h-3.5 w-3.5" />
         </button>
