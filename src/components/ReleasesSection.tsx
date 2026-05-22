@@ -80,7 +80,7 @@ export function ReleasesSection() {
           <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20">
             <Sparkles className="h-6 w-6 text-primary" />
           </div>
-          <h2 className="font-display text-3xl md:text-4xl text-foreground">LANÇAMENTOS</h2>
+          <h2 className="font-display text-3xl md:text-4xl text-foreground">NOVIDADES</h2>
           <div className="flex-1 h-px bg-gradient-to-r from-primary/30 to-transparent ml-4" />
         </motion.div>
 
