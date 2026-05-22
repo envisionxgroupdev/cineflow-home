@@ -29,7 +29,7 @@ const SeriesDetails = () => {
   const [details, setDetails] = useState<TmdbSeriesDetails | null>(null);
   const [cast, setCast] = useState<TmdbCastMember[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedSeason, setSelectedSeason] = useState<number>(1);
+  const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
   const [episodes, setEpisodes] = useState<TmdbEpisode[]>([]);
   const [loadingEpisodes, setLoadingEpisodes] = useState(false);
   const [playingEpisode, setPlayingEpisode] = useState<{ season: number; episode: number } | null>(null);
