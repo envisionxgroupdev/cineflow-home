@@ -219,6 +219,8 @@ const MovieDetails = () => {
 
         <AdBanner page="movie_detail" position="middle" />
 
+        {tmdbId && <YouMayLike type="movie" tmdbId={tmdbId} />}
+
       </div>
 
       <AdBanner page="movie_detail" position="bottom" />
