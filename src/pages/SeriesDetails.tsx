@@ -297,75 +297,90 @@ const SeriesDetails = () => {
           );
         })()}
 
-        {/* Seasons & Episodes */}
+        {/* Seasons & Episodes (Vizer-style two-column layout) */}
         {seasons.length > 0 && tmdbId && (
           <div className="mt-12">
-            <h3 className="font-display text-2xl text-foreground mb-6">TEMPORADAS</h3>
+            <h3 className="font-display text-2xl text-foreground mb-6">TEMPORADAS & EPISÓDIOS</h3>
 
-            {/* Season pills (Vizer style) */}
-            <div className="flex gap-2 overflow-x-auto pb-3 mb-6" style={{ scrollbarWidth: 'none' }}>
-              {seasons.map(s => {
-                const active = selectedSeason === s.season_number;
-                return (
-                  <button
-                    key={s.season_number}
-                    onClick={() => { setSelectedSeason(s.season_number); setPlayingEpisode(null); }}
-                    className={`shrink-0 px-5 py-2.5 rounded-full text-sm font-semibold transition-all whitespace-nowrap ${
-                      active
-                        ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30'
-                        : 'bg-foreground/10 text-foreground/80 hover:bg-foreground/15 border border-foreground/10'
-                    }`}
-                  >
-                    Temporada {s.season_number}
-                    <span className={`ml-2 text-[10px] font-normal ${active ? 'text-primary-foreground/80' : 'text-foreground/50'}`}>
-                      {s.episode_count} eps
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6">
+              {/* Seasons list (left) */}
+              <aside className="lg:sticky lg:top-24 lg:self-start">
+                <div className="rounded-2xl border border-border/50 bg-card/40 backdrop-blur-sm overflow-hidden">
+                  <div className="px-4 py-3 border-b border-border/40 bg-background/40">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Temporadas</p>
+                  </div>
+                  <div className="max-h-[60vh] lg:max-h-[70vh] overflow-y-auto flex lg:flex-col gap-2 p-2">
+                    {seasons.map(s => {
+                      const active = selectedSeason === s.season_number;
+                      return (
+                        <button
+                          key={s.season_number}
+                          onClick={() => { setSelectedSeason(s.season_number); setPlayingEpisode(null); }}
+                          className={`shrink-0 lg:w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition-all whitespace-nowrap lg:whitespace-normal flex items-center justify-between gap-3 ${
+                            active
+                              ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30'
+                              : 'bg-foreground/5 text-foreground/85 hover:bg-foreground/10 border border-foreground/5'
+                          }`}
+                        >
+                          <span>Temporada {s.season_number}</span>
+                          <span className={`text-[10px] font-normal px-2 py-0.5 rounded-full ${active ? 'bg-primary-foreground/15 text-primary-foreground' : 'bg-foreground/10 text-foreground/60'}`}>
+                            {s.episode_count} eps
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </aside>
 
-            <h4 className="font-display text-lg text-foreground mb-4">EPISÓDIOS</h4>
+              {/* Episodes list (right) */}
+              <div>
+                <div className="flex items-baseline justify-between mb-4">
+                  <h4 className="font-display text-lg text-foreground">EPISÓDIOS · T{selectedSeason}</h4>
+                  <span className="text-xs text-muted-foreground">{episodes.length} episódios</span>
+                </div>
 
-            {loadingEpisodes ? (
-              <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 text-primary animate-spin" /></div>
-            ) : (
-              <div className="space-y-3">
-                {episodes.map(ep => (
-                  <div key={ep.id}
-                    className={`group flex items-start gap-4 p-3 sm:p-4 rounded-xl border transition-all cursor-pointer ${
-                      playingEpisode?.season === ep.season_number && playingEpisode?.episode === ep.episode_number
-                        ? 'border-primary bg-primary/10' : 'border-border/40 bg-card/40 hover:bg-secondary/60 hover:border-border'
-                    }`}
-                    onClick={() => setPlayingEpisode({ season: ep.season_number, episode: ep.episode_number })}>
-                    <div className="relative shrink-0 w-32 sm:w-44 aspect-video rounded-lg overflow-hidden bg-secondary">
-                      {ep.still_path ? (
-                        <img src={getImageUrl(ep.still_path, 'w300')} alt={ep.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-muted-foreground"><Play className="h-6 w-6" /></div>
-                      )}
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="bg-primary/90 rounded-full p-2.5">
-                          <Play className="h-5 w-5 text-primary-foreground fill-current" />
+                {loadingEpisodes ? (
+                  <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 text-primary animate-spin" /></div>
+                ) : (
+                  <div className="space-y-3">
+                    {episodes.map(ep => (
+                      <div key={ep.id}
+                        className={`group flex items-start gap-4 p-3 sm:p-4 rounded-xl border transition-all cursor-pointer ${
+                          playingEpisode?.season === ep.season_number && playingEpisode?.episode === ep.episode_number
+                            ? 'border-primary bg-primary/10' : 'border-border/40 bg-card/40 hover:bg-secondary/60 hover:border-border'
+                        }`}
+                        onClick={() => setPlayingEpisode({ season: ep.season_number, episode: ep.episode_number })}>
+                        <div className="relative shrink-0 w-32 sm:w-44 aspect-video rounded-lg overflow-hidden bg-secondary">
+                          {ep.still_path ? (
+                            <img src={getImageUrl(ep.still_path, 'w300')} alt={ep.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground"><Play className="h-6 w-6" /></div>
+                          )}
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="bg-primary/90 rounded-full p-2.5">
+                              <Play className="h-5 w-5 text-primary-foreground fill-current" />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xs font-bold text-primary">E{ep.episode_number}</span>
+                            <h4 className="text-sm font-semibold text-foreground truncate">{ep.name}</h4>
+                          </div>
+                          {ep.overview && <p className="text-xs text-muted-foreground line-clamp-2">{ep.overview}</p>}
+                          <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                            {ep.vote_average > 0 && <span className="flex items-center gap-1"><Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />{ep.vote_average.toFixed(1)}</span>}
+                            {ep.runtime && <span>{ep.runtime} min</span>}
+                            {ep.air_date && <span>{ep.air_date}</span>}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-bold text-primary">E{ep.episode_number}</span>
-                        <h4 className="text-sm font-semibold text-foreground truncate">{ep.name}</h4>
-                      </div>
-                      {ep.overview && <p className="text-xs text-muted-foreground line-clamp-2">{ep.overview}</p>}
-                      <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                        {ep.vote_average > 0 && <span className="flex items-center gap-1"><Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />{ep.vote_average.toFixed(1)}</span>}
-                        {ep.runtime && <span>{ep.runtime} min</span>}
-                        {ep.air_date && <span>{ep.air_date}</span>}
-                      </div>
-                    </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
-            )}
+            </div>
           </div>
         )}
 

@@ -68,9 +68,17 @@ export function HeroSection() {
     [items.length]
   );
 
+  const item = items[current];
+  const { data: logoUrl } = useQuery({
+    queryKey: ['title-logo', item?.type, item?.tmdbId],
+    queryFn: () => getTitleLogo(item!.type === 'movie' ? 'movie' : 'tv', item!.tmdbId!),
+    enabled: !!item?.tmdbId,
+    staleTime: 1000 * 60 * 60,
+  });
+
   if (loading) return <HeroSkeleton />;
 
-  if (items.length === 0) {
+  if (items.length === 0 || !item) {
     return (
       <section className="relative h-[70vh] min-h-[400px] flex items-center overflow-hidden bg-background">
         <div className="relative container mx-auto px-4 text-center">
@@ -81,16 +89,8 @@ export function HeroSection() {
     );
   }
 
-  const item = items[current];
   const ratingPct = Math.max(0, Math.min(100, (item.rating / 10) * 100));
   const genres = item.genre ? item.genre.split(",").map(g => g.trim()).filter(Boolean).slice(0, 3) : [];
-
-  const { data: logoUrl } = useQuery({
-    queryKey: ['title-logo', item.type, item.tmdbId],
-    queryFn: () => getTitleLogo(item.type === 'movie' ? 'movie' : 'tv', item.tmdbId!),
-    enabled: !!item.tmdbId,
-    staleTime: 1000 * 60 * 60,
-  });
 
   return (
     <section className="relative min-h-[600px] md:min-h-[680px] flex items-center justify-center overflow-hidden bg-background py-12 md:py-20">
