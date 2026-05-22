@@ -298,98 +298,86 @@ const SeriesDetails = () => {
           );
         })()}
 
-        {/* Seasons & Episodes (Vizer-style two-column layout) — hidden until user clicks Temporadas */}
+        {/* Seasons → Episodes (single-flow, Vizer-style) */}
         {showSeasons && seasons.length > 0 && tmdbId && (
-          <div className="mt-12">
-            <h3 className="font-display text-2xl text-foreground mb-6">TEMPORADAS & EPISÓDIOS</h3>
-
-            <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6">
-              {/* Seasons list (left) */}
-              <aside className="lg:sticky lg:top-24 lg:self-start">
-                <div className="rounded-2xl border border-border/50 bg-card/40 backdrop-blur-sm overflow-hidden">
-                  <div className="px-4 py-3 border-b border-border/40 bg-background/40">
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Temporadas</p>
-                  </div>
-                  <div className="max-h-[60vh] lg:max-h-[70vh] overflow-y-auto flex lg:flex-col gap-2 p-2">
-                    {seasons.map(s => {
-                      const active = selectedSeason === s.season_number;
-                      return (
-                        <button
-                          key={s.season_number}
-                          onClick={() => { setSelectedSeason(s.season_number); setPlayingEpisode(null); }}
-                          className={`shrink-0 lg:w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition-all whitespace-nowrap lg:whitespace-normal flex items-center justify-between gap-3 ${
-                            active
-                              ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30'
-                              : 'bg-foreground/5 text-foreground/85 hover:bg-foreground/10 border border-foreground/5'
-                          }`}
-                        >
-                          <span>Temporada {s.season_number}</span>
-                          <span className={`text-[10px] font-normal px-2 py-0.5 rounded-full ${active ? 'bg-primary-foreground/15 text-primary-foreground' : 'bg-foreground/10 text-foreground/60'}`}>
-                            {s.episode_count} eps
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
+          <div className="mt-10">
+            {selectedSeason === null ? (
+              <>
+                <div className="flex items-baseline justify-between mb-5">
+                  <h3 className="font-display text-2xl text-foreground">TEMPORADAS</h3>
+                  <span className="text-xs text-muted-foreground">{seasons.length} temporada{seasons.length > 1 ? 's' : ''}</span>
                 </div>
-              </aside>
-
-              {/* Episodes list (right) — only after selecting a season */}
-              <div>
-                {selectedSeason === null ? (
-                  <div className="rounded-2xl border border-dashed border-border/50 bg-card/20 py-16 px-6 text-center">
-                    <p className="text-sm text-muted-foreground">Selecione uma temporada para ver os episódios</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                  {seasons.map(s => (
+                    <button
+                      key={s.season_number}
+                      onClick={() => { setSelectedSeason(s.season_number); setPlayingEpisode(null); }}
+                      className="group relative aspect-[16/10] rounded-2xl border border-border/50 bg-card/40 hover:bg-primary/10 hover:border-primary/60 transition-all overflow-hidden text-left p-4 flex flex-col justify-end"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <span className="relative font-display text-xl text-foreground leading-none">T{s.season_number}</span>
+                      <span className="relative text-xs text-muted-foreground mt-2">Temporada {s.season_number}</span>
+                      <span className="relative text-[10px] text-foreground/50 mt-0.5">{s.episode_count} episódios</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center justify-between mb-5 gap-3 flex-wrap">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => { setSelectedSeason(null); setPlayingEpisode(null); }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-foreground/10 hover:bg-foreground/15 border border-foreground/10 text-foreground transition-colors"
+                    >
+                      <ArrowLeft className="h-3.5 w-3.5" /> Temporadas
+                    </button>
+                    <h3 className="font-display text-xl text-foreground">EPISÓDIOS · T{selectedSeason}</h3>
                   </div>
-                ) : (
-                  <>
-                    <div className="flex items-baseline justify-between mb-4">
-                      <h4 className="font-display text-lg text-foreground">EPISÓDIOS · T{selectedSeason}</h4>
-                      <span className="text-xs text-muted-foreground">{episodes.length} episódios</span>
-                    </div>
+                  <span className="text-xs text-muted-foreground">{episodes.length} episódios</span>
+                </div>
 
-                    {loadingEpisodes ? (
-                      <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 text-primary animate-spin" /></div>
-                    ) : (
-                      <div className="space-y-3">
-                        {episodes.map(ep => (
-                          <div key={ep.id}
-                            className={`group flex items-start gap-4 p-3 sm:p-4 rounded-xl border transition-all cursor-pointer ${
-                              playingEpisode?.season === ep.season_number && playingEpisode?.episode === ep.episode_number
-                                ? 'border-primary bg-primary/10' : 'border-border/40 bg-card/40 hover:bg-secondary/60 hover:border-border'
-                            }`}
-                            onClick={() => setPlayingEpisode({ season: ep.season_number, episode: ep.episode_number })}>
-                            <div className="relative shrink-0 w-32 sm:w-44 aspect-video rounded-lg overflow-hidden bg-secondary">
-                              {ep.still_path ? (
-                                <img src={getImageUrl(ep.still_path, 'w300')} alt={ep.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-muted-foreground"><Play className="h-6 w-6" /></div>
-                              )}
-                              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <div className="bg-primary/90 rounded-full p-2.5">
-                                  <Play className="h-5 w-5 text-primary-foreground fill-current" />
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-xs font-bold text-primary">E{ep.episode_number}</span>
-                                <h4 className="text-sm font-semibold text-foreground truncate">{ep.name}</h4>
-                              </div>
-                              {ep.overview && <p className="text-xs text-muted-foreground line-clamp-2">{ep.overview}</p>}
-                              <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                                {ep.vote_average > 0 && <span className="flex items-center gap-1"><Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />{ep.vote_average.toFixed(1)}</span>}
-                                {ep.runtime && <span>{ep.runtime} min</span>}
-                                {ep.air_date && <span>{ep.air_date}</span>}
-                              </div>
+                {loadingEpisodes ? (
+                  <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 text-primary animate-spin" /></div>
+                ) : (
+                  <div className="space-y-3">
+                    {episodes.map(ep => (
+                      <div key={ep.id}
+                        className={`group flex items-start gap-4 p-3 sm:p-4 rounded-xl border transition-all cursor-pointer ${
+                          playingEpisode?.season === ep.season_number && playingEpisode?.episode === ep.episode_number
+                            ? 'border-primary bg-primary/10' : 'border-border/40 bg-card/40 hover:bg-secondary/60 hover:border-border'
+                        }`}
+                        onClick={() => setPlayingEpisode({ season: ep.season_number, episode: ep.episode_number })}>
+                        <div className="relative shrink-0 w-32 sm:w-44 aspect-video rounded-lg overflow-hidden bg-secondary">
+                          {ep.still_path ? (
+                            <img src={getImageUrl(ep.still_path, 'w300')} alt={ep.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground"><Play className="h-6 w-6" /></div>
+                          )}
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="bg-primary/90 rounded-full p-2.5">
+                              <Play className="h-5 w-5 text-primary-foreground fill-current" />
                             </div>
                           </div>
-                        ))}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xs font-bold text-primary">E{ep.episode_number}</span>
+                            <h4 className="text-sm font-semibold text-foreground truncate">{ep.name}</h4>
+                          </div>
+                          {ep.overview && <p className="text-xs text-muted-foreground line-clamp-2">{ep.overview}</p>}
+                          <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                            {ep.vote_average > 0 && <span className="flex items-center gap-1"><Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />{ep.vote_average.toFixed(1)}</span>}
+                            {ep.runtime && <span>{ep.runtime} min</span>}
+                            {ep.air_date && <span>{ep.air_date}</span>}
+                          </div>
+                        </div>
                       </div>
-                    )}
-                  </>
+                    ))}
+                  </div>
                 )}
-              </div>
-            </div>
+              </>
+            )}
           </div>
         )}
 
