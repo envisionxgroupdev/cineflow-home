@@ -199,9 +199,24 @@ const SeriesDetails = () => {
             <li className="text-foreground truncate max-w-[200px]" aria-current="page">{series.title}</li>
           </ol>
         </nav>
-        <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm mb-4">
+        <button
+          type="button"
+          onClick={() => {
+            if (playingEpisode) {
+              setPlayingEpisode(null);
+              setTimeout(() => document.getElementById('temporadas')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 30);
+            } else if (showSeasons) {
+              setShowSeasons(false);
+              setSelectedSeason(null);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+              window.history.length > 1 ? window.history.back() : (window.location.href = '/series');
+            }
+          }}
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm mb-4"
+        >
           <ArrowLeft className="h-4 w-4" /> Voltar
-        </Link>
+        </button>
         <div id="temporadas" />
 
 
