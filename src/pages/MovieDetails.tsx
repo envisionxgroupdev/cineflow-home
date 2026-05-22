@@ -13,9 +13,10 @@ import {
   getMovieDetails, getMovieCredits, getImageUrl, getWarezPlayerUrl, getEmbedMoviesUrl,
   type TmdbMovieDetails, type TmdbCastMember,
 } from '@/services/tmdb';
-import { ArrowLeft, Star, Clock, Calendar, Play, Loader2, AlertTriangle, Pencil } from 'lucide-react';
+import { ArrowLeft, Star, Clock, Calendar, Play, Loader2, AlertTriangle, Pencil, Bookmark } from 'lucide-react';
 import { ShareButtons } from '@/components/ShareButtons';
 import { AdBanner } from '@/components/AdBanner';
+import { VizerHero } from '@/components/vizer/VizerHero';
 import type { Movie } from '@/types/database';
 
 type PlayerSource = 'warezcdn' | 'embedmovies';
@@ -127,15 +128,47 @@ const MovieDetails = () => {
         <script type="application/ld+json">{JSON.stringify(breadcrumbLd)}</script>
       </Helmet>
       <Navbar />
-      <div className="relative w-full h-[50vh] md:h-[60vh]">
-        <img src={backdrop || '/placeholder.svg'} alt={movie.title} className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/80 to-transparent" />
-      </div>
+      <VizerHero
+        backdrop={backdrop}
+        poster={movie.image_url}
+        title={movie.title}
+        tagline={tagline}
+        year={movie.year}
+        runtimeLabel={runtime ? `${Math.floor(runtime / 60)}h ${runtime % 60}min` : null}
+        rating={movie.rating}
+        genres={details?.genres?.map(g => g.name) || (movie.genre ? [movie.genre] : [])}
+        overview={overview}
+        cast={cast}
+        actions={
+          <>
+            {(hasPlayer1 || hasPlayer2) && (
+              <button onClick={() => { setShowPlayer(true); setTimeout(() => document.getElementById('player')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); }}
+                className="group inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-full text-sm font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:brightness-110 transition-all">
+                <Play className="h-4 w-4 fill-current transition-transform group-hover:scale-110" />
+                {showPlayer ? 'Player aberto' : 'Assistir'}
+              </button>
+            )}
+            <button className="inline-flex items-center gap-2 bg-foreground/10 text-foreground px-5 py-3 rounded-full text-sm font-semibold border border-foreground/15 hover:bg-foreground/15 transition-all">
+              <Bookmark className="h-4 w-4" /> Listar
+            </button>
+            <ShareButtons url={canonicalUrl} title={movie.title} />
+            {isAdmin && (
+              <button onClick={() => setEditOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-primary/10 text-primary rounded-full text-xs font-medium hover:bg-primary/20 transition-colors">
+                <Pencil className="h-3.5 w-3.5" /> Editar
+              </button>
+            )}
+            <button onClick={() => setReportOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-destructive/10 text-destructive rounded-full text-xs font-medium hover:bg-destructive/20 transition-colors">
+              <AlertTriangle className="h-3.5 w-3.5" /> Reportar
+            </button>
+          </>
+        }
+      />
 
       <AdBanner page="movie_detail" position="top" />
-      <div className="container mx-auto px-4 -mt-40 relative z-10 pb-12">
-        <nav aria-label="breadcrumb" className="mb-4 text-xs text-muted-foreground">
+      <div className="container mx-auto px-4 relative z-10 pb-12">
+        <nav aria-label="breadcrumb" className="mb-6 text-xs text-muted-foreground">
           <ol className="flex flex-wrap items-center gap-1.5">
             <li><Link to="/" className="hover:text-foreground transition-colors">Início</Link></li>
             <li aria-hidden="true">/</li>
@@ -144,91 +177,43 @@ const MovieDetails = () => {
             <li className="text-foreground truncate max-w-[200px]" aria-current="page">{movie.title}</li>
           </ol>
         </nav>
-        <div className="flex items-center justify-between mb-6">
-          <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm">
-            <ArrowLeft className="h-4 w-4" /> Voltar
-          </Link>
-          <div className="flex items-center gap-2">
-            <ShareButtons url={canonicalUrl} title={movie.title} />
-            {isAdmin && (
-              <button onClick={() => setEditOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-medium hover:bg-primary/20 transition-colors">
-                <Pencil className="h-3.5 w-3.5" /> Editar
-              </button>
-            )}
-            <button onClick={() => setReportOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-destructive/10 text-destructive rounded-lg text-xs font-medium hover:bg-destructive/20 transition-colors">
-              <AlertTriangle className="h-3.5 w-3.5" /> Reportar
-            </button>
-          </div>
-        </div>
+        <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm mb-6">
+          <ArrowLeft className="h-4 w-4" /> Voltar
+        </Link>
 
-        <div className="flex flex-col md:flex-row gap-8">
-          <div className="shrink-0">
-            <img src={movie.image_url || '/placeholder.svg'} alt={movie.title} className="w-48 md:w-64 rounded-xl shadow-2xl shadow-primary/10" />
-          </div>
-          <div className="flex-1">
-            <h1 className="font-display text-3xl md:text-5xl text-foreground mb-2">{movie.title}</h1>
-            {tagline && <p className="text-primary italic text-sm mb-4">"{tagline}"</p>}
-            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-6">
-              <span className="flex items-center gap-1"><Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />{movie.rating?.toFixed(1)}</span>
-              {movie.year && <span className="flex items-center gap-1"><Calendar className="h-4 w-4" /> {movie.year}</span>}
-              {runtime && <span className="flex items-center gap-1"><Clock className="h-4 w-4" /> {runtime} min</span>}
-              {genres && <span className="bg-secondary px-2 py-0.5 rounded text-xs">{genres}</span>}
+        {showPlayer && playerSrc && (
+          <div id="player" className="mb-8 rounded-2xl border border-border/60 bg-gradient-to-b from-card/80 to-card/40 backdrop-blur-sm shadow-2xl shadow-primary/5 overflow-hidden">
+            <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-border/50 bg-background/40">
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="flex h-2 w-2 rounded-full bg-primary shadow-[0_0_10px] shadow-primary animate-pulse shrink-0" />
+                <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Assistindo agora</p>
+              </div>
+              {(hasPlayer1 && hasPlayer2) && (
+                <div className="inline-flex items-center p-1 rounded-full bg-secondary/60 border border-border/50">
+                  <button onClick={() => setActivePlayer('warezcdn')}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${activePlayer === 'warezcdn' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'text-muted-foreground hover:text-foreground'}`}>
+                    Player 1
+                  </button>
+                  <button onClick={() => setActivePlayer('embedmovies')}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${activePlayer === 'embedmovies' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'text-muted-foreground hover:text-foreground'}`}>
+                    Player 2
+                  </button>
+                </div>
+              )}
             </div>
-
-            {(hasPlayer1 || hasPlayer2) && (
-              <div className="flex flex-col gap-3 mb-6">
-                <button onClick={() => setShowPlayer(!showPlayer)}
-                  className="group inline-flex items-center gap-2.5 bg-primary text-primary-foreground px-7 py-3.5 rounded-full text-sm font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:brightness-110 transition-all w-fit">
-                  <Play className="h-5 w-5 fill-current transition-transform group-hover:scale-110" />
-                  {showPlayer ? 'Fechar Player' : 'Assistir Agora'}
-                </button>
+            <div className="bg-black">
+              <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
+                <iframe src={playerSrc} className="absolute inset-0 w-full h-full" allowFullScreen
+                  allow="autoplay; encrypted-media" referrerPolicy="origin" />
               </div>
-            )}
-
-            {showPlayer && playerSrc && (
-              <div className="mb-8 rounded-2xl border border-border/60 bg-gradient-to-b from-card/80 to-card/40 backdrop-blur-sm shadow-2xl shadow-primary/5 overflow-hidden">
-                <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-border/50 bg-background/40">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span className="flex h-2 w-2 rounded-full bg-primary shadow-[0_0_10px] shadow-primary animate-pulse shrink-0" />
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Assistindo agora</p>
-                  </div>
-                  {(hasPlayer1 && hasPlayer2) && (
-                    <div className="inline-flex items-center p-1 rounded-full bg-secondary/60 border border-border/50">
-                      <button onClick={() => setActivePlayer('warezcdn')}
-                        className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${activePlayer === 'warezcdn' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'text-muted-foreground hover:text-foreground'}`}>
-                        Player 1
-                      </button>
-                      <button onClick={() => setActivePlayer('embedmovies')}
-                        className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${activePlayer === 'embedmovies' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'text-muted-foreground hover:text-foreground'}`}>
-                        Player 2
-                      </button>
-                    </div>
-                  )}
-                </div>
-                <div className="bg-black">
-                  <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
-                    <iframe src={playerSrc} className="absolute inset-0 w-full h-full" allowFullScreen
-                      allow="autoplay; encrypted-media" referrerPolicy="origin" />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {overview && (
-              <div className="mb-8">
-                <h3 className="font-display text-xl text-foreground mb-3">SINOPSE</h3>
-                <p className="text-muted-foreground leading-relaxed">{overview}</p>
-              </div>
-            )}
-
-            <div className="mb-8 space-y-1 text-sm text-muted-foreground/70">
-              <p className="font-semibold text-foreground/80 uppercase">ASSISTIR {movie.title.toUpperCase()} ONLINE GRÁTIS</p>
-              <p>{movie.title} LEGENDADO || {movie.title} DUBLADO</p>
-              <p>{movie.title} Online - Assistir {movie.title} Online Grátis Dublado Legendado</p>
             </div>
           </div>
+        )}
+
+        <div className="mb-8 space-y-1 text-sm text-muted-foreground/70">
+          <p className="font-semibold text-foreground/80 uppercase">ASSISTIR {movie.title.toUpperCase()} ONLINE GRÁTIS</p>
+          <p>{movie.title} LEGENDADO || {movie.title} DUBLADO</p>
+          <p>{movie.title} Online - Assistir {movie.title} Online Grátis Dublado Legendado</p>
         </div>
 
         <AdBanner page="movie_detail" position="middle" />
