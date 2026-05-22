@@ -180,22 +180,13 @@ export async function getSeriesCredits(tmdbId: number): Promise<TmdbCastMember[]
 }
 
 export async function getSeasonEpisodes(tmdbId: number, seasonNumber: number): Promise<TmdbEpisode[]> {
-  const [ptRes, enRes] = await Promise.all([
-    fetch(`${TMDB_BASE}/tv/${tmdbId}/season/${seasonNumber}?api_key=${TMDB_API_KEY}&language=pt-BR`),
-    fetch(`${TMDB_BASE}/tv/${tmdbId}/season/${seasonNumber}?api_key=${TMDB_API_KEY}&language=en-US`),
-  ]);
-  const pt = await ptRes.json();
-  const en = await enRes.json().catch(() => ({ episodes: [] }));
-  const enMap = new Map<number, TmdbEpisode>((en.episodes || []).map((e: TmdbEpisode) => [e.episode_number, e]));
-  return (pt.episodes || []).map((ep: TmdbEpisode) => {
-    const fallback = enMap.get(ep.episode_number);
-    return {
-      ...ep,
-      overview: ep.overview && ep.overview.trim() ? ep.overview : (fallback?.overview || ''),
-      name: ep.name || fallback?.name || `Episódio ${ep.episode_number}`,
-      still_path: ep.still_path || fallback?.still_path || null,
-    };
-  });
+  const res = await fetch(`${TMDB_BASE}/tv/${tmdbId}/season/${seasonNumber}?api_key=${TMDB_API_KEY}&language=pt-BR`);
+  const data = await res.json();
+  return (data.episodes || []).map((ep: TmdbEpisode) => ({
+    ...ep,
+    name: ep.name || `Episódio ${ep.episode_number}`,
+    overview: ep.overview && ep.overview.trim() ? ep.overview : '',
+  }));
 }
 
 export interface TmdbLogo {
