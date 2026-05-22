@@ -36,6 +36,7 @@ const SeriesDetails = () => {
   const [activePlayer, setActivePlayer] = useState<PlayerSource>('warezcdn');
   const [reportOpen, setReportOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [showSeasons, setShowSeasons] = useState(false);
 
   useEffect(() => { if (slug) loadSeries(slug); }, [slug]);
 
