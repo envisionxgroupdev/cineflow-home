@@ -13,9 +13,10 @@ import {
   getSeriesDetails, getSeriesCredits, getSeasonEpisodes, getImageUrl, getWarezPlayerUrl, getEmbedMoviesUrl,
   type TmdbSeriesDetails, type TmdbCastMember, type TmdbEpisode, type TmdbSeason,
 } from '@/services/tmdb';
-import { ArrowLeft, Star, Calendar, Play, Loader2, ChevronDown, AlertTriangle, Pencil, SkipBack, SkipForward } from 'lucide-react';
+import { ArrowLeft, Star, Calendar, Play, Loader2, ChevronDown, AlertTriangle, Pencil, SkipBack, SkipForward, Bookmark } from 'lucide-react';
 import { ShareButtons } from '@/components/ShareButtons';
 import { AdBanner } from '@/components/AdBanner';
+import { VizerHero } from '@/components/vizer/VizerHero';
 import type { Series } from '@/types/database';
 
 type PlayerSource = 'warezcdn' | 'embedmovies';
@@ -144,15 +145,44 @@ const SeriesDetails = () => {
         <script type="application/ld+json">{JSON.stringify(breadcrumbLd)}</script>
       </Helmet>
       <Navbar />
-      <div className="relative w-full h-[50vh] md:h-[60vh]">
-        <img src={backdrop || '/placeholder.svg'} alt={series.title} className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/80 to-transparent" />
-      </div>
+      <VizerHero
+        backdrop={backdrop}
+        poster={series.image_url}
+        title={series.title}
+        tagline={tagline}
+        year={series.year}
+        subLine={details?.number_of_seasons ? `${details.number_of_seasons} Temporada${details.number_of_seasons > 1 ? 's' : ''}` : null}
+        rating={series.rating}
+        genres={details?.genres?.map(g => g.name) || (series.genre ? [series.genre] : [])}
+        overview={overview}
+        cast={cast}
+        actions={
+          <>
+            <a href="#temporadas"
+              className="group inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-full text-sm font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:brightness-110 transition-all">
+              <Play className="h-4 w-4 fill-current" /> Assistir
+            </a>
+            <button className="inline-flex items-center gap-2 bg-foreground/10 text-foreground px-5 py-3 rounded-full text-sm font-semibold border border-foreground/15 hover:bg-foreground/15 transition-all">
+              <Bookmark className="h-4 w-4" /> Listar
+            </button>
+            <ShareButtons url={canonicalUrl} title={series.title} />
+            {isAdmin && (
+              <button onClick={() => setEditOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-primary/10 text-primary rounded-full text-xs font-medium hover:bg-primary/20 transition-colors">
+                <Pencil className="h-3.5 w-3.5" /> Editar
+              </button>
+            )}
+            <button onClick={() => setReportOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-destructive/10 text-destructive rounded-full text-xs font-medium hover:bg-destructive/20 transition-colors">
+              <AlertTriangle className="h-3.5 w-3.5" /> Reportar
+            </button>
+          </>
+        }
+      />
 
       <AdBanner page="series_detail" position="top" />
-      <div className="container mx-auto px-4 -mt-40 relative z-10 pb-12">
-        <nav aria-label="breadcrumb" className="mb-4 text-xs text-muted-foreground">
+      <div className="container mx-auto px-4 relative z-10 pb-12">
+        <nav aria-label="breadcrumb" className="mb-6 text-xs text-muted-foreground">
           <ol className="flex flex-wrap items-center gap-1.5">
             <li><Link to="/" className="hover:text-foreground transition-colors">Início</Link></li>
             <li aria-hidden="true">/</li>
@@ -161,53 +191,15 @@ const SeriesDetails = () => {
             <li className="text-foreground truncate max-w-[200px]" aria-current="page">{series.title}</li>
           </ol>
         </nav>
-        <div className="flex items-center justify-between mb-6">
-          <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm">
-            <ArrowLeft className="h-4 w-4" /> Voltar
-          </Link>
-          <div className="flex items-center gap-2">
-            <ShareButtons url={canonicalUrl} title={series.title} />
-            {isAdmin && (
-              <button onClick={() => setEditOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-medium hover:bg-primary/20 transition-colors">
-                <Pencil className="h-3.5 w-3.5" /> Editar
-              </button>
-            )}
-            <button onClick={() => setReportOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-destructive/10 text-destructive rounded-lg text-xs font-medium hover:bg-destructive/20 transition-colors">
-              <AlertTriangle className="h-3.5 w-3.5" /> Reportar
-            </button>
-          </div>
-        </div>
+        <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm mb-4">
+          <ArrowLeft className="h-4 w-4" /> Voltar
+        </Link>
+        <div id="temporadas" />
 
-        <div className="flex flex-col md:flex-row gap-8">
-          <div className="shrink-0">
-            <img src={series.image_url || '/placeholder.svg'} alt={series.title} className="w-48 md:w-64 rounded-xl shadow-2xl shadow-primary/10" />
-          </div>
-          <div className="flex-1">
-            <h1 className="font-display text-3xl md:text-5xl text-foreground mb-2">{series.title}</h1>
-            {tagline && <p className="text-primary italic text-sm mb-4">"{tagline}"</p>}
-            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-6">
-              <span className="flex items-center gap-1"><Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />{series.rating?.toFixed(1)}</span>
-              {series.year && <span className="flex items-center gap-1"><Calendar className="h-4 w-4" /> {series.year}</span>}
-              {details?.number_of_seasons && (
-                <span className="bg-secondary px-2 py-0.5 rounded text-xs">{details.number_of_seasons} temporada{details.number_of_seasons > 1 ? 's' : ''}</span>
-              )}
-              {genres && <span className="bg-secondary px-2 py-0.5 rounded text-xs">{genres}</span>}
-            </div>
-            {overview && (
-              <div className="mb-8">
-                <h3 className="font-display text-xl text-foreground mb-3">SINOPSE</h3>
-                <p className="text-muted-foreground leading-relaxed">{overview}</p>
-              </div>
-            )}
-
-            <div className="mb-8 space-y-1 text-sm text-muted-foreground/70">
-              <p className="font-semibold text-foreground/80 uppercase">ASSISTIR {series.title.toUpperCase()} ONLINE GRÁTIS</p>
-              <p>{series.title} LEGENDADO || {series.title} DUBLADO</p>
-              <p>{series.title} Online - Assistir {series.title} Online Grátis Dublado Legendado</p>
-            </div>
-          </div>
+        <div className="mb-8 space-y-1 text-sm text-muted-foreground/70">
+          <p className="font-semibold text-foreground/80 uppercase">ASSISTIR {series.title.toUpperCase()} ONLINE GRÁTIS</p>
+          <p>{series.title} LEGENDADO || {series.title} DUBLADO</p>
+          <p>{series.title} Online - Assistir {series.title} Online Grátis Dublado Legendado</p>
         </div>
 
         {/* Player */}
