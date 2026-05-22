@@ -126,8 +126,8 @@ const SeriesDetails = () => {
     <div className="min-h-screen bg-background">
       <Helmet>
         <html lang="pt-BR" />
-        <title>{`Assistir ${series.title} Online Grátis Dublado HD - PipocaMax`}</title>
-        <meta name="description" content={`Assistir ${series.title} todas as temporadas online grátis em HD dublado e legendado. ${overview?.slice(0, 120)}`} />
+        <title>{`${series.title} Online HD — PipocaMax`}</title>
+        <meta name="description" content={`Assista ${series.title} todas as temporadas online grátis em HD dublado e legendado. ${overview?.slice(0, 70) || ''}`.slice(0, 158)} />
         <meta name="keywords" content={`${series.title}, assistir ${series.title}, ${series.title} online, ${series.title} dublado, ${series.title} todas temporadas, série ${series.year || ''}`} />
         <link rel="canonical" href={canonicalUrl} />
         <link rel="alternate" hrefLang="pt-BR" href={canonicalUrl} />
