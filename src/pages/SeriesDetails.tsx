@@ -353,27 +353,6 @@ const SeriesDetails = () => {
 
         <AdBanner page="series_detail" position="middle" />
 
-        {/* Cast */}
-        {cast.length > 0 && (
-          <div className="mt-12">
-            <h3 className="font-display text-2xl text-foreground mb-6">ELENCO</h3>
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
-              {cast.map(member => (
-                <div key={member.id} className="text-center">
-                  <div className="aspect-square rounded-full overflow-hidden bg-secondary mb-2 mx-auto w-20 h-20">
-                    {member.profile_path ? (
-                      <img src={getImageUrl(member.profile_path, 'w185')} alt={member.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xl font-display">{member.name[0]}</div>
-                    )}
-                  </div>
-                  <p className="text-xs font-medium text-foreground truncate">{member.name}</p>
-                  <p className="text-[10px] text-muted-foreground truncate">{member.character}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       <AdBanner page="series_detail" position="bottom" />

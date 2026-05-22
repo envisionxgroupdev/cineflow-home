@@ -133,17 +133,17 @@ export function HeroSection() {
               {item.year && item.rating > 0 && <span className="text-foreground/30">•</span>}
               {item.rating > 0 && (
                 <span className="inline-flex items-center gap-1.5">
-                  {/* 5 stars with red fill % */}
-                  <span className="relative inline-block">
+                  <span className="relative inline-flex">
                     <span className="flex gap-0.5 text-foreground/15">
                       {[0, 1, 2, 3, 4].map(i => <Star key={i} className="h-3.5 w-3.5 fill-current" />)}
                     </span>
                     <span
-                      className="absolute inset-0 overflow-hidden text-primary"
+                      className="absolute inset-y-0 left-0 overflow-hidden text-primary pointer-events-none"
                       style={{ width: `${ratingPct}%` }}
+                      aria-hidden
                     >
-                      <span className="flex gap-0.5">
-                        {[0, 1, 2, 3, 4].map(i => <Star key={i} className="h-3.5 w-3.5 fill-current" />)}
+                      <span className="flex gap-0.5 w-max">
+                        {[0, 1, 2, 3, 4].map(i => <Star key={i} className="h-3.5 w-3.5 fill-current shrink-0" />)}
                       </span>
                     </span>
                   </span>
