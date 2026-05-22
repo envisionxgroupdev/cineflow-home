@@ -29,21 +29,23 @@ export function ShareButtons({ url, title }: ShareButtonsProps) {
   };
 
   return (
-    <div className="relative">
+    <div className="relative inline-block">
       <button
-        onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 px-3 py-1.5 bg-secondary text-muted-foreground rounded-lg text-xs font-medium hover:text-foreground transition-colors"
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="inline-flex items-center gap-1.5 px-3 py-2 bg-foreground/10 text-foreground rounded-full text-xs font-medium hover:bg-foreground/15 border border-foreground/15 transition-colors"
       >
         <Share2 className="h-3.5 w-3.5" /> Compartilhar
       </button>
 
       {open && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-2 z-50 bg-card border border-border rounded-xl p-2 shadow-xl min-w-[180px] space-y-1">
+          <div className="fixed inset-0 z-[60]" onClick={() => setOpen(false)} />
+          <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-[70] bg-popover border border-border rounded-xl p-2 shadow-2xl min-w-[200px] space-y-1">
             {platforms.map(p => (
               <button
                 key={p.name}
+                type="button"
                 onClick={() => handleShare(p)}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-white transition-colors ${p.color}`}
               >
