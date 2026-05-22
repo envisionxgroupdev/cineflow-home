@@ -57,6 +57,12 @@ const AllAnimes = () => {
         <title>Animes Online Grátis em HD — PipocaMax</title>
         <meta name="description" content="Assista animes online grátis dublado e legendado em HD. Catálogo completo de animes clássicos e lançamentos." />
         <link rel="canonical" href="https://pipocamax.com/animes" />
+        <meta property="og:title" content="Animes Online Grátis em HD — PipocaMax" />
+        <meta property="og:description" content="Catálogo completo de animes dublados e legendados em HD." />
+        <meta property="og:url" content="https://pipocamax.com/animes" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:title" content="Animes Online Grátis em HD — PipocaMax" />
+        <meta name="twitter:description" content="Catálogo completo de animes em HD." />
       </Helmet>
       <Navbar />
       <div className="pt-20 pb-12">
