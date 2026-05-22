@@ -55,6 +55,12 @@ const AllChannels = () => {
         <title>Canais de TV ao Vivo Online Grátis — PipocaMax</title>
         <meta name="description" content="Assista canais de TV ao vivo online grátis. Globo, SBT, Record, ESPN, HBO e muito mais em HD." />
         <link rel="canonical" href="https://pipocamax.com/canais" />
+        <meta property="og:title" content="Canais de TV ao Vivo Online Grátis — PipocaMax" />
+        <meta property="og:description" content="Assista canais de TV ao vivo online grátis em HD: Globo, SBT, Record, ESPN, HBO e muito mais." />
+        <meta property="og:url" content="https://pipocamax.com/canais" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:title" content="Canais de TV ao Vivo — PipocaMax" />
+        <meta name="twitter:description" content="Canais de TV ao vivo online grátis em HD." />
       </Helmet>
       <Navbar />
       <div className="pt-20 pb-12">
