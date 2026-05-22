@@ -387,9 +387,9 @@ const SeriesDetails = () => {
                           </div>
                           <div className="p-3 flex-1 flex flex-col">
                             <h5 className="text-sm font-semibold text-foreground line-clamp-1 mb-1">{ep.name}</h5>
-                            <p className="text-xs text-muted-foreground line-clamp-3 mb-2 flex-1">
-                              {ep.overview && ep.overview.trim() ? ep.overview : 'Sinopse não disponível para este episódio.'}
-                            </p>
+                            {ep.overview && ep.overview.trim() && (
+                              <p className="text-xs text-muted-foreground line-clamp-3 mb-2 flex-1">{ep.overview}</p>
+                            )}
                             <div className="flex items-center gap-3 text-[11px] text-muted-foreground mt-auto">
                               {ep.vote_average > 0 && (
                                 <span className="flex items-center gap-1">
