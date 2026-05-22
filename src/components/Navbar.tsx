@@ -1,9 +1,8 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Menu, X, LogIn, Shield } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, NavLink as RouterNavLink } from "react-router-dom";
+import { Menu, X, LogIn, Shield, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlobalSearch } from "./GlobalSearch";
-
 import { useAuth } from "@/hooks/useAuth";
 
 const navLinks = [
@@ -18,55 +17,118 @@ const navLinks = [
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { user, isAdmin } = useAuth();
 
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2.5 group">
-          <img src="/logo-pipocamax.png" alt="PipocaMax" width={36} height={36} className="h-9 w-9 object-contain drop-shadow-[0_0_14px_hsl(var(--primary)/0.55)] group-hover:scale-110 group-hover:rotate-[-4deg] transition-transform duration-300" />
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-black/95 backdrop-blur-xl border-b border-primary/20 shadow-[0_4px_24px_-12px_hsl(var(--primary)/0.5)]"
+          : "bg-gradient-to-b from-black via-black/80 to-transparent border-b border-transparent"
+      }`}
+    >
+      {/* Top red accent line */}
+      <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-primary to-transparent opacity-80" />
+
+      <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-2.5 group shrink-0">
+          <img
+            src="/logo-pipocamax.png"
+            alt="PipocaMax"
+            width={36}
+            height={36}
+            className="h-9 w-9 object-contain drop-shadow-[0_0_14px_hsl(var(--primary)/0.7)] group-hover:scale-110 group-hover:rotate-[-4deg] transition-transform duration-300"
+          />
           <div className="flex flex-col leading-none">
             <span className="font-display text-2xl font-bold tracking-[0.18em] text-foreground">
-              PIPOCA<span className="text-gradient-cinema">MAX</span>
+              PIPOCA<span className="text-primary">MAX</span>
             </span>
-            <span className="hidden sm:block text-[9px] font-semibold tracking-[0.32em] uppercase text-muted-foreground/70 mt-0.5">
+            <span className="hidden sm:block text-[9px] font-semibold tracking-[0.32em] uppercase text-primary/70 mt-0.5">
               Cinema · Séries · Animes
             </span>
           </div>
         </Link>
 
         {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-6">
+        <div className="hidden lg:flex items-center gap-1 flex-1 justify-center">
           {navLinks.map((link) => (
-            <a key={link.path} href={link.path}
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-              {link.label}
-            </a>
+            <RouterNavLink
+              key={link.path}
+              to={link.path}
+              end={link.path === "/"}
+              className={({ isActive }) =>
+                `relative text-sm font-semibold uppercase tracking-wider px-3 py-2 transition-colors ${
+                  isActive
+                    ? "text-primary"
+                    : "text-foreground/80 hover:text-primary"
+                } after:absolute after:left-3 after:right-3 after:-bottom-0.5 after:h-[2px] after:bg-primary after:rounded-full after:transition-transform after:duration-300 ${
+                  link.path === "/" ? "" : ""
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  {link.label}
+                  <span
+                    className={`absolute left-3 right-3 -bottom-0.5 h-[2px] bg-primary rounded-full origin-left transition-transform duration-300 ${
+                      isActive ? "scale-x-100" : "scale-x-0"
+                    }`}
+                  />
+                </>
+              )}
+            </RouterNavLink>
           ))}
-          <GlobalSearch />
+        </div>
+
+        {/* Right cluster */}
+        <div className="hidden lg:flex items-center gap-2 shrink-0">
+          <div className="text-foreground/80 hover:text-primary transition-colors">
+            <GlobalSearch />
+          </div>
           {isAdmin && (
-            <Link to="/admin"
-              className="flex items-center gap-1.5 text-sm font-medium bg-primary/10 text-primary px-3 py-1.5 rounded-md hover:bg-primary/20 transition-colors">
-              <Shield className="h-4 w-4" /> Painel
+            <Link
+              to="/admin"
+              className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider border border-primary/40 text-primary px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors"
+            >
+              <Shield className="h-3.5 w-3.5" /> Painel
             </Link>
           )}
           {user ? (
-            <Link to="/admin"
-              className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              {user.email?.split('@')[0]}
+            <Link
+              to="/admin"
+              className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors px-2"
+            >
+              {user.email?.split("@")[0]}
             </Link>
           ) : (
-            <Link to="/login"
-              className="flex items-center gap-1.5 text-sm font-medium bg-primary text-primary-foreground px-3 py-1.5 rounded-md hover:bg-primary/90 transition-colors">
-              <LogIn className="h-4 w-4" /> Login
+            <Link
+              to="/login"
+              className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 hover:shadow-[0_0_20px_hsl(var(--primary)/0.6)] transition-all"
+            >
+              <LogIn className="h-3.5 w-3.5" /> Entrar
             </Link>
           )}
         </div>
 
         {/* Mobile */}
-        <div className="flex md:hidden items-center gap-3">
-          <GlobalSearch />
-          <button className="text-foreground" onClick={() => setMobileOpen(!mobileOpen)}>
+        <div className="flex lg:hidden items-center gap-2">
+          <div className="text-foreground/90">
+            <GlobalSearch />
+          </div>
+          <button
+            className="text-foreground p-2 rounded-md hover:bg-primary/10 transition-colors"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Menu"
+          >
             {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
@@ -74,27 +136,51 @@ export function Navbar() {
 
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }} className="md:hidden bg-background border-b border-border overflow-hidden">
-            <div className="px-4 py-4 flex flex-col gap-3">
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="lg:hidden bg-black/98 backdrop-blur-xl border-b border-primary/20 overflow-hidden"
+          >
+            <div className="px-4 py-4 flex flex-col gap-1">
               {navLinks.map((link) => (
-                <a key={link.path} href={link.path} onClick={() => setMobileOpen(false)}
-                  className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors py-2">
+                <RouterNavLink
+                  key={link.path}
+                  to={link.path}
+                  end={link.path === "/"}
+                  onClick={() => setMobileOpen(false)}
+                  className={({ isActive }) =>
+                    `text-sm font-semibold uppercase tracking-wider py-2.5 px-3 rounded-md transition-colors border-l-2 ${
+                      isActive
+                        ? "text-primary border-primary bg-primary/10"
+                        : "text-foreground/80 border-transparent hover:text-primary hover:border-primary/50 hover:bg-primary/5"
+                    }`
+                  }
+                >
                   {link.label}
-                </a>
+                </RouterNavLink>
               ))}
+              <div className="h-px bg-primary/20 my-2" />
               {isAdmin && (
-                <Link to="/admin" onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-1.5 text-sm font-medium text-primary py-2">
-                  <Shield className="h-4 w-4" /> Painel
+                <Link
+                  to="/admin"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-primary py-2.5 px-3 rounded-md hover:bg-primary/10"
+                >
+                  <Shield className="h-4 w-4" /> Painel Admin
                 </Link>
               )}
               {user ? (
-                <span className="text-sm text-muted-foreground py-2">{user.email?.split('@')[0]}</span>
+                <span className="text-sm text-muted-foreground py-2 px-3">
+                  {user.email?.split("@")[0]}
+                </span>
               ) : (
-                <Link to="/login" onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-1.5 text-sm font-medium text-primary py-2">
-                  <LogIn className="h-4 w-4" /> Login
+                <Link
+                  to="/login"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center justify-center gap-2 text-sm font-bold uppercase tracking-wider bg-primary text-primary-foreground py-2.5 px-3 rounded-md mt-1"
+                >
+                  <LogIn className="h-4 w-4" /> Entrar
                 </Link>
               )}
             </div>
