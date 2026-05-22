@@ -160,10 +160,7 @@ const SeriesDetails = () => {
           <>
             <button
               type="button"
-              onClick={() => {
-                setShowSeasons(true);
-                setTimeout(() => document.getElementById('temporadas')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
-              }}
+              onClick={() => { setShowSeasons(true); setSelectedSeason(null); }}
               className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-full text-sm font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:brightness-110 transition-all">
               <Play className="h-4 w-4 fill-current" /> Temporadas
             </button>
