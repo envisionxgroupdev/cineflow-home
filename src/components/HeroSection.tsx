@@ -85,6 +85,13 @@ export function HeroSection() {
   const ratingPct = Math.max(0, Math.min(100, (item.rating / 10) * 100));
   const genres = item.genre ? item.genre.split(",").map(g => g.trim()).filter(Boolean).slice(0, 3) : [];
 
+  const { data: logoUrl } = useQuery({
+    queryKey: ['title-logo', item.type, item.tmdbId],
+    queryFn: () => getTitleLogo(item.type === 'movie' ? 'movie' : 'tv', item.tmdbId!),
+    enabled: !!item.tmdbId,
+    staleTime: 1000 * 60 * 60,
+  });
+
   return (
     <section className="relative min-h-[600px] md:min-h-[680px] flex items-center justify-center overflow-hidden bg-background py-12 md:py-20">
       {/* Backdrop blurred & darkened */}
@@ -125,10 +132,19 @@ export function HeroSection() {
             transition={{ duration: 0.5 }}
             className="max-w-2xl mx-auto flex flex-col items-center"
           >
-            {/* Title */}
-            <h1 className="font-display text-5xl md:text-7xl lg:text-8xl text-foreground leading-[0.95] mb-6 drop-shadow-[0_4px_24px_hsl(var(--primary)/0.4)]">
-              {item.title}
-            </h1>
+            {/* Title (TMDB logo or text fallback) */}
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt={item.title}
+                className="max-h-32 md:max-h-44 lg:max-h-52 w-auto max-w-[80%] mb-6 drop-shadow-[0_6px_24px_rgba(0,0,0,0.65)] object-contain"
+                loading="eager"
+              />
+            ) : (
+              <h1 className="font-display text-5xl md:text-7xl lg:text-8xl text-foreground leading-[0.95] mb-6 drop-shadow-[0_4px_24px_hsl(var(--primary)/0.4)]">
+                {item.title}
+              </h1>
+            )}
 
             {/* Meta line: year • clock • runtime • stars */}
             <div className="flex items-center justify-center gap-3 md:gap-4 text-sm text-foreground/80 mb-5 flex-wrap">
