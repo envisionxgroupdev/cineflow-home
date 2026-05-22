@@ -191,8 +191,7 @@ const SeriesDetails = () => {
         </Link>
         <div id="temporadas" />
 
-        <div className="mb-8 space-y-1 text-sm text-muted-foreground/70">
-          <p className="font-semibold text-foreground/80 uppercase">ASSISTIR {series.title.toUpperCase()} ONLINE GRÁTIS</p>
+
           <p>{series.title} LEGENDADO || {series.title} DUBLADO</p>
           <p>{series.title} Online - Assistir {series.title} Online Grátis Dublado Legendado</p>
         </div>
