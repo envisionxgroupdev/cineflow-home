@@ -40,7 +40,7 @@ const SeriesDetails = () => {
   useEffect(() => { if (slug) loadSeries(slug); }, [slug]);
 
   useEffect(() => {
-    if (series?.tmdb_id && selectedSeason >= 0) loadEpisodes(series.tmdb_id, selectedSeason);
+    if (series?.tmdb_id && selectedSeason !== null && selectedSeason >= 0) loadEpisodes(series.tmdb_id, selectedSeason);
   }, [series?.tmdb_id, selectedSeason]);
 
   const loadSeries = async (urlSlug: string) => {
