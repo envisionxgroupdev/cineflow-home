@@ -194,7 +194,7 @@ const SeriesDetails = () => {
           <ol className="flex flex-wrap items-center gap-1.5">
             <li><Link to="/" className="hover:text-foreground transition-colors">Início</Link></li>
             <li aria-hidden="true">/</li>
-            <li><Link to="/series" className="hover:text-foreground transition-colors">Séries</Link></li>
+            <li><Link to={series.is_anime ? "/animes" : "/series"} className="hover:text-foreground transition-colors">{series.is_anime ? "Animes" : "Séries"}</Link></li>
             <li aria-hidden="true">/</li>
             <li className="text-foreground truncate max-w-[200px]" aria-current="page">{series.title}</li>
           </ol>
@@ -210,7 +210,7 @@ const SeriesDetails = () => {
               setSelectedSeason(null);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
-              window.history.length > 1 ? window.history.back() : (window.location.href = '/series');
+              window.history.length > 1 ? window.history.back() : (window.location.href = series.is_anime ? '/animes' : '/series');
             }
           }}
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm mb-4"
