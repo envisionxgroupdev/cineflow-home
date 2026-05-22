@@ -120,38 +120,39 @@ const Index = () => {
 
         {/* Stats strip */}
         {!isLoading && (counts.movies > 0 || counts.series > 0 || counts.animes > 0 || counts.channels > 0) && (
-          <section className="container mx-auto px-3 sm:px-4 py-4 md:py-6">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
-              {[
-                { icon: Film, label: "Filmes", value: counts.movies, suffix: "", to: "/filmes" },
-                { icon: Tv, label: "Séries", value: counts.series, suffix: "", to: "/series" },
-                { icon: Sparkles, label: "Animes", value: counts.animes, suffix: "", to: "/animes" },
-                { icon: Radio, label: "Canais TV", value: counts.channels, suffix: "", to: "/canais" },
-              ].map((s, i) => (
-                <motion.div
-                  key={s.label}
-                  initial={{ opacity: 0, y: 12 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.05, duration: 0.4 }}
-                >
-                  <Link
-                    to={s.to}
-                    className="group relative block bg-gradient-to-br from-card/80 to-card/30 backdrop-blur-sm border border-border/60 hover:border-primary/40 rounded-xl px-2.5 py-2.5 md:px-4 md:py-4 flex items-center gap-2 md:gap-3 transition-all hover:shadow-[0_0_20px_hsl(var(--primary)/0.2)] overflow-hidden"
+          <section className="border-y border-border/40 bg-card/40 backdrop-blur-sm">
+            <div className="container mx-auto px-4 py-5 md:py-6">
+              <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-border/40">
+                {[
+                  { icon: Film, label: "Filmes", value: counts.movies, to: "/filmes" },
+                  { icon: Tv, label: "Séries", value: counts.series, to: "/series" },
+                  { icon: Sparkles, label: "Animes", value: counts.animes, to: "/animes" },
+                  { icon: Radio, label: "Canais TV", value: counts.channels, to: "/canais" },
+                ].map((s, i) => (
+                  <motion.div
+                    key={s.label}
+                    initial={{ opacity: 0, y: 8 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.05, duration: 0.4 }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/0 to-primary/0 group-hover:from-primary/5 group-hover:via-transparent group-hover:to-primary/10 transition-all" />
-                    <div className="relative w-8 h-8 md:w-11 md:h-11 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:bg-primary/20 group-hover:scale-110 transition-all">
-                      <s.icon className="h-4 w-4 md:h-5 md:w-5" />
-                    </div>
-                    <div className="relative min-w-0">
-                      <p className="text-base md:text-2xl font-bold text-foreground tabular-nums leading-none">
-                        {s.value}<span className="text-primary">{s.suffix}</span>
+                    <Link
+                      to={s.to}
+                      className="group block px-4 md:px-6 py-2 hover:bg-primary/5 transition-colors"
+                    >
+                      <div className="flex items-baseline gap-2">
+                        <span className="font-display text-2xl md:text-4xl text-foreground tabular-nums leading-none group-hover:text-primary transition-colors">
+                          {s.value.toLocaleString("pt-BR")}
+                        </span>
+                        <s.icon className="h-3 w-3 text-primary/60" />
+                      </div>
+                      <p className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] text-primary font-bold mt-1">
+                        {s.label}
                       </p>
-                      <p className="text-[9px] md:text-xs text-muted-foreground uppercase tracking-wider mt-1 truncate">{s.label}</p>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </section>
         )}
