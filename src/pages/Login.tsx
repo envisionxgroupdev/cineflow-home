@@ -36,6 +36,15 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <Helmet>
+        <title>Login — PipocaMax</title>
+        <meta name="description" content="Acesse sua conta no PipocaMax para gerenciar seus filmes e séries favoritos." />
+        <meta name="robots" content="noindex, nofollow" />
+        <link rel="canonical" href="https://pipocamax.com/login" />
+        <meta property="og:title" content="Login — PipocaMax" />
+        <meta property="og:description" content="Acesse sua conta no PipocaMax." />
+        <meta property="og:url" content="https://pipocamax.com/login" />
+      </Helmet>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
