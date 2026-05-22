@@ -298,8 +298,8 @@ const SeriesDetails = () => {
           );
         })()}
 
-        {/* Seasons & Episodes (Vizer-style two-column layout) */}
-        {seasons.length > 0 && tmdbId && (
+        {/* Seasons & Episodes (Vizer-style two-column layout) — hidden until user clicks Temporadas */}
+        {showSeasons && seasons.length > 0 && tmdbId && (
           <div className="mt-12">
             <h3 className="font-display text-2xl text-foreground mb-6">TEMPORADAS & EPISÓDIOS</h3>
 
