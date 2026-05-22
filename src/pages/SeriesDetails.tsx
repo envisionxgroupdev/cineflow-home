@@ -192,9 +192,7 @@ const SeriesDetails = () => {
         <div id="temporadas" />
 
 
-          <p>{series.title} LEGENDADO || {series.title} DUBLADO</p>
-          <p>{series.title} Online - Assistir {series.title} Online Grátis Dublado Legendado</p>
-        </div>
+
 
         {/* Player */}
         {playingEpisode && (() => {
