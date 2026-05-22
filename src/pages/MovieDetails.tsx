@@ -17,6 +17,7 @@ import { ArrowLeft, Star, Clock, Calendar, Play, Loader2, AlertTriangle, Pencil,
 import { ShareButtons } from '@/components/ShareButtons';
 import { AdBanner } from '@/components/AdBanner';
 import { VizerHero } from '@/components/vizer/VizerHero';
+import { YouMayLike } from '@/components/vizer/YouMayLike';
 import type { Movie } from '@/types/database';
 
 type PlayerSource = 'warezcdn' | 'embedmovies';
@@ -217,6 +218,8 @@ const MovieDetails = () => {
         </div>
 
         <AdBanner page="movie_detail" position="middle" />
+
+        {tmdbId && <YouMayLike type="movie" tmdbId={tmdbId} />}
 
       </div>
 

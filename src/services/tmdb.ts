@@ -185,6 +185,39 @@ export async function getSeasonEpisodes(tmdbId: number, seasonNumber: number): P
   return data.episodes || [];
 }
 
+export interface TmdbLogo {
+  file_path: string;
+  iso_639_1: string | null;
+  aspect_ratio: number;
+}
+
+export async function getTitleLogo(type: 'movie' | 'tv', tmdbId: number): Promise<string | null> {
+  const res = await fetch(`${TMDB_BASE}/${type}/${tmdbId}/images?api_key=${TMDB_API_KEY}&include_image_language=pt,en,null`);
+  const data = await res.json();
+  const logos: TmdbLogo[] = data.logos || [];
+  if (logos.length === 0) return null;
+  const pt = logos.find(l => l.iso_639_1 === 'pt');
+  const en = logos.find(l => l.iso_639_1 === 'en');
+  const chosen = pt || en || logos[0];
+  return chosen.file_path ? `${TMDB_IMG}/w500${chosen.file_path}` : null;
+}
+
+export interface TmdbRecommendation {
+  id: number;
+  title?: string;
+  name?: string;
+  poster_path: string | null;
+  vote_average: number;
+  release_date?: string;
+  first_air_date?: string;
+}
+
+export async function getRecommendations(type: 'movie' | 'tv', tmdbId: number): Promise<TmdbRecommendation[]> {
+  const res = await fetch(`${TMDB_BASE}/${type}/${tmdbId}/recommendations?api_key=${TMDB_API_KEY}&language=pt-BR&page=1`);
+  const data = await res.json();
+  return (data.results || []).slice(0, 12);
+}
+
 export async function tmdbMovieToDb(movie: TmdbMovie) {
   const genres = await fetchGenres('movie');
   return {
