@@ -17,6 +17,7 @@ import { ArrowLeft, Star, Calendar, Play, Loader2, ChevronDown, AlertTriangle, P
 import { ShareButtons } from '@/components/ShareButtons';
 import { AdBanner } from '@/components/AdBanner';
 import { VizerHero } from '@/components/vizer/VizerHero';
+import { YouMayLike } from '@/components/vizer/YouMayLike';
 import type { Series } from '@/types/database';
 
 type PlayerSource = 'warezcdn' | 'embedmovies';
@@ -299,17 +300,32 @@ const SeriesDetails = () => {
         {/* Seasons & Episodes */}
         {seasons.length > 0 && tmdbId && (
           <div className="mt-12">
-            <h3 className="font-display text-2xl text-foreground mb-6">TEMPORADAS & EPISÓDIOS</h3>
-            <div className="relative inline-block mb-6">
-              <select value={selectedSeason}
-                onChange={e => { setSelectedSeason(Number(e.target.value)); setPlayingEpisode(null); }}
-                className="appearance-none bg-secondary border border-border text-foreground rounded-lg px-4 py-2.5 pr-10 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/50">
-                {seasons.map(s => (
-                  <option key={s.season_number} value={s.season_number}>Temporada {s.season_number} ({s.episode_count} eps)</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            <h3 className="font-display text-2xl text-foreground mb-6">TEMPORADAS</h3>
+
+            {/* Season pills (Vizer style) */}
+            <div className="flex gap-2 overflow-x-auto pb-3 mb-6" style={{ scrollbarWidth: 'none' }}>
+              {seasons.map(s => {
+                const active = selectedSeason === s.season_number;
+                return (
+                  <button
+                    key={s.season_number}
+                    onClick={() => { setSelectedSeason(s.season_number); setPlayingEpisode(null); }}
+                    className={`shrink-0 px-5 py-2.5 rounded-full text-sm font-semibold transition-all whitespace-nowrap ${
+                      active
+                        ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30'
+                        : 'bg-foreground/10 text-foreground/80 hover:bg-foreground/15 border border-foreground/10'
+                    }`}
+                  >
+                    Temporada {s.season_number}
+                    <span className={`ml-2 text-[10px] font-normal ${active ? 'text-primary-foreground/80' : 'text-foreground/50'}`}>
+                      {s.episode_count} eps
+                    </span>
+                  </button>
+                );
+              })}
             </div>
+
+            <h4 className="font-display text-lg text-foreground mb-4">EPISÓDIOS</h4>
 
             {loadingEpisodes ? (
               <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 text-primary animate-spin" /></div>
@@ -317,25 +333,27 @@ const SeriesDetails = () => {
               <div className="space-y-3">
                 {episodes.map(ep => (
                   <div key={ep.id}
-                    className={`flex items-start gap-4 p-4 rounded-xl border transition-colors cursor-pointer ${
+                    className={`group flex items-start gap-4 p-3 sm:p-4 rounded-xl border transition-all cursor-pointer ${
                       playingEpisode?.season === ep.season_number && playingEpisode?.episode === ep.episode_number
-                        ? 'border-primary bg-primary/10' : 'border-border bg-card hover:bg-secondary/50'
+                        ? 'border-primary bg-primary/10' : 'border-border/40 bg-card/40 hover:bg-secondary/60 hover:border-border'
                     }`}
                     onClick={() => setPlayingEpisode({ season: ep.season_number, episode: ep.episode_number })}>
                     <div className="relative shrink-0 w-32 sm:w-44 aspect-video rounded-lg overflow-hidden bg-secondary">
                       {ep.still_path ? (
-                        <img src={getImageUrl(ep.still_path, 'w300')} alt={ep.name} className="w-full h-full object-cover" />
+                        <img src={getImageUrl(ep.still_path, 'w300')} alt={ep.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-muted-foreground"><Play className="h-6 w-6" /></div>
                       )}
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity">
-                        <Play className="h-8 w-8 text-white fill-white" />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="bg-primary/90 rounded-full p-2.5">
+                          <Play className="h-5 w-5 text-primary-foreground fill-current" />
+                        </div>
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-xs font-bold text-primary">E{ep.episode_number}</span>
-                        <h4 className="text-sm font-medium text-foreground truncate">{ep.name}</h4>
+                        <h4 className="text-sm font-semibold text-foreground truncate">{ep.name}</h4>
                       </div>
                       {ep.overview && <p className="text-xs text-muted-foreground line-clamp-2">{ep.overview}</p>}
                       <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
@@ -350,6 +368,8 @@ const SeriesDetails = () => {
             )}
           </div>
         )}
+
+        {tmdbId && <YouMayLike type="tv" tmdbId={tmdbId} />}
 
         <AdBanner page="series_detail" position="middle" />
 
