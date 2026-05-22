@@ -70,18 +70,24 @@ export function ContentSection({ id, title, items }: ContentSectionProps) {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="flex items-center justify-between mb-4 md:mb-6 gap-3"
+          className="flex items-end justify-between mb-6 md:mb-10 gap-3"
         >
-          <div className="flex items-center gap-2 md:gap-3 min-w-0">
-            <div className="p-2 rounded-lg bg-primary/10 shrink-0">
-              <Icon className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+          <div className="min-w-0">
+            <div className="flex items-center gap-3 mb-1">
+              <Icon className="h-4 w-4 md:h-5 md:w-5 text-primary shrink-0" />
+              <h2 className="font-display text-3xl md:text-5xl text-foreground tracking-tighter uppercase truncate">
+                {title}
+              </h2>
             </div>
-            <h2 className="font-display text-2xl md:text-4xl text-foreground truncate">{title}</h2>
-            <div className="hidden md:block flex-1 h-px bg-gradient-to-r from-primary/20 to-transparent ml-4 min-w-[60px]" />
+            <p className="text-[10px] text-muted-foreground/70 uppercase tracking-[0.3em] mt-1 pl-7">
+              Curadoria Editorial PipocaMax
+            </p>
           </div>
-          <Link to={meta.href} className="flex items-center gap-1 text-xs sm:text-sm text-primary hover:text-primary/80 transition-colors group shrink-0">
-            Ver todos
-            <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+          <Link
+            to={meta.href}
+            className="text-[10px] uppercase tracking-[0.2em] font-bold border-b border-primary pb-1 text-foreground hover:text-primary transition-colors shrink-0 whitespace-nowrap"
+          >
+            Explorar Todos
           </Link>
         </motion.div>
 
