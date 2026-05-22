@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { contentUrl } from "@/lib/utils";
 import { HeroSkeleton } from "@/components/HeroSkeleton";
+import { getTitleLogo } from "@/services/tmdb";
 import type { Movie, Series } from "@/types/database";
 
 interface HeroItem {
@@ -18,6 +19,7 @@ interface HeroItem {
   year: string;
   genre: string;
   runtime?: number | null;
+  tmdbId: number | null;
   type: "movie" | "series";
 }
 
@@ -28,8 +30,8 @@ export function HeroSection() {
     queryKey: ['home-hero'],
     queryFn: async (): Promise<HeroItem[]> => {
       const [moviesRes, seriesRes] = await Promise.all([
-        supabase.from("movies").select("id,title,overview,image_url,backdrop_url,rating,year,genre").not("backdrop_url", "is", null).order("created_at", { ascending: false }).limit(5),
-        supabase.from("series").select("id,title,overview,image_url,backdrop_url,rating,year,genre").not("backdrop_url", "is", null).order("created_at", { ascending: false }).limit(5),
+        supabase.from("movies").select("id,title,overview,image_url,backdrop_url,rating,year,genre,tmdb_id").not("backdrop_url", "is", null).order("created_at", { ascending: false }).limit(5),
+        supabase.from("series").select("id,title,overview,image_url,backdrop_url,rating,year,genre,tmdb_id").not("backdrop_url", "is", null).order("created_at", { ascending: false }).limit(5),
       ]);
       const toHero = (arr: Partial<Movie | Series>[], type: "movie" | "series"): HeroItem[] =>
         arr.filter(i => i.backdrop_url).map(i => ({
@@ -41,6 +43,7 @@ export function HeroSection() {
           rating: i.rating ?? 0,
           year: i.year || "",
           genre: i.genre || "",
+          tmdbId: i.tmdb_id ?? null,
           type,
         }));
       return [
