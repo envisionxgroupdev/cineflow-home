@@ -6,8 +6,15 @@ import { Footer } from "@/components/Footer";
 const About = () => (
   <div className="min-h-screen bg-background">
     <Helmet>
-      <title>Sobre — PipocaMax</title>
-      <meta name="description" content="Conheça o PipocaMax, sua plataforma de filmes e séries online." />
+      <title>Sobre o PipocaMax — Quem Somos e Nossa Missão</title>
+      <meta name="description" content="Conheça o PipocaMax: nossa missão é conectar você ao melhor entretenimento com filmes e séries online em HD, atualizados diariamente." />
+      <link rel="canonical" href="https://pipocamax.com/sobre" />
+      <meta property="og:title" content="Sobre o PipocaMax — Quem Somos" />
+      <meta property="og:description" content="Conheça a missão do PipocaMax e o que oferecemos: catálogo extenso, busca inteligente e interface moderna." />
+      <meta property="og:url" content="https://pipocamax.com/sobre" />
+      <meta property="og:type" content="website" />
+      <meta name="twitter:title" content="Sobre o PipocaMax" />
+      <meta name="twitter:description" content="Conheça a missão do PipocaMax e o que oferecemos." />
     </Helmet>
     <Navbar />
     <div className="container mx-auto px-4 pt-24 pb-16 max-w-3xl">

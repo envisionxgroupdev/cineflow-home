@@ -59,9 +59,15 @@ const Contact = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Helmet>
-        <title>Contato - PipocaMax</title>
-        <meta name="description" content="Entre em contato com a PipocaMax. Envie sua mensagem informando seu Telegram para resposta." />
+        <title>Contato — Fale com o PipocaMax</title>
+        <meta name="description" content="Entre em contato com a PipocaMax. Envie sua mensagem informando seu Telegram para receber resposta da nossa equipe." />
         <link rel="canonical" href="https://pipocamax.com/contato" />
+        <meta property="og:title" content="Contato — PipocaMax" />
+        <meta property="og:description" content="Fale com a equipe do PipocaMax via formulário, e-mail ou Telegram." />
+        <meta property="og:url" content="https://pipocamax.com/contato" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:title" content="Contato — PipocaMax" />
+        <meta name="twitter:description" content="Fale com a equipe do PipocaMax." />
       </Helmet>
       <Navbar />
       <main className="flex-1 pt-24 pb-16">

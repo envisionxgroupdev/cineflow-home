@@ -98,6 +98,10 @@ export function HeroSection() {
           <img
             src={item.backdrop}
             alt={item.title}
+            width={1920}
+            height={1080}
+            fetchPriority="high"
+            decoding="async"
             className="w-full h-full object-cover"
           />
         </motion.div>
