@@ -15,6 +15,7 @@ import {
 } from '@/services/tmdb';
 import { ArrowLeft, Star, Clock, Calendar, Play, Loader2, AlertTriangle, Pencil, Bookmark } from 'lucide-react';
 import { ShareButtons } from '@/components/ShareButtons';
+import { ClosePlayerDialog } from '@/components/ClosePlayerDialog';
 import { AdBanner } from '@/components/AdBanner';
 import { VizerHero } from '@/components/vizer/VizerHero';
 import { YouMayLike } from '@/components/vizer/YouMayLike';
@@ -33,6 +34,7 @@ const MovieDetails = () => {
   const [activePlayer, setActivePlayer] = useState<PlayerSource>('warezcdn');
   const [reportOpen, setReportOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [confirmCloseOpen, setConfirmCloseOpen] = useState(false);
 
   useEffect(() => { if (slug) loadMovie(slug); }, [slug]);
 
@@ -182,8 +184,7 @@ const MovieDetails = () => {
           type="button"
           onClick={() => {
             if (showPlayer) {
-              setShowPlayer(false);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
+              setConfirmCloseOpen(true);
             } else {
               window.history.length > 1 ? window.history.back() : (window.location.href = '/filmes');
             }
@@ -239,6 +240,15 @@ const MovieDetails = () => {
 
       <ReportModal contentId={movie.id} contentType="movie" contentTitle={movie.title} open={reportOpen} onClose={() => setReportOpen(false)} />
       {isAdmin && <EditContentModal item={movie} type="movie" open={editOpen} onClose={() => setEditOpen(false)} onSaved={() => loadMovie(movie.id)} />}
+      <ClosePlayerDialog
+        open={confirmCloseOpen}
+        onCancel={() => setConfirmCloseOpen(false)}
+        onConfirm={() => {
+          setConfirmCloseOpen(false);
+          setShowPlayer(false);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
     </div>
   );
 };
