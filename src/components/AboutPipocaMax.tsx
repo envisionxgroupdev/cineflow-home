@@ -49,16 +49,7 @@ export function AboutPipocaMax() {
             </div>
 
             <div className="space-y-4 text-sm md:text-base text-muted-foreground leading-relaxed">
-              <p>
-                <strong className="text-foreground">PipocaMax</strong> é a sua plataforma para assistir <strong className="text-foreground">filmes, séries e animes online grátis</strong>, com lançamentos atualizados diariamente em HD, dublado e legendado em português. Tudo o que você precisa para maratonar está aqui — sem cadastro e sem complicação.
-              </p>
-              <p>
-                Nosso site é um <strong className="text-foreground">indexador automático</strong>: usamos robôs e inteligência artificial para encontrar e organizar conteúdos disponíveis publicamente na web. O PipocaMax <strong className="text-foreground">não armazena, não hospeda e não distribui</strong> filmes, séries ou animes em seus servidores — todo o conteúdo é exibido por meio de players de terceiros como WarezCDN, EmbedMovies, Fembed, entre outros.
-              </p>
-              <p>
-                Por isso, atuamos dentro da lei. O uso do PipocaMax é de <strong className="text-foreground">total responsabilidade do usuário</strong>. Caso você seja detentor de direitos autorais sobre algum conteúdo indexado, por favor entre em contato diretamente com o distribuidor responsável pela hospedagem do arquivo, ou nos envie uma solicitação pela nossa página <a href="/dmca" className="text-primary hover:underline font-semibold">DMCA</a>.
-              </p>
-              <p className="text-xs text-muted-foreground/70 pt-2 border-t border-border/40">
+              <p className="text-xs text-muted-foreground/70 text-center">
                 Palavras-chave: assistir filmes online grátis, séries online dublado HD, animes online legendado, lançamentos do cinema, melhor site de filmes e séries grátis.
               </p>
             </div>
