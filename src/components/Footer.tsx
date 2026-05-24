@@ -95,17 +95,34 @@ export function Footer() {
           </div>
 
           {/* Legal disclaimer */}
-          <div className="relative overflow-hidden rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 via-card/40 to-transparent p-5 md:p-6">
-            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.08),transparent_60%)]" />
-            <div className="relative flex items-start gap-4">
-              <div className="shrink-0 w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-                <ShieldAlert className="h-5 w-5" />
+          <div className="relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-background/80 to-background p-6 md:p-8 shadow-[0_0_60px_-15px_hsl(var(--primary)/0.35)]">
+            {/* Decorative gradients */}
+            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_0%_0%,hsl(var(--primary)/0.18),transparent_55%)]" />
+            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_100%_100%,hsl(var(--primary)/0.12),transparent_55%)]" />
+            {/* Top accent line */}
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+            {/* Corner glow */}
+            <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+
+            <div className="relative flex flex-col sm:flex-row items-start gap-5">
+              <div className="shrink-0 relative">
+                <div className="absolute inset-0 bg-primary/40 blur-xl rounded-full" />
+                <div className="relative w-14 h-14 rounded-xl bg-gradient-to-br from-primary/30 to-primary/10 border border-primary/40 text-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                  <ShieldAlert className="h-7 w-7" />
+                </div>
               </div>
-              <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-1.5">Aviso Legal</p>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Este site <span className="text-foreground font-medium">não hospeda</span> e <span className="text-foreground font-medium">não armazena</span> nenhum arquivo em seus servidores.
-                  Indexamos apenas mídia hospedada em serviços de terceiros.
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 mb-2.5">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/15 border border-primary/30 text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                    Aviso Legal
+                  </span>
+                </div>
+                <h4 className="font-display text-lg md:text-xl text-foreground mb-2 leading-tight">
+                  Plataforma 100% dentro da lei
+                </h4>
+                <p className="text-sm md:text-[15px] text-muted-foreground leading-relaxed">
+                  Este site <span className="text-foreground font-semibold">não hospeda</span>, <span className="text-foreground font-semibold">não armazena</span> e <span className="text-foreground font-semibold">não distribui</span> nenhum arquivo em seus servidores. Atuamos exclusivamente como um indexador automático, organizando mídia hospedada em <span className="text-foreground font-semibold">serviços de terceiros</span> disponíveis publicamente na web.
                 </p>
               </div>
             </div>
