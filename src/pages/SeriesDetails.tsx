@@ -15,6 +15,7 @@ import {
 } from '@/services/tmdb';
 import { ArrowLeft, Star, Calendar, Play, Loader2, ChevronDown, AlertTriangle, Pencil, SkipBack, SkipForward, Bookmark, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ShareButtons } from '@/components/ShareButtons';
+import { ClosePlayerDialog } from '@/components/ClosePlayerDialog';
 import { AdBanner } from '@/components/AdBanner';
 import { VizerHero } from '@/components/vizer/VizerHero';
 import { YouMayLike } from '@/components/vizer/YouMayLike';
@@ -40,6 +41,7 @@ const SeriesDetails = () => {
   const [reportOpen, setReportOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [showSeasons, setShowSeasons] = useState(false);
+  const [confirmCloseOpen, setConfirmCloseOpen] = useState(false);
 
   useEffect(() => { if (slug) loadSeries(slug); }, [slug]);
 
@@ -203,8 +205,7 @@ const SeriesDetails = () => {
           type="button"
           onClick={() => {
             if (playingEpisode) {
-              setPlayingEpisode(null);
-              setTimeout(() => document.getElementById('temporadas')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 30);
+              setConfirmCloseOpen(true);
             } else if (showSeasons) {
               setShowSeasons(false);
               setSelectedSeason(null);
@@ -264,11 +265,7 @@ const SeriesDetails = () => {
                     </h3>
                   </div>
                 </div>
-                <button onClick={() => {
-                    if (window.confirm('Deseja realmente fechar o player? Você perderá o progresso atual deste episódio.')) {
-                      setPlayingEpisode(null);
-                    }
-                  }}
+                <button onClick={() => setConfirmCloseOpen(true)}
                   className="text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-md hover:bg-secondary/60 transition-colors shrink-0">
                   Fechar
                 </button>
@@ -421,6 +418,15 @@ const SeriesDetails = () => {
       <Footer />
       <ReportModal contentId={series.id} contentType="series" contentTitle={series.title} open={reportOpen} onClose={() => setReportOpen(false)} />
       {isAdmin && <EditContentModal item={series} type="series" open={editOpen} onClose={() => setEditOpen(false)} onSaved={() => loadSeries(series.id)} />}
+      <ClosePlayerDialog
+        open={confirmCloseOpen}
+        onCancel={() => setConfirmCloseOpen(false)}
+        onConfirm={() => {
+          setConfirmCloseOpen(false);
+          setPlayingEpisode(null);
+          setTimeout(() => document.getElementById('temporadas')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 30);
+        }}
+      />
     </div>
   );
 };
