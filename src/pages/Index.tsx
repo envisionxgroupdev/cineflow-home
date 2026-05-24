@@ -8,7 +8,7 @@ import { ReleasesSection } from "@/components/ReleasesSection";
 import { Top10Section } from "@/components/Top10Section";
 import { TopTodaySection } from "@/components/TopTodaySection";
 import { NovidadesSection } from "@/components/NovidadesSection";
-import { AboutPipocaMax } from "@/components/AboutPipocaMax";
+
 import { Footer } from "@/components/Footer";
 import { EditContentModal } from "@/components/EditContentModal";
 import { AdBanner } from "@/components/AdBanner";
@@ -140,7 +140,6 @@ const Index = () => {
           </div>
         )}
         <AdBanner page="home" position="bottom" />
-        <AboutPipocaMax />
       </div>
       <TelegramFloat />
       <CookieBanner />
