@@ -95,39 +95,69 @@ export function Footer() {
           </div>
 
           {/* Legal disclaimer */}
-          <div className="relative bg-[hsl(var(--background))]/60 border border-foreground/5 p-8 md:p-12 overflow-hidden group">
-            {/* Top-left accent bar */}
-            <div className="absolute top-0 left-0 w-12 h-[2px] bg-primary" />
+          <div className="relative overflow-hidden rounded-3xl border border-foreground/10 bg-gradient-to-br from-background/80 via-background/60 to-background/30 backdrop-blur-sm">
+            {/* Side accent rail */}
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary/40 to-transparent" />
 
-            <div className="flex flex-col gap-6 relative">
-              <div className="flex items-center gap-4">
-                <span className="text-[10px] tracking-[0.2em] font-bold text-primary uppercase">
+            {/* Soft corner glows */}
+            <div className="absolute -top-20 -right-20 w-56 h-56 bg-primary/10 blur-[90px] pointer-events-none" />
+            <div className="absolute -bottom-24 left-1/3 w-56 h-56 bg-primary/5 blur-[100px] pointer-events-none" />
+
+            {/* Faint grid texture */}
+            <div
+              className="absolute inset-0 opacity-[0.04] pointer-events-none"
+              style={{
+                backgroundImage:
+                  'linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)',
+                backgroundSize: '32px 32px',
+              }}
+            />
+
+            <div className="relative px-7 py-9 md:px-12 md:py-12">
+              {/* Label row */}
+              <div className="flex items-center gap-3 mb-7">
+                <ShieldAlert className="w-4 h-4 text-primary" strokeWidth={2.2} />
+                <span className="text-[10px] tracking-[0.32em] font-bold text-primary uppercase">
                   Aviso Legal
                 </span>
-                <div className="h-px flex-1 bg-foreground/10" />
+                <div className="h-px flex-1 bg-gradient-to-r from-primary/30 via-foreground/10 to-transparent" />
               </div>
 
-              <h2 className="font-display text-2xl md:text-3xl text-foreground uppercase tracking-tight leading-tight">
-                Plataforma <span className="text-primary">100%</span> dentro da lei
-              </h2>
+              {/* Pull-quote style content */}
+              <div className="relative">
+                <span
+                  aria-hidden
+                  className="absolute -top-6 -left-2 md:-left-4 font-display text-7xl md:text-8xl leading-none text-primary/15 select-none pointer-events-none"
+                >
+                  &ldquo;
+                </span>
 
-              <div className="space-y-4">
-                <p className="text-muted-foreground leading-relaxed font-light text-sm md:text-base">
-                  Este site <strong className="text-foreground font-medium italic underline decoration-primary/40 underline-offset-4">não hospeda, não armazena</strong> e <strong className="text-foreground font-medium italic underline decoration-primary/40 underline-offset-4">não distribui</strong> nenhum arquivo em seus servidores.
-                </p>
-                <p className="text-muted-foreground leading-relaxed font-light text-sm md:text-base">
-                  Atuamos exclusivamente como um indexador automático, organizando mídia hospedada em <span className="text-foreground/80 font-medium">serviços de terceiros</span> disponíveis publicamente na web.
-                </p>
+                <div className="relative space-y-5 md:pl-6">
+                  <p className="text-foreground/90 leading-relaxed text-[15px] md:text-lg font-light">
+                    Este site <strong className="text-foreground font-semibold">não hospeda</strong>, <strong className="text-foreground font-semibold">não armazena</strong> e <strong className="text-foreground font-semibold">não distribui</strong> nenhum arquivo em seus servidores.
+                  </p>
+                  <p className="text-muted-foreground leading-relaxed text-sm md:text-[15px] font-light">
+                    Atuamos exclusivamente como um <span className="text-foreground/90 font-medium">indexador automático</span>, organizando mídia hospedada em <span className="text-foreground/90 font-medium">serviços de terceiros</span> disponíveis publicamente na web.
+                  </p>
+                </div>
               </div>
 
-              <div className="pt-4 flex items-center gap-3 opacity-50 group-hover:opacity-100 transition-opacity duration-500">
-                <ShieldAlert className="w-4 h-4 text-primary" />
-                <span className="text-[11px] text-foreground tracking-[0.18em] uppercase">Conformidade Digital Assegurada</span>
+              {/* Trust pills */}
+              <div className="mt-8 pt-6 border-t border-foreground/5 flex flex-wrap items-center gap-x-5 gap-y-2">
+                {[
+                  'Indexação Automática',
+                  'Conteúdo de Terceiros',
+                  'Conformidade DMCA',
+                ].map((label) => (
+                  <div key={label} className="flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary/70" />
+                    <span className="text-[11px] tracking-[0.14em] uppercase text-muted-foreground font-medium">
+                      {label}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
-
-            {/* Background decorative glow */}
-            <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-primary/10 blur-[100px] pointer-events-none" />
           </div>
 
           {/* Brand + Bottom */}
