@@ -6,8 +6,9 @@ import { HeroSection } from "@/components/HeroSection";
 import { ContentSection } from "@/components/ContentSection";
 import { ReleasesSection } from "@/components/ReleasesSection";
 import { Top10Section } from "@/components/Top10Section";
-
-import { Footer } from "@/components/Footer";
+import { TopTodaySection } from "@/components/TopTodaySection";
+import { NovidadesSection } from "@/components/NovidadesSection";
+import { AboutPipocaMax } from "@/components/AboutPipocaMax";
 import { EditContentModal } from "@/components/EditContentModal";
 import { AdBanner } from "@/components/AdBanner";
 import { SplashLoader } from "@/components/SplashLoader";
