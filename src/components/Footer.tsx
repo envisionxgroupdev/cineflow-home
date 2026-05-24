@@ -95,37 +95,39 @@ export function Footer() {
           </div>
 
           {/* Legal disclaimer */}
-          <div className="relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-background/80 to-background p-6 md:p-8 shadow-[0_0_60px_-15px_hsl(var(--primary)/0.35)]">
-            {/* Decorative gradients */}
-            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_0%_0%,hsl(var(--primary)/0.18),transparent_55%)]" />
-            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_100%_100%,hsl(var(--primary)/0.12),transparent_55%)]" />
-            {/* Top accent line */}
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
-            {/* Corner glow */}
-            <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+          <div className="relative bg-[hsl(var(--background))]/60 border border-foreground/5 p-8 md:p-12 overflow-hidden group">
+            {/* Top-left accent bar */}
+            <div className="absolute top-0 left-0 w-12 h-[2px] bg-primary" />
 
-            <div className="relative flex flex-col sm:flex-row items-start gap-5">
-              <div className="shrink-0 relative">
-                <div className="absolute inset-0 bg-primary/40 blur-xl rounded-full" />
-                <div className="relative w-14 h-14 rounded-xl bg-gradient-to-br from-primary/30 to-primary/10 border border-primary/40 text-primary flex items-center justify-center shadow-lg shadow-primary/20">
-                  <ShieldAlert className="h-7 w-7" />
-                </div>
+            <div className="flex flex-col gap-6 relative">
+              <div className="flex items-center gap-4">
+                <span className="text-[10px] tracking-[0.2em] font-bold text-primary uppercase">
+                  Aviso Legal
+                </span>
+                <div className="h-px flex-1 bg-foreground/10" />
               </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 mb-2.5">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/15 border border-primary/30 text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                    Aviso Legal
-                  </span>
-                </div>
-                <h4 className="font-display text-lg md:text-xl text-foreground mb-2 leading-tight">
-                  Plataforma 100% dentro da lei
-                </h4>
-                <p className="text-sm md:text-[15px] text-muted-foreground leading-relaxed">
-                  Este site <span className="text-foreground font-semibold">não hospeda</span>, <span className="text-foreground font-semibold">não armazena</span> e <span className="text-foreground font-semibold">não distribui</span> nenhum arquivo em seus servidores. Atuamos exclusivamente como um indexador automático, organizando mídia hospedada em <span className="text-foreground font-semibold">serviços de terceiros</span> disponíveis publicamente na web.
+
+              <h2 className="font-display text-2xl md:text-3xl text-foreground uppercase tracking-tight leading-tight">
+                Plataforma <span className="text-primary">100%</span> dentro da lei
+              </h2>
+
+              <div className="space-y-4">
+                <p className="text-muted-foreground leading-relaxed font-light text-sm md:text-base">
+                  Este site <strong className="text-foreground font-medium italic underline decoration-primary/40 underline-offset-4">não hospeda, não armazena</strong> e <strong className="text-foreground font-medium italic underline decoration-primary/40 underline-offset-4">não distribui</strong> nenhum arquivo em seus servidores.
+                </p>
+                <p className="text-muted-foreground leading-relaxed font-light text-sm md:text-base">
+                  Atuamos exclusivamente como um indexador automático, organizando mídia hospedada em <span className="text-foreground/80 font-medium">serviços de terceiros</span> disponíveis publicamente na web.
                 </p>
               </div>
+
+              <div className="pt-4 flex items-center gap-3 opacity-50 group-hover:opacity-100 transition-opacity duration-500">
+                <ShieldAlert className="w-4 h-4 text-primary" />
+                <span className="text-[11px] text-foreground tracking-[0.18em] uppercase">Conformidade Digital Assegurada</span>
+              </div>
             </div>
+
+            {/* Background decorative glow */}
+            <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-primary/10 blur-[100px] pointer-events-none" />
           </div>
 
           {/* Brand + Bottom */}
