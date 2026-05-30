@@ -256,10 +256,10 @@ export async function tmdbSeriesToDb(series: TmdbSeries) {
 
 // WarezCDN player URLs
 export function getWarezPlayerUrl(type: 'filme' | 'serie', tmdbId: number, season?: number, episode?: number): string {
-  if (type === 'filme') return `https://warezcdn.site/filme/${tmdbId}`;
-  if (season !== undefined && episode !== undefined) return `https://warezcdn.site/serie/${tmdbId}/${season}/${episode}`;
-  if (season !== undefined) return `https://warezcdn.site/serie/${tmdbId}/${season}`;
-  return `https://warezcdn.site/serie/${tmdbId}`;
+  if (type === 'filme') return `https://warezcdn.lat/filme/${tmdbId}`;
+  if (season !== undefined && episode !== undefined) return `https://warezcdn.lat/serie/${tmdbId}/${season}/${episode}`;
+  if (season !== undefined) return `https://warezcdn.lat/serie/${tmdbId}/${season}`;
+  return `https://warezcdn.lat/serie/${tmdbId}`;
 }
 
 // MyEmbed player URLs
