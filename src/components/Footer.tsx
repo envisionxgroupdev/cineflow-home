@@ -1,4 +1,4 @@
-import { Home, Clapperboard, Tv, Star, Info, FileText, Shield, Lock, Send, Globe, ExternalLink, Mail, ShieldAlert, Sparkles, Radio } from "lucide-react";
+import { Home, Clapperboard, Tv, Star, Info, FileText, Shield, Lock, Send, Globe, ExternalLink, Mail, Sparkles, Radio } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useSiteCodes } from "./SiteScripts";
 
