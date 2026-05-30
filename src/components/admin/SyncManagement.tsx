@@ -117,14 +117,14 @@ export function SyncManagement() {
     setPage(0);
     try {
       if (isChannels) {
-        const json: any = await fetchJsonResilient(`https://warezcdn.site/lista?category=canais&format=json`, { timeoutMs: 20_000, retries: 2 });
+        const json: any = await fetchJsonResilient(`https://warezcdn.lat/lista?category=canais&format=json`, { timeoutMs: 20_000, retries: 2 });
         const list: ChannelItem[] = (json.data || []).filter((c: any) => c.is_active);
         const importedSet = await loadImportedChannels();
         setChannels(list.map((c) => ({ ...c, alreadyImported: importedSet.has(c.id) })));
         toast.success(`${list.length} canais encontrados no WarezCDN`);
       } else {
         const apiCat = isAnime ? "anime" : category;
-        const data: any = await fetchJsonResilient(`https://warezcdn.site/lista?category=${apiCat}&type=tmdb&format=json`, { timeoutMs: 20_000, retries: 2 });
+        const data: any = await fetchJsonResilient(`https://warezcdn.lat/lista?category=${apiCat}&type=tmdb&format=json`, { timeoutMs: 20_000, retries: 2 });
         const ids: number[] = Array.isArray(data) ? data.map((id: any) => Number(id)).filter(Boolean) : [];
         setWarezIds(ids);
         await loadImported();

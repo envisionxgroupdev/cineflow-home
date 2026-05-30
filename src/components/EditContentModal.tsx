@@ -112,7 +112,7 @@ export function EditContentModal({ item, type, open, onClose, onSaved }: EditCon
                 </button>
               )}
             </div>
-            <input value={playerUrl} onChange={e => setPlayerUrl(e.target.value)} className={inputClass} placeholder="https://warezcdn.site/filme/..." />
+            <input value={playerUrl} onChange={e => setPlayerUrl(e.target.value)} className={inputClass} placeholder="https://warezcdn.lat/filme/..." />
             <p className="text-[10px] text-muted-foreground">Deixe vazio para usar o player padrão (WarezCDN via TMDB ID)</p>
           </div>
 
