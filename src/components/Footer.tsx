@@ -1,4 +1,4 @@
-import { Home, Clapperboard, Tv, Star, Info, FileText, Shield, Lock, Send, Globe, ExternalLink, Mail, ShieldAlert, Sparkles, Radio } from "lucide-react";
+import { Home, Clapperboard, Tv, Star, Info, FileText, Shield, Lock, Send, Globe, ExternalLink, Mail, Sparkles, Radio } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useSiteCodes } from "./SiteScripts";
 
@@ -94,70 +94,11 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Legal disclaimer */}
-          <div className="relative overflow-hidden rounded-3xl border border-foreground/10 bg-gradient-to-br from-background/80 via-background/60 to-background/30 backdrop-blur-sm">
-            {/* Side accent rail */}
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary/40 to-transparent" />
-
-            {/* Soft corner glows */}
-            <div className="absolute -top-20 -right-20 w-56 h-56 bg-primary/10 blur-[90px] pointer-events-none" />
-            <div className="absolute -bottom-24 left-1/3 w-56 h-56 bg-primary/5 blur-[100px] pointer-events-none" />
-
-            {/* Faint grid texture */}
-            <div
-              className="absolute inset-0 opacity-[0.04] pointer-events-none"
-              style={{
-                backgroundImage:
-                  'linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)',
-                backgroundSize: '32px 32px',
-              }}
-            />
-
-            <div className="relative px-7 py-9 md:px-12 md:py-12">
-              {/* Label row */}
-              <div className="flex items-center gap-3 mb-7">
-                <ShieldAlert className="w-4 h-4 text-primary" strokeWidth={2.2} />
-                <span className="text-[10px] tracking-[0.32em] font-bold text-primary uppercase">
-                  Aviso Legal
-                </span>
-                <div className="h-px flex-1 bg-gradient-to-r from-primary/30 via-foreground/10 to-transparent" />
-              </div>
-
-              {/* Pull-quote style content */}
-              <div className="relative">
-                <span
-                  aria-hidden
-                  className="absolute -top-6 -left-2 md:-left-4 font-display text-7xl md:text-8xl leading-none text-primary/15 select-none pointer-events-none"
-                >
-                  &ldquo;
-                </span>
-
-                <div className="relative space-y-5 md:pl-6">
-                  <p className="text-foreground/90 leading-relaxed text-[15px] md:text-lg font-light">
-                    Este site <strong className="text-foreground font-semibold">não hospeda</strong>, <strong className="text-foreground font-semibold">não armazena</strong> e <strong className="text-foreground font-semibold">não distribui</strong> nenhum arquivo em seus servidores.
-                  </p>
-                  <p className="text-muted-foreground leading-relaxed text-sm md:text-[15px] font-light">
-                    Atuamos exclusivamente como um <span className="text-foreground/90 font-medium">indexador automático</span>, organizando mídia hospedada em <span className="text-foreground/90 font-medium">serviços de terceiros</span> disponíveis publicamente na web.
-                  </p>
-                </div>
-              </div>
-
-              {/* Trust pills */}
-              <div className="mt-8 pt-6 border-t border-foreground/5 flex flex-wrap items-center gap-x-5 gap-y-2">
-                {[
-                  'Indexação Automática',
-                  'Conteúdo de Terceiros',
-                  'Conformidade DMCA',
-                ].map((label) => (
-                  <div key={label} className="flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary/70" />
-                    <span className="text-[11px] tracking-[0.14em] uppercase text-muted-foreground font-medium">
-                      {label}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+          {/* Legal disclaimer — compact */}
+          <div className="rounded-xl border border-foreground/10 bg-background/50 px-5 py-4 text-center">
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Não hospedamos, armazenamos ou distribuímos arquivos. Somos um indexador automático de conteúdo de terceiros.
+            </p>
           </div>
 
           {/* Brand + Bottom */}
