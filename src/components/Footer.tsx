@@ -94,12 +94,19 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Legal disclaimer — compact */}
-          <div className="rounded-xl border border-foreground/10 bg-background/50 px-5 py-4 text-center">
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Não hospedamos, armazenamos ou distribuímos arquivos. Somos um indexador automático de conteúdo de terceiros.
-            </p>
+          {/* Legal disclaimer — refined */}
+          <div className="relative overflow-hidden rounded-2xl border border-foreground/10 bg-gradient-to-r from-background/30 via-background/60 to-background/30 backdrop-blur-sm">
+            <span aria-hidden className="absolute left-0 top-0 h-full w-px bg-gradient-to-b from-transparent via-primary/50 to-transparent" />
+            <span aria-hidden className="absolute right-0 top-0 h-full w-px bg-gradient-to-b from-transparent via-primary/30 to-transparent" />
+            <div className="flex items-center gap-3 px-5 py-3.5">
+              <Shield className="h-3.5 w-3.5 shrink-0 text-primary/70" />
+              <p className="text-[11px] leading-relaxed text-muted-foreground">
+                <span className="font-semibold uppercase tracking-[0.14em] text-foreground/80">Aviso Legal · </span>
+                Não hospedamos, armazenamos ou distribuímos arquivos. Somos apenas um indexador automático de conteúdo de terceiros.
+              </p>
+            </div>
           </div>
+
 
           {/* Brand + Bottom */}
           <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
