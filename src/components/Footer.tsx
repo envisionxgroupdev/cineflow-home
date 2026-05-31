@@ -94,14 +94,18 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Legal disclaimer — refined */}
-          <div className="relative overflow-hidden rounded-2xl border border-foreground/10 bg-gradient-to-r from-background/30 via-background/60 to-background/30 backdrop-blur-sm">
-            <span aria-hidden className="absolute left-0 top-0 h-full w-px bg-gradient-to-b from-transparent via-primary/50 to-transparent" />
-            <span aria-hidden className="absolute right-0 top-0 h-full w-px bg-gradient-to-b from-transparent via-primary/30 to-transparent" />
-            <div className="flex items-center gap-3 px-5 py-3.5">
-              <Shield className="h-3.5 w-3.5 shrink-0 text-primary/70" />
-              <p className="text-[11px] leading-relaxed text-muted-foreground">
-                <span className="font-semibold uppercase tracking-[0.14em] text-foreground/80">Aviso Legal · </span>
+          {/* Legal disclaimer — destacado */}
+          <div className="relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-background/70 to-primary/5 backdrop-blur-sm shadow-[0_8px_32px_-12px_hsl(var(--primary)/0.35)]">
+            <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent" />
+            <span aria-hidden className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+            <span aria-hidden className="absolute -left-12 -top-12 h-32 w-32 rounded-full bg-primary/20 blur-3xl" />
+            <span aria-hidden className="absolute -right-12 -bottom-12 h-32 w-32 rounded-full bg-primary/15 blur-3xl" />
+            <div className="relative flex items-start sm:items-center gap-3 sm:gap-4 px-4 sm:px-6 py-4">
+              <div className="shrink-0 flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-primary/15 border border-primary/40 shadow-[inset_0_1px_0_0_hsl(var(--primary)/0.3)]">
+                <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              </div>
+              <p className="text-[12px] sm:text-[13px] leading-relaxed text-foreground/85">
+                <span className="block sm:inline font-bold uppercase tracking-[0.18em] text-primary text-[10px] sm:text-[11px] mb-1 sm:mb-0 sm:mr-2">Aviso Legal</span>
                 Não hospedamos, armazenamos ou distribuímos arquivos. Somos apenas um indexador automático de conteúdo de terceiros.
               </p>
             </div>

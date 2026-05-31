@@ -59,30 +59,29 @@ export function Navbar() {
         </Link>
 
         {/* Desktop nav */}
-        <div className="hidden lg:flex items-center gap-1 flex-1 justify-center">
+        <div className="hidden lg:flex items-center gap-0.5 flex-1 justify-center rounded-full border border-primary/15 bg-gradient-to-r from-background/40 via-background/70 to-background/40 backdrop-blur-md px-1.5 py-1 max-w-fit mx-auto shadow-[inset_0_1px_0_0_hsl(var(--foreground)/0.04)]">
           {navLinks.map((link) => (
             <RouterNavLink
               key={link.path}
               to={link.path}
               end={link.path === "/"}
               className={({ isActive }) =>
-                `relative text-sm font-semibold uppercase tracking-wider px-3 py-2 transition-colors ${
+                `group relative text-[12px] font-bold uppercase tracking-[0.18em] px-3.5 py-1.5 rounded-full transition-all duration-300 ${
                   isActive
-                    ? "text-primary"
-                    : "text-foreground/80 hover:text-primary"
-                } after:absolute after:left-3 after:right-3 after:-bottom-0.5 after:h-[2px] after:bg-primary after:rounded-full after:transition-transform after:duration-300 ${
-                  link.path === "/" ? "" : ""
+                    ? "text-primary-foreground bg-gradient-to-b from-primary to-primary/80 shadow-[0_4px_18px_-6px_hsl(var(--primary)/0.7),inset_0_1px_0_0_hsl(var(--foreground)/0.2)]"
+                    : "text-foreground/70 hover:text-foreground hover:bg-primary/10"
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  {link.label}
-                  <span
-                    className={`absolute left-3 right-3 -bottom-0.5 h-[2px] bg-primary rounded-full origin-left transition-transform duration-300 ${
-                      isActive ? "scale-x-100" : "scale-x-0"
-                    }`}
-                  />
+                  <span className="relative z-10">{link.label}</span>
+                  {!isActive && (
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute inset-x-3 -bottom-px h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
+                    />
+                  )}
                 </>
               )}
             </RouterNavLink>
