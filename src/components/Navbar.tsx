@@ -12,6 +12,7 @@ const navLinks = [
   { label: "Animes", path: "/animes" },
   { label: "Canais", path: "/canais" },
   { label: "Pedidos", path: "/pedidos" },
+  { label: "Minha Lista", path: "/minha-lista" },
   { label: "Contato", path: "/contato" },
 ];
 

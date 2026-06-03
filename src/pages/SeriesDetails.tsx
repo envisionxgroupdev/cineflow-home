@@ -13,7 +13,8 @@ import {
   getSeriesDetails, getSeriesCredits, getSeasonEpisodes, getImageUrl, getWarezPlayerUrl, getEmbedMoviesUrl,
   type TmdbSeriesDetails, type TmdbCastMember, type TmdbEpisode, type TmdbSeason,
 } from '@/services/tmdb';
-import { ArrowLeft, Star, Calendar, Play, Loader2, ChevronDown, AlertTriangle, Pencil, SkipBack, SkipForward, Bookmark, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Star, Calendar, Play, Loader2, ChevronDown, AlertTriangle, Pencil, SkipBack, SkipForward, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { WatchlistButton } from '@/components/WatchlistButton';
 import { ShareButtons } from '@/components/ShareButtons';
 import { ClosePlayerDialog } from '@/components/ClosePlayerDialog';
 import { AdBanner } from '@/components/AdBanner';
@@ -172,9 +173,10 @@ const SeriesDetails = () => {
               className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-full text-sm font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:brightness-110 transition-all">
               <Play className="h-4 w-4 fill-current" /> Temporadas
             </button>
-            <button className="inline-flex items-center gap-2 bg-foreground/10 text-foreground px-5 py-3 rounded-full text-sm font-semibold border border-foreground/15 hover:bg-foreground/15 transition-all">
-              <Bookmark className="h-4 w-4" /> Listar
-            </button>
+            <WatchlistButton item={{
+              content_id: series.id, content_type: 'series', title: series.title,
+              image_url: series.image_url, year: series.year, rating: series.rating,
+            }} />
             <ShareButtons url={canonicalUrl} title={series.title} />
             {isAdmin && (
               <button onClick={() => setEditOpen(true)}
