@@ -29,6 +29,7 @@ const Privacy = lazy(() => import("./pages/Privacy.tsx"));
 const About = lazy(() => import("./pages/About.tsx"));
 const Requests = lazy(() => import("./pages/Requests.tsx"));
 const Contact = lazy(() => import("./pages/Contact.tsx"));
+const MyList = lazy(() => import("./pages/MyList.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 
 const queryClient = new QueryClient({
