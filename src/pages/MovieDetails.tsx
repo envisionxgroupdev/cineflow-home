@@ -13,7 +13,8 @@ import {
   getMovieDetails, getMovieCredits, getImageUrl, getWarezPlayerUrl, getEmbedMoviesUrl,
   type TmdbMovieDetails, type TmdbCastMember,
 } from '@/services/tmdb';
-import { ArrowLeft, Star, Clock, Calendar, Play, Loader2, AlertTriangle, Pencil, Bookmark } from 'lucide-react';
+import { ArrowLeft, Star, Clock, Calendar, Play, Loader2, AlertTriangle, Pencil } from 'lucide-react';
+import { WatchlistButton } from '@/components/WatchlistButton';
 import { ShareButtons } from '@/components/ShareButtons';
 import { ClosePlayerDialog } from '@/components/ClosePlayerDialog';
 import { AdBanner } from '@/components/AdBanner';
@@ -151,9 +152,10 @@ const MovieDetails = () => {
                 {showPlayer ? 'Player aberto' : 'Assistir'}
               </button>
             )}
-            <button className="inline-flex items-center gap-2 bg-foreground/10 text-foreground px-5 py-3 rounded-full text-sm font-semibold border border-foreground/15 hover:bg-foreground/15 transition-all">
-              <Bookmark className="h-4 w-4" /> Listar
-            </button>
+            <WatchlistButton item={{
+              content_id: movie.id, content_type: 'movie', title: movie.title,
+              image_url: movie.image_url, year: movie.year, rating: movie.rating,
+            }} />
             <ShareButtons url={canonicalUrl} title={movie.title} />
             {isAdmin && (
               <button onClick={() => setEditOpen(true)}
