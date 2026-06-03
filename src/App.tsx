@@ -146,6 +146,7 @@ const App = () => (
                   <Route path="/sobre" element={<About />} />
                   <Route path="/pedidos" element={<Requests />} />
                   <Route path="/contato" element={<Contact />} />
+                  <Route path="/minha-lista" element={<MyList />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
