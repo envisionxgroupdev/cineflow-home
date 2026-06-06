@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink as RouterNavLink } from "react-router-dom";
-import { Menu, X, LogIn, Shield, Search } from "lucide-react";
+import { Menu, X, LogIn, UserPlus, Shield, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlobalSearch } from "./GlobalSearch";
 import { useAuth } from "@/hooks/useAuth";
@@ -110,12 +110,20 @@ export function Navbar() {
               {user.email?.split("@")[0]}
             </Link>
           ) : (
-            <Link
-              to="/login"
-              className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 hover:shadow-[0_0_20px_hsl(var(--primary)/0.6)] transition-all"
-            >
-              <LogIn className="h-3.5 w-3.5" /> Entrar
-            </Link>
+            <div className="flex items-center gap-1.5">
+              <Link
+                to="/login?mode=signup"
+                className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider border border-primary/40 text-primary px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors"
+              >
+                <UserPlus className="h-3.5 w-3.5" /> Cadastrar
+              </Link>
+              <Link
+                to="/login"
+                className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 hover:shadow-[0_0_20px_hsl(var(--primary)/0.6)] transition-all"
+              >
+                <LogIn className="h-3.5 w-3.5" /> Entrar
+              </Link>
+            </div>
           )}
         </div>
 
@@ -175,13 +183,22 @@ export function Navbar() {
                   {user.email?.split("@")[0]}
                 </span>
               ) : (
-                <Link
-                  to="/login"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center justify-center gap-2 text-sm font-bold uppercase tracking-wider bg-primary text-primary-foreground py-2.5 px-3 rounded-md mt-1"
-                >
-                  <LogIn className="h-4 w-4" /> Entrar
-                </Link>
+                <div className="flex flex-col gap-2 mt-1">
+                  <Link
+                    to="/login"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-center gap-2 text-sm font-bold uppercase tracking-wider bg-primary text-primary-foreground py-2.5 px-3 rounded-md"
+                  >
+                    <LogIn className="h-4 w-4" /> Entrar
+                  </Link>
+                  <Link
+                    to="/login?mode=signup"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-center gap-2 text-sm font-bold uppercase tracking-wider border border-primary/40 text-primary py-2.5 px-3 rounded-md"
+                  >
+                    <UserPlus className="h-4 w-4" /> Cadastrar
+                  </Link>
+                </div>
               )}
             </div>
           </motion.div>

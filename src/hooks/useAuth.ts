@@ -45,9 +45,29 @@ export function useAuth() {
     return { error };
   }
 
+  async function signUp(email: string, password: string, displayName?: string) {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/`,
+        data: { display_name: displayName ?? email.split('@')[0] },
+      },
+    });
+    if (!error && data.user) {
+      // best-effort upsert profile in case trigger isn't installed
+      await supabase.from('profiles').upsert({
+        id: data.user.id,
+        email,
+        display_name: displayName ?? email.split('@')[0],
+      } as any, { onConflict: 'id' });
+    }
+    return { error };
+  }
+
   async function signOut() {
     await supabase.auth.signOut();
   }
 
-  return { user, session, loading, isAdmin, signIn, signOut };
+  return { user, session, loading, isAdmin, signIn, signUp, signOut };
 }

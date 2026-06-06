@@ -3,13 +3,14 @@ import { Helmet } from "react-helmet-async";
 import { TmdbSearchModal } from "@/components/TmdbSearchModal";
 import { EditContentModal } from "@/components/EditContentModal";
 import { UserManagement } from "@/components/admin/UserManagement";
+import { MaintenanceManagement } from "@/components/admin/MaintenanceManagement";
 import { ReportsManagement } from "@/components/admin/ReportsManagement";
 import { RequestsManagement } from "@/components/admin/RequestsManagement";
 import { ContactMessagesManagement } from "@/components/admin/ContactMessagesManagement";
 import {
   Film, Tv, Plus, Search, Trash2, Pencil, ArrowLeft, LogOut, Loader2, Users,
   AlertTriangle, Sparkles, LayoutDashboard, RefreshCw, Code2, Megaphone, Inbox,
-  MessageSquare, Radio, Bell, Home,
+  MessageSquare, Radio, Bell, Home, Wrench,
 } from "lucide-react";
 import { Dashboard } from "@/components/admin/Dashboard";
 import { SyncManagement } from "@/components/admin/SyncManagement";
@@ -31,7 +32,7 @@ import {
 type Tab =
   | "dashboard" | "movies" | "series" | "animes" | "channels"
   | "users" | "reports" | "requests" | "contact"
-  | "sync" | "codes" | "ads" | "notifications";
+  | "sync" | "codes" | "ads" | "notifications" | "maintenance";
 
 interface TabMeta {
   key: Tab;
@@ -147,6 +148,7 @@ const Admin = () => {
         { key: "codes", label: "Códigos", icon: Code2, description: "Scripts globais do site" },
         { key: "ads", label: "Anúncios", icon: Megaphone, description: "Posicionamento e gestão de anúncios" },
         { key: "notifications", label: "Notificações", icon: Bell, description: "Avisos enviados aos visitantes" },
+        { key: "maintenance", label: "Manutenção", icon: Wrench, description: "Ativar/desativar modo manutenção do site" },
       ],
     },
   ];
@@ -234,6 +236,7 @@ const Admin = () => {
                 : activeTab === "codes" ? (isAdmin ? <CodeManagement /> : null)
                 : activeTab === "ads" ? (isAdmin ? <AdsManagement /> : null)
                 : activeTab === "notifications" ? (isAdmin ? <NotificationsManagement /> : null)
+                : activeTab === "maintenance" ? (isAdmin ? <MaintenanceManagement /> : null)
                 : activeTab === "channels" ? (
                   <>
                     <Toolbar
