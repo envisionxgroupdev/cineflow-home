@@ -7,21 +7,23 @@ export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isBanned, setIsBanned] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      if (session?.user) checkAdmin(session.user.id);
+      if (session?.user) void checkRoles(session.user.id);
       else setLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
-      if (session?.user) checkAdmin(session.user.id);
+      if (session?.user) void checkRoles(session.user.id);
       else {
         setIsAdmin(false);
+        setIsBanned(false);
         setLoading(false);
       }
     });
@@ -29,20 +31,39 @@ export function useAuth() {
     return () => subscription.unsubscribe();
   }, []);
 
-  async function checkAdmin(userId: string) {
+  async function checkRoles(userId: string) {
     const { data } = await supabase
       .from('user_roles')
       .select('role')
-      .eq('user_id', userId)
-      .eq('role', 'admin')
-      .maybeSingle();
-    setIsAdmin(!!data);
+      .eq('user_id', userId);
+    const roles = (data || []).map((r: any) => r.role);
+    const banned = roles.includes('banned');
+    setIsBanned(banned);
+    setIsAdmin(roles.includes('admin') && !banned);
+    if (banned) {
+      // force sign out if user is banned
+      await supabase.auth.signOut();
+      setUser(null);
+      setSession(null);
+    }
     setLoading(false);
   }
 
   async function signIn(email: string, password: string) {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error };
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return { error };
+    if (data.user) {
+      const { data: rolesData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', data.user.id);
+      const banned = (rolesData || []).some((r: any) => r.role === 'banned');
+      if (banned) {
+        await supabase.auth.signOut();
+        return { error: { message: 'Sua conta foi banida. Entre em contato com o suporte.' } as any };
+      }
+    }
+    return { error: null };
   }
 
   async function signUp(email: string, password: string, displayName?: string) {
@@ -55,7 +76,6 @@ export function useAuth() {
       },
     });
     if (!error && data.user) {
-      // best-effort upsert profile in case trigger isn't installed
       await supabase.from('profiles').upsert({
         id: data.user.id,
         email,
@@ -69,5 +89,5 @@ export function useAuth() {
     await supabase.auth.signOut();
   }
 
-  return { user, session, loading, isAdmin, signIn, signUp, signOut };
+  return { user, session, loading, isAdmin, isBanned, signIn, signUp, signOut };
 }
