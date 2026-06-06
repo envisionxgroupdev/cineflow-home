@@ -10,7 +10,7 @@ import { ContactMessagesManagement } from "@/components/admin/ContactMessagesMan
 import {
   Film, Tv, Plus, Search, Trash2, Pencil, ArrowLeft, LogOut, Loader2, Users,
   AlertTriangle, Sparkles, LayoutDashboard, RefreshCw, Code2, Megaphone, Inbox,
-  MessageSquare, Radio, Bell, Home,
+  MessageSquare, Radio, Bell, Home, Wrench,
 } from "lucide-react";
 import { Dashboard } from "@/components/admin/Dashboard";
 import { SyncManagement } from "@/components/admin/SyncManagement";
