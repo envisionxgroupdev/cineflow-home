@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { TmdbSearchModal } from "@/components/TmdbSearchModal";
 import { EditContentModal } from "@/components/EditContentModal";
 import { UserManagement } from "@/components/admin/UserManagement";
+import { MaintenanceManagement } from "@/components/admin/MaintenanceManagement";
 import { ReportsManagement } from "@/components/admin/ReportsManagement";
 import { RequestsManagement } from "@/components/admin/RequestsManagement";
 import { ContactMessagesManagement } from "@/components/admin/ContactMessagesManagement";
