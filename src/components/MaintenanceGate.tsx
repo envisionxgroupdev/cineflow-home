@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Wrench, Shield } from 'lucide-react';
+import { Wrench, Shield, Ban } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { SITE_SETTINGS_UPDATED_EVENT } from '@/lib/siteSettingsEvents';
 
 export function MaintenanceGate({ children }: { children: React.ReactNode }) {
-  const { isAdmin, loading: authLoading } = useAuth();
+  const { isAdmin, isBanned, loading: authLoading } = useAuth();
   const [enabled, setEnabled] = useState(false);
   const [title, setTitle] = useState('Site em manutenção');
   const [message, setMessage] = useState('Estamos realizando uma atualização. Voltaremos em breve!');
