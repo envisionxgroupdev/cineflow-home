@@ -40,6 +40,29 @@ export function MaintenanceGate({ children }: { children: React.ReactNode }) {
   const adminPath = path.startsWith('/admin') || path.startsWith('/login');
 
   if (!checked || authLoading) return <>{children}</>;
+
+  if (isBanned) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4 py-10">
+        <div className="max-w-md w-full text-center">
+          <div className="h-20 w-20 rounded-full bg-destructive/10 border border-destructive/30 flex items-center justify-center mx-auto mb-6">
+            <Ban className="h-9 w-9 text-destructive" />
+          </div>
+          <h1 className="font-display text-3xl sm:text-4xl text-foreground mb-3">Conta banida</h1>
+          <p className="text-sm text-muted-foreground mb-8">
+            Sua conta foi banida e não pode acessar a plataforma. Se você acredita que isso é um engano, entre em contato com o suporte.
+          </p>
+          <Link
+            to="/contato"
+            className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
+          >
+            Falar com suporte
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   if (!enabled || isAdmin || adminPath) return <>{children}</>;
 
   return (
