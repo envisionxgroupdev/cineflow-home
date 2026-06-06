@@ -183,13 +183,22 @@ export function Navbar() {
                   {user.email?.split("@")[0]}
                 </span>
               ) : (
-                <Link
-                  to="/login"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center justify-center gap-2 text-sm font-bold uppercase tracking-wider bg-primary text-primary-foreground py-2.5 px-3 rounded-md mt-1"
-                >
-                  <LogIn className="h-4 w-4" /> Entrar
-                </Link>
+                <div className="flex flex-col gap-2 mt-1">
+                  <Link
+                    to="/login"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-center gap-2 text-sm font-bold uppercase tracking-wider bg-primary text-primary-foreground py-2.5 px-3 rounded-md"
+                  >
+                    <LogIn className="h-4 w-4" /> Entrar
+                  </Link>
+                  <Link
+                    to="/login?mode=signup"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-center gap-2 text-sm font-bold uppercase tracking-wider border border-primary/40 text-primary py-2.5 px-3 rounded-md"
+                  >
+                    <UserPlus className="h-4 w-4" /> Cadastrar
+                  </Link>
+                </div>
               )}
             </div>
           </motion.div>
