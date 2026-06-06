@@ -110,12 +110,20 @@ export function Navbar() {
               {user.email?.split("@")[0]}
             </Link>
           ) : (
-            <Link
-              to="/login"
-              className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 hover:shadow-[0_0_20px_hsl(var(--primary)/0.6)] transition-all"
-            >
-              <LogIn className="h-3.5 w-3.5" /> Entrar
-            </Link>
+            <div className="flex items-center gap-1.5">
+              <Link
+                to="/login?mode=signup"
+                className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider border border-primary/40 text-primary px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors"
+              >
+                <UserPlus className="h-3.5 w-3.5" /> Cadastrar
+              </Link>
+              <Link
+                to="/login"
+                className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 hover:shadow-[0_0_20px_hsl(var(--primary)/0.6)] transition-all"
+              >
+                <LogIn className="h-3.5 w-3.5" /> Entrar
+              </Link>
+            </div>
           )}
         </div>
 
