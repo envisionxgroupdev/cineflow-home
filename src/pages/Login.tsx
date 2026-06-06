@@ -28,7 +28,7 @@ const Login = () => {
       await executeRecaptcha(mode);
       if (mode === 'login') {
         const { error } = await signIn(email, password);
-        if (error) setError('E-mail ou senha incorretos');
+        if (error) setError(error.message?.includes('banida') ? error.message : 'E-mail ou senha incorretos');
         else navigate('/');
       } else {
         if (password.length < 6) { setError('Senha precisa ter pelo menos 6 caracteres'); setLoading(false); return; }
