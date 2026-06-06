@@ -154,6 +154,7 @@ const App = () => (
               </Suspense>
             </ChunkErrorBoundary>
             <NotificationsToast />
+            </MaintenanceGate>
           </BrowserRouter>
           </SiteScripts>
         </TooltipProvider>
