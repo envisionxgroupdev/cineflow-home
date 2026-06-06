@@ -236,6 +236,7 @@ const Admin = () => {
                 : activeTab === "codes" ? (isAdmin ? <CodeManagement /> : null)
                 : activeTab === "ads" ? (isAdmin ? <AdsManagement /> : null)
                 : activeTab === "notifications" ? (isAdmin ? <NotificationsManagement /> : null)
+                : activeTab === "maintenance" ? (isAdmin ? <MaintenanceManagement /> : null)
                 : activeTab === "channels" ? (
                   <>
                     <Toolbar
