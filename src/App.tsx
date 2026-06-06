@@ -127,6 +127,7 @@ const App = () => (
           <Sonner />
           <SiteScripts>
           <BrowserRouter>
+            <MaintenanceGate>
             <ChunkErrorBoundary>
               <Suspense fallback={<RouteFallback />}>
                 <Routes>
