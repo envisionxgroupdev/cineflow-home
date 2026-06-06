@@ -32,7 +32,7 @@ import {
 type Tab =
   | "dashboard" | "movies" | "series" | "animes" | "channels"
   | "users" | "reports" | "requests" | "contact"
-  | "sync" | "codes" | "ads" | "notifications";
+  | "sync" | "codes" | "ads" | "notifications" | "maintenance";
 
 interface TabMeta {
   key: Tab;
