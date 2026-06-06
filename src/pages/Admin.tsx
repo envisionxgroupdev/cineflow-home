@@ -148,6 +148,7 @@ const Admin = () => {
         { key: "codes", label: "Códigos", icon: Code2, description: "Scripts globais do site" },
         { key: "ads", label: "Anúncios", icon: Megaphone, description: "Posicionamento e gestão de anúncios" },
         { key: "notifications", label: "Notificações", icon: Bell, description: "Avisos enviados aos visitantes" },
+        { key: "maintenance", label: "Manutenção", icon: Wrench, description: "Ativar/desativar modo manutenção do site" },
       ],
     },
   ];
