@@ -119,20 +119,29 @@ export function UserManagement() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <div className="flex items-center gap-1 justify-end">
+                      <div className="flex items-center gap-1.5 justify-end flex-wrap">
                         <button onClick={() => { setEditingUser(p); setEditName(p.display_name || ''); }}
-                          className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded transition-colors" title="Editar nome">
-                          <Pencil className="h-4 w-4" />
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-md border border-border text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-primary/10 transition-colors"
+                          title="Editar nome">
+                          <Pencil className="h-3.5 w-3.5" /> Editar
                         </button>
                         <button onClick={() => toggleAdmin(p.id, isAdmin)}
-                          className={`p-1.5 rounded transition-colors ${isAdmin ? 'text-destructive hover:bg-destructive/10' : 'text-primary hover:bg-primary/10'}`}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-md border transition-colors ${
+                            isAdmin
+                              ? 'border-destructive/40 text-destructive hover:bg-destructive/10'
+                              : 'border-primary/40 text-primary hover:bg-primary/10'
+                          }`}
                           title={isAdmin ? 'Remover admin' : 'Tornar admin'}>
-                          {isAdmin ? <ShieldOff className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
+                          {isAdmin ? <><ShieldOff className="h-3.5 w-3.5" /> Remover admin</> : <><Shield className="h-3.5 w-3.5" /> Promover</>}
                         </button>
                         <button onClick={() => setConfirmAction({ userId: p.id, action: isBanned ? 'unban' : 'ban' })}
-                          className={`p-1.5 rounded transition-colors ${isBanned ? 'text-primary hover:bg-primary/10' : 'text-destructive hover:bg-destructive/10'}`}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-md border transition-colors ${
+                            isBanned
+                              ? 'border-primary/40 text-primary hover:bg-primary/10'
+                              : 'border-destructive/40 text-destructive hover:bg-destructive/10'
+                          }`}
                           title={isBanned ? 'Desbanir' : 'Banir'}>
-                          <Ban className="h-4 w-4" />
+                          <Ban className="h-3.5 w-3.5" /> {isBanned ? 'Desbanir' : 'Banir'}
                         </button>
                       </div>
                     </td>
