@@ -32,21 +32,33 @@ export function useAuth() {
   }, []);
 
   async function checkRoles(userId: string) {
-    const { data } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId);
-    const roles = (data || []).map((r: any) => r.role);
-    const banned = roles.includes('banned');
-    setIsBanned(banned);
-    setIsAdmin(roles.includes('admin') && !banned);
-    if (banned) {
-      // force sign out if user is banned
-      await supabase.auth.signOut();
-      setUser(null);
-      setSession(null);
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId);
+      if (error) {
+        console.warn('[useAuth] checkRoles error:', error.message);
+        setIsAdmin(false);
+        setIsBanned(false);
+        return;
+      }
+      const roles = (data || []).map((r: any) => r.role);
+      const banned = roles.includes('banned');
+      setIsBanned(banned);
+      setIsAdmin(roles.includes('admin') && !banned);
+      if (banned) {
+        await supabase.auth.signOut();
+        setUser(null);
+        setSession(null);
+      }
+    } catch (e) {
+      console.warn('[useAuth] checkRoles exception:', e);
+      setIsAdmin(false);
+      setIsBanned(false);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   async function signIn(email: string, password: string) {
