@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Save, Loader2, Code2, FileCode, Eye, EyeOff } from 'lucide-react';
+import { SITE_SETTINGS_UPDATED_EVENT } from '@/lib/siteSettingsEvents';
 
 interface CodeSetting {
   key: string;
