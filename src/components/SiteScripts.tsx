@@ -101,12 +101,27 @@ function cloneAndActivate(node: Node): Node {
   return node.cloneNode(true);
 }
 
+function parseHeadFragment(html: string): Node[] {
+  // Parse as a real document so <meta>, <link>, <script>, <noscript> are recognized
+  const doc = new DOMParser().parseFromString(
+    `<!doctype html><html><head>${html}</head><body></body></html>`,
+    'text/html'
+  );
+  return Array.from(doc.head.childNodes).filter(n => n.nodeType === 1);
+}
+
+function parseBodyFragment(html: string): Node[] {
+  const doc = new DOMParser().parseFromString(
+    `<!doctype html><html><head></head><body>${html}</body></html>`,
+    'text/html'
+  );
+  return Array.from(doc.body.childNodes).filter(n => n.nodeType === 1);
+}
+
 function InjectHead({ html }: { html: string }) {
   useEffect(() => {
-    const container = document.createElement('div');
-    container.innerHTML = html;
     const nodes: Node[] = [];
-    container.childNodes.forEach(node => {
+    parseHeadFragment(html).forEach(node => {
       const active = cloneAndActivate(node);
       document.head.appendChild(active);
       nodes.push(active);
@@ -118,10 +133,8 @@ function InjectHead({ html }: { html: string }) {
 
 function InjectBody({ html }: { html: string }) {
   useEffect(() => {
-    const container = document.createElement('div');
-    container.innerHTML = html;
     const nodes: Node[] = [];
-    container.childNodes.forEach(node => {
+    parseBodyFragment(html).forEach(node => {
       const active = cloneAndActivate(node);
       document.body.appendChild(active);
       nodes.push(active);
