@@ -10,56 +10,55 @@ export function useAuth() {
   const [isBanned, setIsBanned] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
+
+    // Roles run in background; loading only reflects session readiness
+    const checkRoles = async (userId: string) => {
+      try {
+        const { data, error } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', userId);
+        if (!mounted) return;
+        if (error) {
+          console.warn('[useAuth] checkRoles error:', error.message);
+          return;
+        }
+        const roles = (data || []).map((r: any) => r.role);
+        const banned = roles.includes('banned');
+        setIsBanned(banned);
+        setIsAdmin(roles.includes('admin') && !banned);
+        if (banned) {
+          await supabase.auth.signOut();
+        }
+      } catch (e: any) {
+        console.warn('[useAuth] checkRoles exception:', e?.message || e);
+      }
+    };
+
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
+      setLoading(false);
       if (session?.user) void checkRoles(session.user.id);
-      else setLoading(false);
-    });
+    }).catch(() => { if (mounted) setLoading(false); });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
-      if (session?.user) void checkRoles(session.user.id);
-      else {
+      setLoading(false);
+      if (session?.user) {
+        void checkRoles(session.user.id);
+      } else {
         setIsAdmin(false);
         setIsBanned(false);
-        setLoading(false);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => { mounted = false; subscription.unsubscribe(); };
   }, []);
-
-  async function checkRoles(userId: string) {
-    try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId);
-      if (error) {
-        console.warn('[useAuth] checkRoles error:', error.message);
-        setIsAdmin(false);
-        setIsBanned(false);
-        return;
-      }
-      const roles = (data || []).map((r: any) => r.role);
-      const banned = roles.includes('banned');
-      setIsBanned(banned);
-      setIsAdmin(roles.includes('admin') && !banned);
-      if (banned) {
-        await supabase.auth.signOut();
-        setUser(null);
-        setSession(null);
-      }
-    } catch (e) {
-      console.warn('[useAuth] checkRoles exception:', e);
-      setIsAdmin(false);
-      setIsBanned(false);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   async function signIn(email: string, password: string) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
