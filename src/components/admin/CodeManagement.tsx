@@ -62,22 +62,17 @@ export function CodeManagement() {
     setSaving(true);
     try {
       for (const field of CODE_FIELDS) {
-        const value = codes[field.key] || '';
-        const { data: existing } = await supabase
+        const value = codes[field.key] ?? '';
+        const { error } = await supabase
           .from('site_settings')
-          .select('key')
-          .eq('key', field.key)
-          .maybeSingle();
-
-        if (existing) {
-          await supabase.from('site_settings').update({ value }).eq('key', field.key);
-        } else if (value) {
-          await supabase.from('site_settings').insert({ key: field.key, value });
-        }
+          .upsert({ key: field.key, value, updated_at: new Date().toISOString() } as any, { onConflict: 'key' });
+        if (error) throw error;
       }
+      window.dispatchEvent(new Event(SITE_SETTINGS_UPDATED_EVENT));
       toast.success('Códigos salvos com sucesso!');
-    } catch {
-      toast.error('Erro ao salvar códigos');
+    } catch (e: any) {
+      console.error('[CodeManagement] save error', e);
+      toast.error(e?.message || 'Erro ao salvar códigos');
     }
     setSaving(false);
   };
