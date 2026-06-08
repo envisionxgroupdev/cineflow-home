@@ -5,15 +5,16 @@ import type { User, Session } from '@supabase/supabase-js';
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [sessionLoading, setSessionLoading] = useState(true);
+  const [rolesLoading, setRolesLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isBanned, setIsBanned] = useState(false);
 
   useEffect(() => {
     let mounted = true;
 
-    // Roles run in background; loading only reflects session readiness
     const checkRoles = async (userId: string) => {
+      setRolesLoading(true);
       try {
         const { data, error } = await supabase
           .from('user_roles')
@@ -28,11 +29,11 @@ export function useAuth() {
         const banned = roles.includes('banned');
         setIsBanned(banned);
         setIsAdmin(roles.includes('admin') && !banned);
-        if (banned) {
-          await supabase.auth.signOut();
-        }
+        if (banned) await supabase.auth.signOut();
       } catch (e: any) {
         console.warn('[useAuth] checkRoles exception:', e?.message || e);
+      } finally {
+        if (mounted) setRolesLoading(false);
       }
     };
 
@@ -40,20 +41,21 @@ export function useAuth() {
       if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
+      setSessionLoading(false);
       if (session?.user) void checkRoles(session.user.id);
-    }).catch(() => { if (mounted) setLoading(false); });
+    }).catch(() => { if (mounted) setSessionLoading(false); });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
+      setSessionLoading(false);
       if (session?.user) {
         void checkRoles(session.user.id);
       } else {
         setIsAdmin(false);
         setIsBanned(false);
+        setRolesLoading(false);
       }
     });
 
@@ -100,5 +102,8 @@ export function useAuth() {
     await supabase.auth.signOut();
   }
 
-  return { user, session, loading, isAdmin, isBanned, signIn, signUp, signOut };
+  // `loading` waits for both session and roles so admin guards behave correctly
+  const loading = sessionLoading || (!!user && rolesLoading);
+
+  return { user, session, loading, sessionLoading, rolesLoading, isAdmin, isBanned, signIn, signUp, signOut };
 }
