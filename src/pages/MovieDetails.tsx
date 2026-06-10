@@ -79,12 +79,14 @@ const MovieDetails = () => {
 
   const getPlayerUrl = (source: PlayerSource) => {
     if (source === 'warezcdn') return movie.player_url || (tmdbId ? getWarezPlayerUrl('filme', tmdbId) : '');
-    return movie.player_url_2 || (tmdbId ? getEmbedMoviesUrl('filme', tmdbId) : '');
+    if (source === 'embedmovies') return movie.player_url_2 || (tmdbId ? getEmbedMoviesUrl('filme', tmdbId) : '');
+    return tmdbId ? getSuperflixUrl('filme', tmdbId) : '';
   };
 
   const playerSrc = getPlayerUrl(activePlayer);
   const hasPlayer1 = !!(movie.player_url || tmdbId);
   const hasPlayer2 = !!(movie.player_url_2 || tmdbId);
+  const hasPlayer3 = !!tmdbId;
 
   const canonicalUrl = `https://pipocamax.com/filme/assistir-${slugify(movie.title)}-online-gratis`;
   const jsonLd = {
