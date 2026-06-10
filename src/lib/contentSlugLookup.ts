@@ -27,7 +27,7 @@ export async function findRowBySlug<T extends { title: string }>(
       return null;
     }
 
-    const rows = (data as T[] | null) ?? [];
+    const rows = ((data as unknown) as T[] | null) ?? [];
     if (rows.length === 0) return null;
 
     const found = rows.find((row) => matchesSlug(row.title, urlSlug));
@@ -36,4 +36,5 @@ export async function findRowBySlug<T extends { title: string }>(
     if (rows.length < PAGE_SIZE) return null;
     from += PAGE_SIZE;
   }
+
 }
