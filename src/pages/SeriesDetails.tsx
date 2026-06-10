@@ -10,7 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { slugify } from '@/lib/utils';
 import { findRowBySlug } from '@/lib/contentSlugLookup';
 import {
-  getSeriesDetails, getSeriesCredits, getSeasonEpisodes, getImageUrl, getWarezPlayerUrl, getEmbedMoviesUrl,
+  getSeriesDetails, getSeriesCredits, getSeasonEpisodes, getImageUrl, getWarezPlayerUrl, getEmbedMoviesUrl, getSuperflixUrl,
   type TmdbSeriesDetails, type TmdbCastMember, type TmdbEpisode, type TmdbSeason,
 } from '@/services/tmdb';
 import { ArrowLeft, Star, Calendar, Play, Loader2, ChevronDown, AlertTriangle, Pencil, SkipBack, SkipForward, X, ChevronLeft, ChevronRight } from 'lucide-react';
