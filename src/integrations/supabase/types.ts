@@ -14,16 +14,462 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      admin_audit_log: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string | null
+          created_at: string
+          details: Json | null
+          id: string
+          target_id: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Relationships: []
+      }
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          status: string
+          subject: string
+          telegram: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          status?: string
+          subject: string
+          telegram?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          status?: string
+          subject?: string
+          telegram?: string | null
+        }
+        Relationships: []
+      }
+      movies: {
+        Row: {
+          backdrop_url: string | null
+          created_at: string
+          created_by: string | null
+          genre: string | null
+          id: string
+          image_url: string | null
+          is_release: boolean
+          original_title: string | null
+          overview: string | null
+          player_url: string | null
+          player_url_2: string | null
+          rating: number
+          release_date: string | null
+          title: string
+          tmdb_id: number | null
+          updated_at: string
+          year: string | null
+        }
+        Insert: {
+          backdrop_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          genre?: string | null
+          id?: string
+          image_url?: string | null
+          is_release?: boolean
+          original_title?: string | null
+          overview?: string | null
+          player_url?: string | null
+          player_url_2?: string | null
+          rating?: number
+          release_date?: string | null
+          title: string
+          tmdb_id?: number | null
+          updated_at?: string
+          year?: string | null
+        }
+        Update: {
+          backdrop_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          genre?: string | null
+          id?: string
+          image_url?: string | null
+          is_release?: boolean
+          original_title?: string | null
+          overview?: string | null
+          player_url?: string | null
+          player_url_2?: string | null
+          rating?: number
+          release_date?: string | null
+          title?: string
+          tmdb_id?: number | null
+          updated_at?: string
+          year?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          content_slug: string | null
+          content_type: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          is_active: boolean
+          message: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          content_slug?: string | null
+          content_type?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          message?: string | null
+          title: string
+          type?: string
+        }
+        Update: {
+          content_slug?: string | null
+          content_type?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          message?: string | null
+          title?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          content_id: string
+          content_title: string
+          content_type: string
+          created_at: string
+          details: string | null
+          id: string
+          reason: string
+          reporter_email: string | null
+          status: string
+        }
+        Insert: {
+          content_id: string
+          content_title: string
+          content_type: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason: string
+          reporter_email?: string | null
+          status?: string
+        }
+        Update: {
+          content_id?: string
+          content_title?: string
+          content_type?: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason?: string
+          reporter_email?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      requests: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          requester_email: string | null
+          requester_name: string | null
+          status: string
+          title: string
+          type: string
+          updated_at: string
+          year: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          requester_email?: string | null
+          requester_name?: string | null
+          status?: string
+          title: string
+          type: string
+          updated_at?: string
+          year?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          requester_email?: string | null
+          requester_name?: string | null
+          status?: string
+          title?: string
+          type?: string
+          updated_at?: string
+          year?: string | null
+        }
+        Relationships: []
+      }
+      series: {
+        Row: {
+          backdrop_url: string | null
+          created_at: string
+          created_by: string | null
+          first_air_date: string | null
+          genre: string | null
+          id: string
+          image_url: string | null
+          is_anime: boolean
+          is_release: boolean
+          original_title: string | null
+          overview: string | null
+          player_url: string | null
+          player_url_2: string | null
+          rating: number
+          title: string
+          tmdb_id: number | null
+          updated_at: string
+          year: string | null
+        }
+        Insert: {
+          backdrop_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          first_air_date?: string | null
+          genre?: string | null
+          id?: string
+          image_url?: string | null
+          is_anime?: boolean
+          is_release?: boolean
+          original_title?: string | null
+          overview?: string | null
+          player_url?: string | null
+          player_url_2?: string | null
+          rating?: number
+          title: string
+          tmdb_id?: number | null
+          updated_at?: string
+          year?: string | null
+        }
+        Update: {
+          backdrop_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          first_air_date?: string | null
+          genre?: string | null
+          id?: string
+          image_url?: string | null
+          is_anime?: boolean
+          is_release?: boolean
+          original_title?: string | null
+          overview?: string | null
+          player_url?: string | null
+          player_url_2?: string | null
+          rating?: number
+          title?: string
+          tmdb_id?: number | null
+          updated_at?: string
+          year?: string | null
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value?: string
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
+      tv_channels: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          embed_url: string
+          external_id: string
+          id: string
+          is_active: boolean
+          logo_url: string | null
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          embed_url: string
+          external_id: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          embed_url?: string
+          external_id?: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      watchlist: {
+        Row: {
+          content_id: string
+          content_type: string
+          created_at: string
+          id: string
+          image_url: string | null
+          rating: number
+          title: string
+          user_id: string
+          year: string | null
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          rating?: number
+          title: string
+          user_id: string
+          year?: string | null
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          rating?: number
+          title?: string
+          user_id?: string
+          year?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user" | "banned"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +596,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user", "banned"],
+    },
   },
 } as const
