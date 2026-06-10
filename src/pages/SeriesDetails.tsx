@@ -296,6 +296,12 @@ const SeriesDetails = () => {
                     className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${activePlayer === 'embedmovies' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'text-muted-foreground hover:text-foreground'}`}>
                     Player 2
                   </button>
+                  {tmdbId && (
+                    <button onClick={() => setActivePlayer('superflix')}
+                      className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${activePlayer === 'superflix' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'text-muted-foreground hover:text-foreground'}`}>
+                      Player 3
+                    </button>
+                  )}
                 </div>
 
                 {/* Episode nav */}
