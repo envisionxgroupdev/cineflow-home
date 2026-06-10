@@ -10,7 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { slugify } from '@/lib/utils';
 import { findRowBySlug } from '@/lib/contentSlugLookup';
 import {
-  getSeriesDetails, getSeriesCredits, getSeasonEpisodes, getImageUrl, getWarezPlayerUrl, getEmbedMoviesUrl,
+  getSeriesDetails, getSeriesCredits, getSeasonEpisodes, getImageUrl, getWarezPlayerUrl, getEmbedMoviesUrl, getSuperflixUrl,
   type TmdbSeriesDetails, type TmdbCastMember, type TmdbEpisode, type TmdbSeason,
 } from '@/services/tmdb';
 import { ArrowLeft, Star, Calendar, Play, Loader2, ChevronDown, AlertTriangle, Pencil, SkipBack, SkipForward, X, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -25,7 +25,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 
 import type { Series } from '@/types/database';
 
-type PlayerSource = 'warezcdn' | 'embedmovies';
+type PlayerSource = 'warezcdn' | 'embedmovies' | 'superflix';
 
 const SeriesDetails = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -98,9 +98,11 @@ const SeriesDetails = () => {
     if (source === 'warezcdn') {
       if (series.player_url) return `${series.player_url}/${season}/${episode}`;
       if (tmdbId) return getWarezPlayerUrl('serie', tmdbId, season, episode);
-    } else {
+    } else if (source === 'embedmovies') {
       if (series.player_url_2) return `${series.player_url_2}/${season}/${episode}`;
       if (tmdbId) return getEmbedMoviesUrl('serie', tmdbId, season, episode);
+    } else {
+      if (tmdbId) return getSuperflixUrl('serie', tmdbId, season, episode);
     }
     return '';
   };
@@ -294,6 +296,12 @@ const SeriesDetails = () => {
                     className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${activePlayer === 'embedmovies' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'text-muted-foreground hover:text-foreground'}`}>
                     Player 2
                   </button>
+                  {tmdbId && (
+                    <button onClick={() => setActivePlayer('superflix')}
+                      className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${activePlayer === 'superflix' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'text-muted-foreground hover:text-foreground'}`}>
+                      Player 3
+                    </button>
+                  )}
                 </div>
 
                 {/* Episode nav */}
