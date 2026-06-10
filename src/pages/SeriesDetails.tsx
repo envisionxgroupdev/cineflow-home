@@ -25,7 +25,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 
 import type { Series } from '@/types/database';
 
-type PlayerSource = 'warezcdn' | 'embedmovies';
+type PlayerSource = 'warezcdn' | 'embedmovies' | 'superflix';
 
 const SeriesDetails = () => {
   const { slug } = useParams<{ slug: string }>();
