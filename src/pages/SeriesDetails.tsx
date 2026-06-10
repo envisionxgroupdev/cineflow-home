@@ -98,9 +98,11 @@ const SeriesDetails = () => {
     if (source === 'warezcdn') {
       if (series.player_url) return `${series.player_url}/${season}/${episode}`;
       if (tmdbId) return getWarezPlayerUrl('serie', tmdbId, season, episode);
-    } else {
+    } else if (source === 'embedmovies') {
       if (series.player_url_2) return `${series.player_url_2}/${season}/${episode}`;
       if (tmdbId) return getEmbedMoviesUrl('serie', tmdbId, season, episode);
+    } else {
+      if (tmdbId) return getSuperflixUrl('serie', tmdbId, season, episode);
     }
     return '';
   };
