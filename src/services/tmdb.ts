@@ -159,12 +159,18 @@ export async function getTrendingSeries(): Promise<TmdbSeries[]> {
 
 export async function getMovieDetails(tmdbId: number): Promise<TmdbMovieDetails> {
   const res = await fetch(`${TMDB_BASE}/movie/${tmdbId}?api_key=${TMDB_API_KEY}&language=pt-BR`);
-  return res.json();
+  if (!res.ok) throw new Error(`TMDB ${res.status} for movie ${tmdbId}`);
+  const data = await res.json();
+  if (!data || !data.id) throw new Error(`TMDB movie ${tmdbId} resposta inválida`);
+  return data;
 }
 
 export async function getSeriesDetails(tmdbId: number): Promise<TmdbSeriesDetails> {
   const res = await fetch(`${TMDB_BASE}/tv/${tmdbId}?api_key=${TMDB_API_KEY}&language=pt-BR`);
-  return res.json();
+  if (!res.ok) throw new Error(`TMDB ${res.status} for tv ${tmdbId}`);
+  const data = await res.json();
+  if (!data || !data.id) throw new Error(`TMDB tv ${tmdbId} resposta inválida`);
+  return data;
 }
 
 export async function getMovieCredits(tmdbId: number): Promise<TmdbCastMember[]> {
