@@ -205,16 +205,26 @@ const MovieDetails = () => {
                 <span className="flex h-2 w-2 rounded-full bg-primary shadow-[0_0_10px] shadow-primary animate-pulse shrink-0" />
                 <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Assistindo agora</p>
               </div>
-              {(hasPlayer1 && hasPlayer2) && (
+              {(hasPlayer1 || hasPlayer2 || hasPlayer3) && (
                 <div className="inline-flex items-center p-1 rounded-full bg-secondary/60 border border-border/50">
-                  <button onClick={() => setActivePlayer('warezcdn')}
-                    className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${activePlayer === 'warezcdn' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'text-muted-foreground hover:text-foreground'}`}>
-                    Player 1
-                  </button>
-                  <button onClick={() => setActivePlayer('embedmovies')}
-                    className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${activePlayer === 'embedmovies' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'text-muted-foreground hover:text-foreground'}`}>
-                    Player 2
-                  </button>
+                  {hasPlayer1 && (
+                    <button onClick={() => setActivePlayer('warezcdn')}
+                      className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${activePlayer === 'warezcdn' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'text-muted-foreground hover:text-foreground'}`}>
+                      Player 1
+                    </button>
+                  )}
+                  {hasPlayer2 && (
+                    <button onClick={() => setActivePlayer('embedmovies')}
+                      className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${activePlayer === 'embedmovies' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'text-muted-foreground hover:text-foreground'}`}>
+                      Player 2
+                    </button>
+                  )}
+                  {hasPlayer3 && (
+                    <button onClick={() => setActivePlayer('superflix')}
+                      className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${activePlayer === 'superflix' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'text-muted-foreground hover:text-foreground'}`}>
+                      Player 3
+                    </button>
+                  )}
                 </div>
               )}
             </div>
