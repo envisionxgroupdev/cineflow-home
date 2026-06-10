@@ -10,7 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { slugify } from '@/lib/utils';
 import { findRowBySlug } from '@/lib/contentSlugLookup';
 import {
-  getMovieDetails, getMovieCredits, getImageUrl, getWarezPlayerUrl, getEmbedMoviesUrl,
+  getMovieDetails, getMovieCredits, getImageUrl, getWarezPlayerUrl, getEmbedMoviesUrl, getSuperflixUrl,
   type TmdbMovieDetails, type TmdbCastMember,
 } from '@/services/tmdb';
 import { ArrowLeft, Star, Clock, Calendar, Play, Loader2, AlertTriangle, Pencil } from 'lucide-react';
@@ -22,7 +22,7 @@ import { VizerHero } from '@/components/vizer/VizerHero';
 import { YouMayLike } from '@/components/vizer/YouMayLike';
 import type { Movie } from '@/types/database';
 
-type PlayerSource = 'warezcdn' | 'embedmovies';
+type PlayerSource = 'warezcdn' | 'embedmovies' | 'superflix';
 
 const MovieDetails = () => {
   const { slug } = useParams<{ slug: string }>();
