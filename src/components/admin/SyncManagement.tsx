@@ -213,32 +213,41 @@ export function SyncManagement() {
     if (importedIds.has(item.tmdb_id)) { toast.info(`"${item.title}" já foi importado!`); return; }
     setPreviews((prev) => prev.map((p) => p.tmdb_id === item.tmdb_id ? { ...p, loading: true } : p));
 
-    const payload = buildTmdbPayload(item);
-    const { error } = await supabase.from(dbTable).upsert(payload, { onConflict: 'tmdb_id' });
-    if (error) {
-      toast.error(`Erro ao importar: ${error.message}`);
-    } else {
+    let ok = false;
+    try {
+      const payload = buildTmdbPayload(item);
+      const { error } = await supabase.from(dbTable).upsert(payload, { onConflict: 'tmdb_id' });
+      if (error) throw error;
+      ok = true;
       toast.success(`${item.title} importado!`);
       setImportedIds((prev) => new Set([...prev, item.tmdb_id]));
+    } catch (err) {
+      toast.error(`Erro ao importar: ${getErrorMessage(err)}`);
+    } finally {
+      setPreviews((prev) => prev.map((p) => p.tmdb_id === item.tmdb_id ? { ...p, loading: false, alreadyImported: ok } : p));
     }
-    setPreviews((prev) => prev.map((p) => p.tmdb_id === item.tmdb_id ? { ...p, loading: false, alreadyImported: !error } : p));
   };
 
   // Import single channel
   const handleImportChannel = async (ch: ChannelItem) => {
     if (importedChannelIds.has(ch.id)) { toast.info(`"${ch.name}" já foi importado!`); return; }
     setChannels((prev) => prev.map((c) => c.id === ch.id ? { ...c, loading: true } : c));
-    const { error } = await supabase.from("tv_channels").upsert({
-      external_id: ch.id, name: ch.name, category: ch.category || null,
-      description: ch.description || null, logo_url: ch.logo_url || null,
-      embed_url: ch.embed_url, is_active: ch.is_active,
-    }, { onConflict: 'external_id' });
-    if (error) { toast.error(`Erro: ${error.message}`); }
-    else {
+    let ok = false;
+    try {
+      const { error } = await supabase.from("tv_channels").upsert({
+        external_id: ch.id, name: ch.name, category: ch.category || null,
+        description: ch.description || null, logo_url: ch.logo_url || null,
+        embed_url: ch.embed_url, is_active: ch.is_active,
+      }, { onConflict: 'external_id' });
+      if (error) throw error;
+      ok = true;
       toast.success(`${ch.name} importado!`);
       setImportedChannelIds((prev) => new Set([...prev, ch.id]));
+    } catch (err) {
+      toast.error(`Erro ao importar canal: ${getErrorMessage(err)}`);
+    } finally {
+      setChannels((prev) => prev.map((c) => c.id === ch.id ? { ...c, loading: false, alreadyImported: ok } : c));
     }
-    setChannels((prev) => prev.map((c) => c.id === ch.id ? { ...c, loading: false, alreadyImported: !error } : c));
   };
 
   // Bulk import
