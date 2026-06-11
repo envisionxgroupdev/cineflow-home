@@ -13,7 +13,7 @@ import { Footer } from "@/components/Footer";
 import { EditContentModal } from "@/components/EditContentModal";
 import { AdBanner } from "@/components/AdBanner";
 import { SplashLoader } from "@/components/SplashLoader";
-import { CookieBanner } from "@/components/CookieBanner";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import type { Movie, Series } from "@/types/database";
@@ -142,7 +142,7 @@ const Index = () => {
         <AdBanner page="home" position="bottom" />
       </div>
       <TelegramFloat />
-      <CookieBanner />
+      
       <Footer />
 
       {editItem && (

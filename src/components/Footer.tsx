@@ -82,16 +82,6 @@ export function Footer() {
               </div>
             </div>
 
-            {/* Parceiros */}
-            <div>
-              <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-                <ExternalLink className="h-4 w-4 text-primary" />
-                Parceiros
-              </h3>
-              <div className="flex flex-col gap-2.5 text-sm">
-                <p className="text-muted-foreground/60 text-xs italic">Em breve...</p>
-              </div>
-            </div>
           </div>
 
           {/* Legal disclaimer — destacado */}
