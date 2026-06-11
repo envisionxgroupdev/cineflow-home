@@ -18,7 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import type { Movie, Series } from "@/types/database";
 import type { TvChannel } from "@/types/channel";
-import { TelegramFloat } from "@/components/TelegramFloat";
+
 import { ChannelCard } from "@/components/ChannelCard";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -141,7 +141,7 @@ const Index = () => {
         )}
         <AdBanner page="home" position="bottom" />
       </div>
-      <TelegramFloat />
+      
       
       <Footer />
 
