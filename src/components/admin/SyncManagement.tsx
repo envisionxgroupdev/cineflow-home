@@ -206,16 +206,49 @@ export function SyncManagement() {
     if (warezIds.length > 0 && !isChannels) loadPage(page);
   }, [page, warezIds, loadPage, isChannels]);
 
-  // Build payload for movie/series/anime
-  const buildTmdbPayload = (item: TmdbPreview): MovieInsert | SeriesInsert => {
-    const base = {
+  const buildMoviePayload = (item: TmdbPreview): MovieInsert => ({
+    title: item.title, original_title: item.original_title, overview: item.overview,
+    year: item.year, genre: item.genre, rating: item.rating,
+    image_url: item.image_url, backdrop_url: item.backdrop_url,
+    tmdb_id: item.tmdb_id, is_release: false,
+    release_date: item.year ? `${item.year}-01-01` : null,
+  });
+
+  const buildSeriesPayload = (item: TmdbPreview): SeriesInsert => ({
+    title: item.title, original_title: item.original_title, overview: item.overview,
+    year: item.year, genre: item.genre, rating: item.rating,
+    image_url: item.image_url, backdrop_url: item.backdrop_url,
+    tmdb_id: item.tmdb_id, is_release: false,
+    first_air_date: item.year ? `${item.year}-01-01` : null,
+    is_anime: isAnime,
+  });
+
+  const importMoviePayload = async (payload: MovieInsert) => supabase.from("movies").upsert(payload, { onConflict: "tmdb_id" });
+  const importSeriesPayload = async (payload: SeriesInsert) => supabase.from("series").upsert(payload, { onConflict: "tmdb_id" });
+
+  const buildBulkMoviePayload = async (tmdbId: number): Promise<MovieInsert> => {
+    const d = await withRetry(() => getMovieDetails(tmdbId));
+    if (!d || !d.id) throw new Error("TMDB vazio");
+    return {
+      title: d.title, original_title: d.original_title, overview: d.overview,
+      year: d.release_date?.slice(0, 4) || "",
+      genre: d.genres?.map(g => g.name).slice(0, 3).join(", ") || "",
+      rating: Math.round((d.vote_average || 0) * 10) / 10,
+      image_url: getImageUrl(d.poster_path),
+      backdrop_url: getImageUrl(d.backdrop_path, "w1280"),
+      tmdb_id: d.id, is_release: false, release_date: d.release_date || null,
+    };
+  };
+
+  const buildBulkSeriesPayload = async (tmdbId: number): Promise<SeriesInsert> => {
+    const d = await withRetry(() => getSeriesDetails(tmdbId));
+    if (!d || !d.id) throw new Error("TMDB vazio");
+    return {
       title: item.title, original_title: item.original_title, overview: item.overview,
       year: item.year, genre: item.genre, rating: item.rating,
       image_url: item.image_url, backdrop_url: item.backdrop_url,
       tmdb_id: item.tmdb_id, is_release: false,
     };
-    if (tmdbType === "movie") return { ...base, release_date: item.year ? `${item.year}-01-01` : null } satisfies MovieInsert;
-    return { ...base, first_air_date: item.year ? `${item.year}-01-01` : null, is_anime: isAnime } satisfies SeriesInsert;
   };
 
   // Import single TMDB item
