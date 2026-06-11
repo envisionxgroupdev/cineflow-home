@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { RefreshCw, Download, Film, Tv, Loader2, Search, Check, Zap, Square, Sparkles, Radio } from "lucide-react";
+import { RefreshCw, Download, Film, Tv, Loader2, Search, Check, Zap, Square, Sparkles, Radio, type LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import { getMovieDetails, getSeriesDetails, getImageUrl } from "@/services/tmdb";
 import { toast } from "sonner";
 import { fetchJsonResilient } from "@/lib/resilientFetch";
@@ -22,6 +23,11 @@ async function withRetry<T>(fn: () => Promise<T>, retries = 4, delayMs = 800): P
 }
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+
+const getErrorMessage = (err: unknown) => {
+  if (err && typeof err === "object" && "message" in err) return String((err as { message?: unknown }).message || "falha desconhecida");
+  return typeof err === "string" ? err : "falha de rede";
+};
 
 type Category = "movie" | "serie" | "anime" | "canais";
 
@@ -51,6 +57,14 @@ interface ChannelItem {
   loading?: boolean;
 }
 
+interface ImportedTmdbRow { tmdb_id: number | null }
+interface ImportedChannelRow { external_id: string | null }
+interface WarezChannelsResponse { data?: ChannelItem[] }
+
+type MovieInsert = Database["public"]["Tables"]["movies"]["Insert"];
+type SeriesInsert = Database["public"]["Tables"]["series"]["Insert"];
+type CategoryConfig = { key: Category; label: string; icon: LucideIcon };
+
 const PAGE_SIZE = 20;
 const BULK_BATCH_SIZE = 2;
 const BATCH_DELAY_MS = 600;
@@ -73,7 +87,6 @@ export function SyncManagement() {
   const isChannels = category === "canais";
   const isAnime = category === "anime";
   const tmdbType: "movie" | "series" = category === "movie" ? "movie" : "series";
-  const dbTable = tmdbType === "movie" ? "movies" : "series";
 
   // Load already imported TMDB IDs (movies + series, including animes)
   const loadImported = useCallback(async () => {
@@ -84,7 +97,7 @@ export function SyncManagement() {
       while (true) {
         const { data } = await supabase.from(table).select("tmdb_id").range(from, from + PAGE - 1);
         if (!data || data.length === 0) break;
-        allIds.push(...data.map((d: any) => d.tmdb_id).filter(Boolean));
+        allIds.push(...(data as ImportedTmdbRow[]).map((d) => d.tmdb_id).filter((id): id is number => Boolean(id)));
         if (data.length < PAGE) break;
         from += PAGE;
       }
@@ -100,7 +113,7 @@ export function SyncManagement() {
     while (true) {
       const { data } = await supabase.from("tv_channels").select("external_id").range(from, from + 999);
       if (!data || data.length === 0) break;
-      all.push(...data.map((d: any) => d.external_id).filter(Boolean));
+      all.push(...(data as ImportedChannelRow[]).map((d) => d.external_id).filter((id): id is string => Boolean(id)));
       if (data.length < 1000) break;
       from += 1000;
     }
@@ -117,25 +130,26 @@ export function SyncManagement() {
     setPage(0);
     try {
       if (isChannels) {
-        const json: any = await fetchJsonResilient(`https://warezcdn.lat/lista?category=canais&format=json`, { timeoutMs: 20_000, retries: 2 });
-        const list: ChannelItem[] = (json.data || []).filter((c: any) => c.is_active);
+        const json = await fetchJsonResilient<WarezChannelsResponse>(`https://warezcdn.lat/lista?category=canais&format=json`, { timeoutMs: 20_000, retries: 2 });
+        const list: ChannelItem[] = (json.data || []).filter((c) => c.is_active);
         const importedSet = await loadImportedChannels();
         setChannels(list.map((c) => ({ ...c, alreadyImported: importedSet.has(c.id) })));
         toast.success(`${list.length} canais encontrados no WarezCDN`);
       } else {
         const apiCat = isAnime ? "anime" : category;
-        const data: any = await fetchJsonResilient(`https://warezcdn.lat/lista?category=${apiCat}&type=tmdb&format=json`, { timeoutMs: 20_000, retries: 2 });
-        const ids: number[] = Array.isArray(data) ? data.map((id: any) => Number(id)).filter(Boolean) : [];
+        const data = await fetchJsonResilient<unknown[]>(`https://warezcdn.lat/lista?category=${apiCat}&type=tmdb&format=json`, { timeoutMs: 20_000, retries: 2 });
+        const ids: number[] = Array.isArray(data) ? data.map((id) => Number(id)).filter(Boolean) : [];
         setWarezIds(ids);
         await loadImported();
         toast.success(`${ids.length} IDs encontrados no WarezCDN`);
       }
-    } catch (err: any) {
-      toast.error(`Erro ao buscar lista: ${err?.message || 'falha de rede'}. Tente novamente.`);
+    } catch (err) {
+      toast.error(`Erro ao buscar lista: ${getErrorMessage(err)}. Tente novamente.`);
       setWarezIds([]);
       setChannels([]);
+    } finally {
+      setLoadingList(false);
     }
-    setLoadingList(false);
   };
 
   // Load TMDB previews for current page (movies/series/anime)
@@ -146,57 +160,98 @@ export function SyncManagement() {
     const slice = warezIds.slice(start, start + PAGE_SIZE);
 
     const results: TmdbPreview[] = [];
-    await Promise.allSettled(
-      slice.map(async (tmdbId) => {
-        try {
-          if (tmdbType === "movie") {
-            const d = await withRetry(() => getMovieDetails(tmdbId));
-            results.push({
-              tmdb_id: d.id, title: d.title, original_title: d.original_title,
-              year: d.release_date?.slice(0, 4) || "",
-              image_url: getImageUrl(d.poster_path),
-              backdrop_url: getImageUrl(d.backdrop_path, "w1280"),
-              overview: d.overview,
-              genre: d.genres?.map((g) => g.name).slice(0, 3).join(", ") || "",
-              rating: Math.round(d.vote_average * 10) / 10,
-              alreadyImported: importedIds.has(d.id),
-            });
-          } else {
-            const d = await withRetry(() => getSeriesDetails(tmdbId));
-            results.push({
-              tmdb_id: d.id, title: d.name, original_title: d.original_name,
-              year: d.first_air_date?.slice(0, 4) || "",
-              image_url: getImageUrl(d.poster_path),
-              backdrop_url: getImageUrl(d.backdrop_path, "w1280"),
-              overview: d.overview,
-              genre: d.genres?.map((g) => g.name).slice(0, 3).join(", ") || "",
-              rating: Math.round(d.vote_average * 10) / 10,
-              alreadyImported: importedIds.has(d.id),
-            });
+    try {
+      await Promise.allSettled(
+        slice.map(async (tmdbId) => {
+          try {
+            if (tmdbType === "movie") {
+              const d = await withRetry(() => getMovieDetails(tmdbId));
+              results.push({
+                tmdb_id: d.id, title: d.title, original_title: d.original_title,
+                year: d.release_date?.slice(0, 4) || "",
+                image_url: getImageUrl(d.poster_path),
+                backdrop_url: getImageUrl(d.backdrop_path, "w1280"),
+                overview: d.overview,
+                genre: d.genres?.map((g) => g.name).slice(0, 3).join(", ") || "",
+                rating: Math.round(d.vote_average * 10) / 10,
+                alreadyImported: importedIds.has(d.id),
+              });
+            } else {
+              const d = await withRetry(() => getSeriesDetails(tmdbId));
+              results.push({
+                tmdb_id: d.id, title: d.name, original_title: d.original_name,
+                year: d.first_air_date?.slice(0, 4) || "",
+                image_url: getImageUrl(d.poster_path),
+                backdrop_url: getImageUrl(d.backdrop_path, "w1280"),
+                overview: d.overview,
+                genre: d.genres?.map((g) => g.name).slice(0, 3).join(", ") || "",
+                rating: Math.round(d.vote_average * 10) / 10,
+                alreadyImported: importedIds.has(d.id),
+              });
+            }
+          } catch (err) {
+            console.warn(`[Sync] Preview TMDB ${tmdbId} falhou:`, err);
           }
-        } catch {}
-      })
-    );
-    results.sort((a, b) => slice.indexOf(a.tmdb_id) - slice.indexOf(b.tmdb_id));
-    setPreviews(results);
-    setLoadingPreviews(false);
+        })
+      );
+      results.sort((a, b) => slice.indexOf(a.tmdb_id) - slice.indexOf(b.tmdb_id));
+      setPreviews(results);
+    } finally {
+      setLoadingPreviews(false);
+    }
   }, [warezIds, tmdbType, importedIds, isChannels]);
 
   useEffect(() => {
     if (warezIds.length > 0 && !isChannels) loadPage(page);
   }, [page, warezIds, loadPage, isChannels]);
 
-  // Build payload for movie/series/anime
-  const buildTmdbPayload = (item: TmdbPreview) => {
-    const base: any = {
-      title: item.title, original_title: item.original_title, overview: item.overview,
-      year: item.year, genre: item.genre, rating: item.rating,
-      image_url: item.image_url, backdrop_url: item.backdrop_url,
-      tmdb_id: item.tmdb_id, is_release: false,
+  const buildMoviePayload = (item: TmdbPreview): MovieInsert => ({
+    title: item.title, original_title: item.original_title, overview: item.overview,
+    year: item.year, genre: item.genre, rating: item.rating,
+    image_url: item.image_url, backdrop_url: item.backdrop_url,
+    tmdb_id: item.tmdb_id, is_release: false,
+    release_date: item.year ? `${item.year}-01-01` : null,
+  });
+
+  const buildSeriesPayload = (item: TmdbPreview): SeriesInsert => ({
+    title: item.title, original_title: item.original_title, overview: item.overview,
+    year: item.year, genre: item.genre, rating: item.rating,
+    image_url: item.image_url, backdrop_url: item.backdrop_url,
+    tmdb_id: item.tmdb_id, is_release: false,
+    first_air_date: item.year ? `${item.year}-01-01` : null,
+    is_anime: isAnime,
+  });
+
+  const importMoviePayload = async (payload: MovieInsert) => supabase.from("movies").upsert(payload, { onConflict: "tmdb_id" });
+  const importSeriesPayload = async (payload: SeriesInsert) => supabase.from("series").upsert(payload, { onConflict: "tmdb_id" });
+
+  const buildBulkMoviePayload = async (tmdbId: number): Promise<MovieInsert> => {
+    const d = await withRetry(() => getMovieDetails(tmdbId));
+    if (!d || !d.id) throw new Error("TMDB vazio");
+    return {
+      title: d.title, original_title: d.original_title, overview: d.overview,
+      year: d.release_date?.slice(0, 4) || "",
+      genre: d.genres?.map(g => g.name).slice(0, 3).join(", ") || "",
+      rating: Math.round((d.vote_average || 0) * 10) / 10,
+      image_url: getImageUrl(d.poster_path),
+      backdrop_url: getImageUrl(d.backdrop_path, "w1280"),
+      tmdb_id: d.id, is_release: false, release_date: d.release_date || null,
     };
-    if (tmdbType === "movie") base.release_date = item.year ? `${item.year}-01-01` : null;
-    else { base.first_air_date = item.year ? `${item.year}-01-01` : null; base.is_anime = isAnime; }
-    return base;
+  };
+
+  const buildBulkSeriesPayload = async (tmdbId: number): Promise<SeriesInsert> => {
+    const d = await withRetry(() => getSeriesDetails(tmdbId));
+    if (!d || !d.id) throw new Error("TMDB vazio");
+    return {
+      title: d.name, original_title: d.original_name, overview: d.overview,
+      year: d.first_air_date?.slice(0, 4) || "",
+      genre: d.genres?.map(g => g.name).slice(0, 3).join(", ") || "",
+      rating: Math.round((d.vote_average || 0) * 10) / 10,
+      image_url: getImageUrl(d.poster_path),
+      backdrop_url: getImageUrl(d.backdrop_path, "w1280"),
+      tmdb_id: d.id, is_release: false,
+      first_air_date: d.first_air_date || null, is_anime: isAnime,
+    };
   };
 
   // Import single TMDB item
@@ -204,32 +259,42 @@ export function SyncManagement() {
     if (importedIds.has(item.tmdb_id)) { toast.info(`"${item.title}" já foi importado!`); return; }
     setPreviews((prev) => prev.map((p) => p.tmdb_id === item.tmdb_id ? { ...p, loading: true } : p));
 
-    const payload = buildTmdbPayload(item);
-    const { error } = await supabase.from(dbTable).upsert(payload, { onConflict: 'tmdb_id' });
-    if (error) {
-      toast.error(`Erro ao importar: ${error.message}`);
-    } else {
+    let ok = false;
+    try {
+      const { error } = tmdbType === "movie"
+        ? await importMoviePayload(buildMoviePayload(item))
+        : await importSeriesPayload(buildSeriesPayload(item));
+      if (error) throw error;
+      ok = true;
       toast.success(`${item.title} importado!`);
       setImportedIds((prev) => new Set([...prev, item.tmdb_id]));
+    } catch (err) {
+      toast.error(`Erro ao importar: ${getErrorMessage(err)}`);
+    } finally {
+      setPreviews((prev) => prev.map((p) => p.tmdb_id === item.tmdb_id ? { ...p, loading: false, alreadyImported: ok } : p));
     }
-    setPreviews((prev) => prev.map((p) => p.tmdb_id === item.tmdb_id ? { ...p, loading: false, alreadyImported: !error } : p));
   };
 
   // Import single channel
   const handleImportChannel = async (ch: ChannelItem) => {
     if (importedChannelIds.has(ch.id)) { toast.info(`"${ch.name}" já foi importado!`); return; }
     setChannels((prev) => prev.map((c) => c.id === ch.id ? { ...c, loading: true } : c));
-    const { error } = await supabase.from("tv_channels").upsert({
-      external_id: ch.id, name: ch.name, category: ch.category || null,
-      description: ch.description || null, logo_url: ch.logo_url || null,
-      embed_url: ch.embed_url, is_active: ch.is_active,
-    }, { onConflict: 'external_id' });
-    if (error) { toast.error(`Erro: ${error.message}`); }
-    else {
+    let ok = false;
+    try {
+      const { error } = await supabase.from("tv_channels").upsert({
+        external_id: ch.id, name: ch.name, category: ch.category || null,
+        description: ch.description || null, logo_url: ch.logo_url || null,
+        embed_url: ch.embed_url, is_active: ch.is_active,
+      }, { onConflict: 'external_id' });
+      if (error) throw error;
+      ok = true;
       toast.success(`${ch.name} importado!`);
       setImportedChannelIds((prev) => new Set([...prev, ch.id]));
+    } catch (err) {
+      toast.error(`Erro ao importar canal: ${getErrorMessage(err)}`);
+    } finally {
+      setChannels((prev) => prev.map((c) => c.id === ch.id ? { ...c, loading: false, alreadyImported: ok } : c));
     }
-    setChannels((prev) => prev.map((c) => c.id === ch.id ? { ...c, loading: false, alreadyImported: !error } : c));
   };
 
   // Bulk import
@@ -272,34 +337,9 @@ export function SyncManagement() {
     const failedIds: number[] = [];
 
     const importOne = async (tmdbId: number) => {
-      let payload: any;
-      if (tmdbType === "movie") {
-        const d = await withRetry(() => getMovieDetails(tmdbId));
-        if (!d || !d.id) throw new Error("TMDB vazio");
-        payload = {
-          title: d.title, original_title: d.original_title, overview: d.overview,
-          year: d.release_date?.slice(0, 4) || "",
-          genre: d.genres?.map(g => g.name).slice(0, 3).join(", ") || "",
-          rating: Math.round((d.vote_average || 0) * 10) / 10,
-          image_url: getImageUrl(d.poster_path),
-          backdrop_url: getImageUrl(d.backdrop_path, "w1280"),
-          tmdb_id: d.id, is_release: false, release_date: d.release_date || null,
-        };
-      } else {
-        const d = await withRetry(() => getSeriesDetails(tmdbId));
-        if (!d || !d.id) throw new Error("TMDB vazio");
-        payload = {
-          title: d.name, original_title: d.original_name, overview: d.overview,
-          year: d.first_air_date?.slice(0, 4) || "",
-          genre: d.genres?.map(g => g.name).slice(0, 3).join(", ") || "",
-          rating: Math.round((d.vote_average || 0) * 10) / 10,
-          image_url: getImageUrl(d.poster_path),
-          backdrop_url: getImageUrl(d.backdrop_path, "w1280"),
-          tmdb_id: d.id, is_release: false,
-          first_air_date: d.first_air_date || null, is_anime: isAnime,
-        };
-      }
-      const { error } = await supabase.from(dbTable).upsert(payload, { onConflict: 'tmdb_id' });
+      const { error } = tmdbType === "movie"
+        ? await importMoviePayload(await buildBulkMoviePayload(tmdbId))
+        : await importSeriesPayload(await buildBulkSeriesPayload(tmdbId));
       if (error) throw error;
       setImportedIds((prev) => new Set([...prev, tmdbId]));
     };
@@ -358,7 +398,7 @@ export function SyncManagement() {
     ? channels.filter((c) => c.name.toLowerCase().includes(searchFilter.toLowerCase()))
     : channels;
 
-  const categories: { key: Category; label: string; icon: any }[] = [
+  const categories: CategoryConfig[] = [
     { key: "movie", label: "Filmes", icon: Film },
     { key: "serie", label: "Séries", icon: Tv },
     { key: "anime", label: "Animes", icon: Sparkles },
