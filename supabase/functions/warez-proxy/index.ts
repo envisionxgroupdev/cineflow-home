@@ -36,6 +36,7 @@ Deno.serve(async (req) => {
     clearTimeout(t);
 
     const body = await res.text();
+    const isUpstreamError = !res.ok;
     // Always return HTTP 200 so the preview's error overlay doesn't trip on upstream 404s.
     // Callers inspect the JSON body (e.g. TMDB status_code) to decide success.
     return new Response(body, {
@@ -44,7 +45,7 @@ Deno.serve(async (req) => {
         ...corsHeaders,
         "Content-Type": res.headers.get("content-type") || "application/json",
         "X-Upstream-Status": String(res.status),
-        "Cache-Control": "public, max-age=300",
+        "Cache-Control": isUpstreamError ? "no-store" : "public, max-age=300",
       },
     });
   } catch (err) {
