@@ -338,34 +338,9 @@ export function SyncManagement() {
     const failedIds: number[] = [];
 
     const importOne = async (tmdbId: number) => {
-      let payload: any;
-      if (tmdbType === "movie") {
-        const d = await withRetry(() => getMovieDetails(tmdbId));
-        if (!d || !d.id) throw new Error("TMDB vazio");
-        payload = {
-          title: d.title, original_title: d.original_title, overview: d.overview,
-          year: d.release_date?.slice(0, 4) || "",
-          genre: d.genres?.map(g => g.name).slice(0, 3).join(", ") || "",
-          rating: Math.round((d.vote_average || 0) * 10) / 10,
-          image_url: getImageUrl(d.poster_path),
-          backdrop_url: getImageUrl(d.backdrop_path, "w1280"),
-          tmdb_id: d.id, is_release: false, release_date: d.release_date || null,
-        };
-      } else {
-        const d = await withRetry(() => getSeriesDetails(tmdbId));
-        if (!d || !d.id) throw new Error("TMDB vazio");
-        payload = {
-          title: d.name, original_title: d.original_name, overview: d.overview,
-          year: d.first_air_date?.slice(0, 4) || "",
-          genre: d.genres?.map(g => g.name).slice(0, 3).join(", ") || "",
-          rating: Math.round((d.vote_average || 0) * 10) / 10,
-          image_url: getImageUrl(d.poster_path),
-          backdrop_url: getImageUrl(d.backdrop_path, "w1280"),
-          tmdb_id: d.id, is_release: false,
-          first_air_date: d.first_air_date || null, is_anime: isAnime,
-        };
-      }
-      const { error } = await supabase.from(dbTable).upsert(payload, { onConflict: 'tmdb_id' });
+      const { error } = tmdbType === "movie"
+        ? await importMoviePayload(await buildBulkMoviePayload(tmdbId))
+        : await importSeriesPayload(await buildBulkSeriesPayload(tmdbId));
       if (error) throw error;
       setImportedIds((prev) => new Set([...prev, tmdbId]));
     };
