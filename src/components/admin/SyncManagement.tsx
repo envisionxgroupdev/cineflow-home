@@ -87,7 +87,6 @@ export function SyncManagement() {
   const isChannels = category === "canais";
   const isAnime = category === "anime";
   const tmdbType: "movie" | "series" = category === "movie" ? "movie" : "series";
-  const dbTable = tmdbType === "movie" ? "movies" : "series";
 
   // Load already imported TMDB IDs (movies + series, including animes)
   const loadImported = useCallback(async () => {
@@ -399,7 +398,7 @@ export function SyncManagement() {
     ? channels.filter((c) => c.name.toLowerCase().includes(searchFilter.toLowerCase()))
     : channels;
 
-  const categories: { key: Category; label: string; icon: any }[] = [
+  const categories: CategoryConfig[] = [
     { key: "movie", label: "Filmes", icon: Film },
     { key: "serie", label: "Séries", icon: Tv },
     { key: "anime", label: "Animes", icon: Sparkles },
