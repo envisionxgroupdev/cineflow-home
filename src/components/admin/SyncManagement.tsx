@@ -23,6 +23,11 @@ async function withRetry<T>(fn: () => Promise<T>, retries = 4, delayMs = 800): P
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
+const getErrorMessage = (err: unknown) => {
+  if (err && typeof err === "object" && "message" in err) return String((err as { message?: unknown }).message || "falha desconhecida");
+  return typeof err === "string" ? err : "falha de rede";
+};
+
 type Category = "movie" | "serie" | "anime" | "canais";
 
 interface TmdbPreview {
@@ -131,11 +136,12 @@ export function SyncManagement() {
         toast.success(`${ids.length} IDs encontrados no WarezCDN`);
       }
     } catch (err: any) {
-      toast.error(`Erro ao buscar lista: ${err?.message || 'falha de rede'}. Tente novamente.`);
+      toast.error(`Erro ao buscar lista: ${getErrorMessage(err)}. Tente novamente.`);
       setWarezIds([]);
       setChannels([]);
+    } finally {
+      setLoadingList(false);
     }
-    setLoadingList(false);
   };
 
   // Load TMDB previews for current page (movies/series/anime)
@@ -146,40 +152,43 @@ export function SyncManagement() {
     const slice = warezIds.slice(start, start + PAGE_SIZE);
 
     const results: TmdbPreview[] = [];
-    await Promise.allSettled(
-      slice.map(async (tmdbId) => {
-        try {
-          if (tmdbType === "movie") {
-            const d = await withRetry(() => getMovieDetails(tmdbId));
-            results.push({
-              tmdb_id: d.id, title: d.title, original_title: d.original_title,
-              year: d.release_date?.slice(0, 4) || "",
-              image_url: getImageUrl(d.poster_path),
-              backdrop_url: getImageUrl(d.backdrop_path, "w1280"),
-              overview: d.overview,
-              genre: d.genres?.map((g) => g.name).slice(0, 3).join(", ") || "",
-              rating: Math.round(d.vote_average * 10) / 10,
-              alreadyImported: importedIds.has(d.id),
-            });
-          } else {
-            const d = await withRetry(() => getSeriesDetails(tmdbId));
-            results.push({
-              tmdb_id: d.id, title: d.name, original_title: d.original_name,
-              year: d.first_air_date?.slice(0, 4) || "",
-              image_url: getImageUrl(d.poster_path),
-              backdrop_url: getImageUrl(d.backdrop_path, "w1280"),
-              overview: d.overview,
-              genre: d.genres?.map((g) => g.name).slice(0, 3).join(", ") || "",
-              rating: Math.round(d.vote_average * 10) / 10,
-              alreadyImported: importedIds.has(d.id),
-            });
-          }
-        } catch {}
-      })
-    );
-    results.sort((a, b) => slice.indexOf(a.tmdb_id) - slice.indexOf(b.tmdb_id));
-    setPreviews(results);
-    setLoadingPreviews(false);
+    try {
+      await Promise.allSettled(
+        slice.map(async (tmdbId) => {
+          try {
+            if (tmdbType === "movie") {
+              const d = await withRetry(() => getMovieDetails(tmdbId));
+              results.push({
+                tmdb_id: d.id, title: d.title, original_title: d.original_title,
+                year: d.release_date?.slice(0, 4) || "",
+                image_url: getImageUrl(d.poster_path),
+                backdrop_url: getImageUrl(d.backdrop_path, "w1280"),
+                overview: d.overview,
+                genre: d.genres?.map((g) => g.name).slice(0, 3).join(", ") || "",
+                rating: Math.round(d.vote_average * 10) / 10,
+                alreadyImported: importedIds.has(d.id),
+              });
+            } else {
+              const d = await withRetry(() => getSeriesDetails(tmdbId));
+              results.push({
+                tmdb_id: d.id, title: d.name, original_title: d.original_name,
+                year: d.first_air_date?.slice(0, 4) || "",
+                image_url: getImageUrl(d.poster_path),
+                backdrop_url: getImageUrl(d.backdrop_path, "w1280"),
+                overview: d.overview,
+                genre: d.genres?.map((g) => g.name).slice(0, 3).join(", ") || "",
+                rating: Math.round(d.vote_average * 10) / 10,
+                alreadyImported: importedIds.has(d.id),
+              });
+            }
+          } catch {}
+        })
+      );
+      results.sort((a, b) => slice.indexOf(a.tmdb_id) - slice.indexOf(b.tmdb_id));
+      setPreviews(results);
+    } finally {
+      setLoadingPreviews(false);
+    }
   }, [warezIds, tmdbType, importedIds, isChannels]);
 
   useEffect(() => {
