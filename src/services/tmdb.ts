@@ -188,8 +188,7 @@ export async function getSeriesCredits(tmdbId: number): Promise<TmdbCastMember[]
 }
 
 export async function getSeasonEpisodes(tmdbId: number, seasonNumber: number): Promise<TmdbEpisode[]> {
-  const res = await fetch(`${TMDB_BASE}/tv/${tmdbId}/season/${seasonNumber}?api_key=${TMDB_API_KEY}&language=pt-BR`);
-  const data = await res.json();
+  const data: any = await tmdbFetchJson(`/tv/${tmdbId}/season/${seasonNumber}`, { language: 'pt-BR' });
   return (data.episodes || []).map((ep: TmdbEpisode) => ({
     ...ep,
     name: ep.name || `Episódio ${ep.episode_number}`,
@@ -204,8 +203,7 @@ export interface TmdbLogo {
 }
 
 export async function getTitleLogo(type: 'movie' | 'tv', tmdbId: number): Promise<string | null> {
-  const res = await fetch(`${TMDB_BASE}/${type}/${tmdbId}/images?api_key=${TMDB_API_KEY}&include_image_language=pt,en,null`);
-  const data = await res.json();
+  const data: any = await tmdbFetchJson(`/${type}/${tmdbId}/images`, { include_image_language: 'pt,en,null' });
   const logos: TmdbLogo[] = data.logos || [];
   if (logos.length === 0) return null;
   const pt = logos.find(l => l.iso_639_1 === 'pt');
@@ -225,8 +223,7 @@ export interface TmdbRecommendation {
 }
 
 export async function getRecommendations(type: 'movie' | 'tv', tmdbId: number): Promise<TmdbRecommendation[]> {
-  const res = await fetch(`${TMDB_BASE}/${type}/${tmdbId}/recommendations?api_key=${TMDB_API_KEY}&language=pt-BR&page=1`);
-  const data = await res.json();
+  const data: any = await tmdbFetchJson(`/${type}/${tmdbId}/recommendations`, { language: 'pt-BR', page: 1 });
   return (data.results || []).slice(0, 12);
 }
 
