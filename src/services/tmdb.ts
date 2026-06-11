@@ -1,6 +1,8 @@
 const TMDB_API_KEY = 'c3303b4812a831ae634e26763a65644e';
 const TMDB_BASE = 'https://api.themoviedb.org/3';
 const TMDB_IMG = 'https://image.tmdb.org/t/p';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 export interface TmdbMovie {
   id: number;
@@ -92,12 +94,28 @@ interface TmdbGenre {
 let movieGenresCache: TmdbGenre[] = [];
 let tvGenresCache: TmdbGenre[] = [];
 
+async function tmdbFetchJson<T = any>(path: string, params: Record<string, string | number | undefined> = {}): Promise<T> {
+  const direct = new URL(`${TMDB_BASE}${path}`);
+  direct.searchParams.set('api_key', TMDB_API_KEY);
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== '') direct.searchParams.set(key, String(value));
+  });
+
+  const proxied = `${SUPABASE_URL}/functions/v1/warez-proxy?url=${encodeURIComponent(direct.toString())}`;
+  const res = await fetch(proxied, {
+    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+  });
+  if (!res.ok) throw new Error(`TMDB ${res.status} em ${path}`);
+  const data = await res.json();
+  if (data?.status_code && data?.success === false) throw new Error(data.status_message || `TMDB ${data.status_code}`);
+  return data as T;
+}
+
 async function fetchGenres(type: 'movie' | 'tv'): Promise<TmdbGenre[]> {
   const cache = type === 'movie' ? movieGenresCache : tvGenresCache;
   if (cache.length > 0) return cache;
 
-  const res = await fetch(`${TMDB_BASE}/genre/${type}/list?api_key=${TMDB_API_KEY}&language=pt-BR`);
-  const data = await res.json();
+  const data: any = await tmdbFetchJson(`/genre/${type}/list`, { language: 'pt-BR' });
   const genres = data.genres || [];
 
   if (type === 'movie') movieGenresCache = genres;
@@ -121,27 +139,19 @@ function mapGenreIds(ids: number[], genres: TmdbGenre[]): string {
 
 export async function searchMovies(query: string, year?: number): Promise<TmdbMovie[]> {
   if (!query.trim() && year) {
-    const res = await fetch(`${TMDB_BASE}/discover/movie?api_key=${TMDB_API_KEY}&language=pt-BR&primary_release_year=${year}&sort_by=popularity.desc`);
-    const data = await res.json();
+    const data: any = await tmdbFetchJson('/discover/movie', { language: 'pt-BR', primary_release_year: year, sort_by: 'popularity.desc' });
     return data.results || [];
   }
-  let url = `${TMDB_BASE}/search/movie?api_key=${TMDB_API_KEY}&language=pt-BR&query=${encodeURIComponent(query)}`;
-  if (year) url += `&primary_release_year=${year}`;
-  const res = await fetch(url);
-  const data = await res.json();
+  const data: any = await tmdbFetchJson('/search/movie', { language: 'pt-BR', query, primary_release_year: year });
   return data.results || [];
 }
 
 export async function searchSeries(query: string, year?: number): Promise<TmdbSeries[]> {
   if (!query.trim() && year) {
-    const res = await fetch(`${TMDB_BASE}/discover/tv?api_key=${TMDB_API_KEY}&language=pt-BR&first_air_date_year=${year}&sort_by=popularity.desc`);
-    const data = await res.json();
+    const data: any = await tmdbFetchJson('/discover/tv', { language: 'pt-BR', first_air_date_year: year, sort_by: 'popularity.desc' });
     return data.results || [];
   }
-  let url = `${TMDB_BASE}/search/tv?api_key=${TMDB_API_KEY}&language=pt-BR&query=${encodeURIComponent(query)}`;
-  if (year) url += `&first_air_date_year=${year}`;
-  const res = await fetch(url);
-  const data = await res.json();
+  const data: any = await tmdbFetchJson('/search/tv', { language: 'pt-BR', query, first_air_date_year: year });
   return data.results || [];
 }
 
