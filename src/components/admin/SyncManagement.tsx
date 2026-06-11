@@ -207,16 +207,15 @@ export function SyncManagement() {
   }, [page, warezIds, loadPage, isChannels]);
 
   // Build payload for movie/series/anime
-  const buildTmdbPayload = (item: TmdbPreview): TmdbDbPayload => {
-    const base: TmdbDbPayload = {
+  const buildTmdbPayload = (item: TmdbPreview): MovieInsert | SeriesInsert => {
+    const base = {
       title: item.title, original_title: item.original_title, overview: item.overview,
       year: item.year, genre: item.genre, rating: item.rating,
       image_url: item.image_url, backdrop_url: item.backdrop_url,
       tmdb_id: item.tmdb_id, is_release: false,
     };
-    if (tmdbType === "movie") base.release_date = item.year ? `${item.year}-01-01` : null;
-    else { base.first_air_date = item.year ? `${item.year}-01-01` : null; base.is_anime = isAnime; }
-    return base;
+    if (tmdbType === "movie") return { ...base, release_date: item.year ? `${item.year}-01-01` : null } satisfies MovieInsert;
+    return { ...base, first_air_date: item.year ? `${item.year}-01-01` : null, is_anime: isAnime } satisfies SeriesInsert;
   };
 
   // Import single TMDB item
