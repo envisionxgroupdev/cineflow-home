@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { RefreshCw, Download, Film, Tv, Loader2, Search, Check, Zap, Square, Sparkles, Radio, type LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import { getMovieDetails, getSeriesDetails, getImageUrl } from "@/services/tmdb";
 import { toast } from "sonner";
 import { fetchJsonResilient } from "@/lib/resilientFetch";
@@ -60,21 +61,9 @@ interface ImportedTmdbRow { tmdb_id: number | null }
 interface ImportedChannelRow { external_id: string | null }
 interface WarezChannelsResponse { data?: ChannelItem[] }
 
-type TmdbDbPayload = {
-  title: string;
-  original_title: string;
-  overview: string;
-  year: string;
-  genre: string;
-  rating: number;
-  image_url: string;
-  backdrop_url: string;
-  tmdb_id: number;
-  is_release: boolean;
-  release_date?: string | null;
-  first_air_date?: string | null;
-  is_anime?: boolean;
-};
+type MovieInsert = Database["public"]["Tables"]["movies"]["Insert"];
+type SeriesInsert = Database["public"]["Tables"]["series"]["Insert"];
+type CategoryConfig = { key: Category; label: string; icon: LucideIcon };
 
 const PAGE_SIZE = 20;
 const BULK_BATCH_SIZE = 2;
