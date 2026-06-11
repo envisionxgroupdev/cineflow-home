@@ -156,42 +156,34 @@ export async function searchSeries(query: string, year?: number): Promise<TmdbSe
 }
 
 export async function getTrendingMovies(): Promise<TmdbMovie[]> {
-  const res = await fetch(`${TMDB_BASE}/movie/now_playing?api_key=${TMDB_API_KEY}&language=pt-BR&page=1`);
-  const data = await res.json();
+  const data: any = await tmdbFetchJson('/movie/now_playing', { language: 'pt-BR', page: 1 });
   return data.results || [];
 }
 
 export async function getTrendingSeries(): Promise<TmdbSeries[]> {
-  const res = await fetch(`${TMDB_BASE}/tv/on_the_air?api_key=${TMDB_API_KEY}&language=pt-BR&page=1`);
-  const data = await res.json();
+  const data: any = await tmdbFetchJson('/tv/on_the_air', { language: 'pt-BR', page: 1 });
   return data.results || [];
 }
 
 export async function getMovieDetails(tmdbId: number): Promise<TmdbMovieDetails> {
-  const res = await fetch(`${TMDB_BASE}/movie/${tmdbId}?api_key=${TMDB_API_KEY}&language=pt-BR`);
-  if (!res.ok) throw new Error(`TMDB ${res.status} for movie ${tmdbId}`);
-  const data = await res.json();
+  const data: any = await tmdbFetchJson(`/movie/${tmdbId}`, { language: 'pt-BR' });
   if (!data || !data.id) throw new Error(`TMDB movie ${tmdbId} resposta inválida`);
   return data;
 }
 
 export async function getSeriesDetails(tmdbId: number): Promise<TmdbSeriesDetails> {
-  const res = await fetch(`${TMDB_BASE}/tv/${tmdbId}?api_key=${TMDB_API_KEY}&language=pt-BR`);
-  if (!res.ok) throw new Error(`TMDB ${res.status} for tv ${tmdbId}`);
-  const data = await res.json();
+  const data: any = await tmdbFetchJson(`/tv/${tmdbId}`, { language: 'pt-BR' });
   if (!data || !data.id) throw new Error(`TMDB tv ${tmdbId} resposta inválida`);
   return data;
 }
 
 export async function getMovieCredits(tmdbId: number): Promise<TmdbCastMember[]> {
-  const res = await fetch(`${TMDB_BASE}/movie/${tmdbId}/credits?api_key=${TMDB_API_KEY}&language=pt-BR`);
-  const data = await res.json();
+  const data: any = await tmdbFetchJson(`/movie/${tmdbId}/credits`, { language: 'pt-BR' });
   return (data.cast || []).slice(0, 12);
 }
 
 export async function getSeriesCredits(tmdbId: number): Promise<TmdbCastMember[]> {
-  const res = await fetch(`${TMDB_BASE}/tv/${tmdbId}/credits?api_key=${TMDB_API_KEY}&language=pt-BR`);
-  const data = await res.json();
+  const data: any = await tmdbFetchJson(`/tv/${tmdbId}/credits`, { language: 'pt-BR' });
   return (data.cast || []).slice(0, 12);
 }
 
