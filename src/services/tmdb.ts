@@ -101,7 +101,7 @@ type TmdbErrorResponse = { status_code?: number; success?: boolean; status_messa
 let movieGenresCache: TmdbGenre[] = [];
 let tvGenresCache: TmdbGenre[] = [];
 
-async function tmdbFetchJson<T>(path: string, params: Record<string, string | number | undefined> = {}): Promise<T> {
+async function tmdbFetchJson<T>(path: string, params: Record<string, string | number | undefined> = {}): Promise<T | null> {
   const direct = new URL(`${TMDB_BASE}${path}`);
   direct.searchParams.set('api_key', TMDB_API_KEY);
   Object.entries(params).forEach(([key, value]) => {
@@ -112,8 +112,12 @@ async function tmdbFetchJson<T>(path: string, params: Record<string, string | nu
   const res = await fetch(proxied, {
     headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
   });
-  if (!res.ok) throw new Error(`TMDB ${res.status} em ${path}`);
+  if (!res.ok) {
+    if (res.status === 404) return null;
+    throw new Error(`TMDB ${res.status} em ${path}`);
+  }
   const data = await res.json() as T & TmdbErrorResponse;
+  if (data.status_code === 34 && data.success === false) return null;
   if (data.status_code && data.success === false) throw new Error(data.status_message || `TMDB ${data.status_code}`);
   return data as T;
 }
@@ -123,7 +127,7 @@ async function fetchGenres(type: 'movie' | 'tv'): Promise<TmdbGenre[]> {
   if (cache.length > 0) return cache;
 
   const data = await tmdbFetchJson<TmdbGenresResponse>(`/genre/${type}/list`, { language: 'pt-BR' });
-  const genres = data.genres || [];
+  const genres = data?.genres || [];
 
   if (type === 'movie') movieGenresCache = genres;
   else tvGenresCache = genres;
@@ -147,56 +151,58 @@ function mapGenreIds(ids: number[], genres: TmdbGenre[]): string {
 export async function searchMovies(query: string, year?: number): Promise<TmdbMovie[]> {
   if (!query.trim() && year) {
     const data = await tmdbFetchJson<TmdbListResponse<TmdbMovie>>('/discover/movie', { language: 'pt-BR', primary_release_year: year, sort_by: 'popularity.desc' });
-    return data.results || [];
+    return data?.results || [];
   }
   const data = await tmdbFetchJson<TmdbListResponse<TmdbMovie>>('/search/movie', { language: 'pt-BR', query, primary_release_year: year });
-  return data.results || [];
+  return data?.results || [];
 }
 
 export async function searchSeries(query: string, year?: number): Promise<TmdbSeries[]> {
   if (!query.trim() && year) {
     const data = await tmdbFetchJson<TmdbListResponse<TmdbSeries>>('/discover/tv', { language: 'pt-BR', first_air_date_year: year, sort_by: 'popularity.desc' });
-    return data.results || [];
+    return data?.results || [];
   }
   const data = await tmdbFetchJson<TmdbListResponse<TmdbSeries>>('/search/tv', { language: 'pt-BR', query, first_air_date_year: year });
-  return data.results || [];
+  return data?.results || [];
 }
 
 export async function getTrendingMovies(): Promise<TmdbMovie[]> {
   const data = await tmdbFetchJson<TmdbListResponse<TmdbMovie>>('/movie/now_playing', { language: 'pt-BR', page: 1 });
-  return data.results || [];
+  return data?.results || [];
 }
 
 export async function getTrendingSeries(): Promise<TmdbSeries[]> {
   const data = await tmdbFetchJson<TmdbListResponse<TmdbSeries>>('/tv/on_the_air', { language: 'pt-BR', page: 1 });
-  return data.results || [];
+  return data?.results || [];
 }
 
-export async function getMovieDetails(tmdbId: number): Promise<TmdbMovieDetails> {
+export async function getMovieDetails(tmdbId: number): Promise<TmdbMovieDetails | null> {
   const data = await tmdbFetchJson<TmdbMovieDetails>(`/movie/${tmdbId}`, { language: 'pt-BR' });
-  if (!data || !data.id) throw new Error(`TMDB movie ${tmdbId} resposta inválida`);
+  if (!data) return null;
+  if (!data.id) throw new Error(`TMDB movie ${tmdbId} resposta inválida`);
   return data;
 }
 
-export async function getSeriesDetails(tmdbId: number): Promise<TmdbSeriesDetails> {
+export async function getSeriesDetails(tmdbId: number): Promise<TmdbSeriesDetails | null> {
   const data = await tmdbFetchJson<TmdbSeriesDetails>(`/tv/${tmdbId}`, { language: 'pt-BR' });
-  if (!data || !data.id) throw new Error(`TMDB tv ${tmdbId} resposta inválida`);
+  if (!data) return null;
+  if (!data.id) throw new Error(`TMDB tv ${tmdbId} resposta inválida`);
   return data;
 }
 
 export async function getMovieCredits(tmdbId: number): Promise<TmdbCastMember[]> {
   const data = await tmdbFetchJson<TmdbCreditsResponse>(`/movie/${tmdbId}/credits`, { language: 'pt-BR' });
-  return (data.cast || []).slice(0, 12);
+  return (data?.cast || []).slice(0, 12);
 }
 
 export async function getSeriesCredits(tmdbId: number): Promise<TmdbCastMember[]> {
   const data = await tmdbFetchJson<TmdbCreditsResponse>(`/tv/${tmdbId}/credits`, { language: 'pt-BR' });
-  return (data.cast || []).slice(0, 12);
+  return (data?.cast || []).slice(0, 12);
 }
 
 export async function getSeasonEpisodes(tmdbId: number, seasonNumber: number): Promise<TmdbEpisode[]> {
   const data = await tmdbFetchJson<TmdbEpisodesResponse>(`/tv/${tmdbId}/season/${seasonNumber}`, { language: 'pt-BR' });
-  return (data.episodes || []).map((ep: TmdbEpisode) => ({
+  return (data?.episodes || []).map((ep: TmdbEpisode) => ({
     ...ep,
     name: ep.name || `Episódio ${ep.episode_number}`,
     overview: ep.overview && ep.overview.trim() ? ep.overview : '',
@@ -211,7 +217,7 @@ export interface TmdbLogo {
 
 export async function getTitleLogo(type: 'movie' | 'tv', tmdbId: number): Promise<string | null> {
   const data = await tmdbFetchJson<TmdbImagesResponse>(`/${type}/${tmdbId}/images`, { include_image_language: 'pt,en,null' });
-  const logos: TmdbLogo[] = data.logos || [];
+  const logos: TmdbLogo[] = data?.logos || [];
   if (logos.length === 0) return null;
   const pt = logos.find(l => l.iso_639_1 === 'pt');
   const en = logos.find(l => l.iso_639_1 === 'en');
@@ -231,7 +237,7 @@ export interface TmdbRecommendation {
 
 export async function getRecommendations(type: 'movie' | 'tv', tmdbId: number): Promise<TmdbRecommendation[]> {
   const data = await tmdbFetchJson<TmdbListResponse<TmdbRecommendation>>(`/${type}/${tmdbId}/recommendations`, { language: 'pt-BR', page: 1 });
-  return (data.results || []).slice(0, 12);
+  return (data?.results || []).slice(0, 12);
 }
 
 export async function tmdbMovieToDb(movie: TmdbMovie) {

@@ -166,6 +166,7 @@ export function SyncManagement() {
           try {
             if (tmdbType === "movie") {
               const d = await withRetry(() => getMovieDetails(tmdbId));
+              if (!d) return;
               results.push({
                 tmdb_id: d.id, title: d.title, original_title: d.original_title,
                 year: d.release_date?.slice(0, 4) || "",
@@ -178,6 +179,7 @@ export function SyncManagement() {
               });
             } else {
               const d = await withRetry(() => getSeriesDetails(tmdbId));
+              if (!d) return;
               results.push({
                 tmdb_id: d.id, title: d.name, original_title: d.original_name,
                 year: d.first_air_date?.slice(0, 4) || "",
