@@ -1,9 +1,18 @@
-// Proxy edge function for WarezCDN — replaces broken third-party CORS proxies.
+// Proxy edge function for media providers — replaces broken third-party CORS proxies.
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
 };
+
+function isAllowedTarget(target: string) {
+  try {
+    const url = new URL(target);
+    return url.hostname.endsWith("warezcdn.lat") || url.hostname === "api.themoviedb.org";
+  } catch {
+    return false;
+  }
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -11,7 +20,7 @@ Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
     const target = url.searchParams.get("url");
-    if (!target || !target.startsWith("https://warezcdn.")) {
+    if (!target || !isAllowedTarget(target)) {
       return new Response(JSON.stringify({ error: "Invalid target URL" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
