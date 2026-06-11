@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { RefreshCw, Download, Film, Tv, Loader2, Search, Check, Zap, Square, Sparkles, Radio } from "lucide-react";
+import { RefreshCw, Download, Film, Tv, Loader2, Search, Check, Zap, Square, Sparkles, Radio, type LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getMovieDetails, getSeriesDetails, getImageUrl } from "@/services/tmdb";
 import { toast } from "sonner";
@@ -56,6 +56,26 @@ interface ChannelItem {
   loading?: boolean;
 }
 
+interface ImportedTmdbRow { tmdb_id: number | null }
+interface ImportedChannelRow { external_id: string | null }
+interface WarezChannelsResponse { data?: ChannelItem[] }
+
+type TmdbDbPayload = {
+  title: string;
+  original_title: string;
+  overview: string;
+  year: string;
+  genre: string;
+  rating: number;
+  image_url: string;
+  backdrop_url: string;
+  tmdb_id: number;
+  is_release: boolean;
+  release_date?: string | null;
+  first_air_date?: string | null;
+  is_anime?: boolean;
+};
+
 const PAGE_SIZE = 20;
 const BULK_BATCH_SIZE = 2;
 const BATCH_DELAY_MS = 600;
@@ -89,7 +109,7 @@ export function SyncManagement() {
       while (true) {
         const { data } = await supabase.from(table).select("tmdb_id").range(from, from + PAGE - 1);
         if (!data || data.length === 0) break;
-        allIds.push(...data.map((d: any) => d.tmdb_id).filter(Boolean));
+        allIds.push(...(data as ImportedTmdbRow[]).map((d) => d.tmdb_id).filter((id): id is number => Boolean(id)));
         if (data.length < PAGE) break;
         from += PAGE;
       }
@@ -105,7 +125,7 @@ export function SyncManagement() {
     while (true) {
       const { data } = await supabase.from("tv_channels").select("external_id").range(from, from + 999);
       if (!data || data.length === 0) break;
-      all.push(...data.map((d: any) => d.external_id).filter(Boolean));
+      all.push(...(data as ImportedChannelRow[]).map((d) => d.external_id).filter((id): id is string => Boolean(id)));
       if (data.length < 1000) break;
       from += 1000;
     }
@@ -122,20 +142,20 @@ export function SyncManagement() {
     setPage(0);
     try {
       if (isChannels) {
-        const json: any = await fetchJsonResilient(`https://warezcdn.lat/lista?category=canais&format=json`, { timeoutMs: 20_000, retries: 2 });
-        const list: ChannelItem[] = (json.data || []).filter((c: any) => c.is_active);
+        const json = await fetchJsonResilient<WarezChannelsResponse>(`https://warezcdn.lat/lista?category=canais&format=json`, { timeoutMs: 20_000, retries: 2 });
+        const list: ChannelItem[] = (json.data || []).filter((c) => c.is_active);
         const importedSet = await loadImportedChannels();
         setChannels(list.map((c) => ({ ...c, alreadyImported: importedSet.has(c.id) })));
         toast.success(`${list.length} canais encontrados no WarezCDN`);
       } else {
         const apiCat = isAnime ? "anime" : category;
-        const data: any = await fetchJsonResilient(`https://warezcdn.lat/lista?category=${apiCat}&type=tmdb&format=json`, { timeoutMs: 20_000, retries: 2 });
-        const ids: number[] = Array.isArray(data) ? data.map((id: any) => Number(id)).filter(Boolean) : [];
+        const data = await fetchJsonResilient<unknown[]>(`https://warezcdn.lat/lista?category=${apiCat}&type=tmdb&format=json`, { timeoutMs: 20_000, retries: 2 });
+        const ids: number[] = Array.isArray(data) ? data.map((id) => Number(id)).filter(Boolean) : [];
         setWarezIds(ids);
         await loadImported();
         toast.success(`${ids.length} IDs encontrados no WarezCDN`);
       }
-    } catch (err: any) {
+    } catch (err) {
       toast.error(`Erro ao buscar lista: ${getErrorMessage(err)}. Tente novamente.`);
       setWarezIds([]);
       setChannels([]);
@@ -181,7 +201,9 @@ export function SyncManagement() {
                 alreadyImported: importedIds.has(d.id),
               });
             }
-          } catch {}
+          } catch (err) {
+            console.warn(`[Sync] Preview TMDB ${tmdbId} falhou:`, err);
+          }
         })
       );
       results.sort((a, b) => slice.indexOf(a.tmdb_id) - slice.indexOf(b.tmdb_id));
@@ -196,8 +218,8 @@ export function SyncManagement() {
   }, [page, warezIds, loadPage, isChannels]);
 
   // Build payload for movie/series/anime
-  const buildTmdbPayload = (item: TmdbPreview) => {
-    const base: any = {
+  const buildTmdbPayload = (item: TmdbPreview): TmdbDbPayload => {
+    const base: TmdbDbPayload = {
       title: item.title, original_title: item.original_title, overview: item.overview,
       year: item.year, genre: item.genre, rating: item.rating,
       image_url: item.image_url, backdrop_url: item.backdrop_url,
