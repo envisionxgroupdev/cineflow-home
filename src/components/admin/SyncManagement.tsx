@@ -244,10 +244,14 @@ export function SyncManagement() {
     const d = await withRetry(() => getSeriesDetails(tmdbId));
     if (!d || !d.id) throw new Error("TMDB vazio");
     return {
-      title: item.title, original_title: item.original_title, overview: item.overview,
-      year: item.year, genre: item.genre, rating: item.rating,
-      image_url: item.image_url, backdrop_url: item.backdrop_url,
-      tmdb_id: item.tmdb_id, is_release: false,
+      title: d.name, original_title: d.original_name, overview: d.overview,
+      year: d.first_air_date?.slice(0, 4) || "",
+      genre: d.genres?.map(g => g.name).slice(0, 3).join(", ") || "",
+      rating: Math.round((d.vote_average || 0) * 10) / 10,
+      image_url: getImageUrl(d.poster_path),
+      backdrop_url: getImageUrl(d.backdrop_path, "w1280"),
+      tmdb_id: d.id, is_release: false,
+      first_air_date: d.first_air_date || null, is_anime: isAnime,
     };
   };
 
@@ -258,8 +262,9 @@ export function SyncManagement() {
 
     let ok = false;
     try {
-      const payload = buildTmdbPayload(item);
-      const { error } = await supabase.from(dbTable).upsert(payload, { onConflict: 'tmdb_id' });
+      const { error } = tmdbType === "movie"
+        ? await importMoviePayload(buildMoviePayload(item))
+        : await importSeriesPayload(buildSeriesPayload(item));
       if (error) throw error;
       ok = true;
       toast.success(`${item.title} importado!`);
