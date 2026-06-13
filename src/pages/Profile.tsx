@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useAuth } from '@/hooks/useAuth';
@@ -9,7 +9,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import {
   User as UserIcon, Mail, Calendar, Shield, LogOut, Save, Loader2,
-  Bookmark, Film, Tv, KeyRound, Eye, EyeOff,
+  Bookmark, Film, Tv, KeyRound, Eye, EyeOff, Crown, Sparkles,
 } from 'lucide-react';
 
 const Profile = () => {
