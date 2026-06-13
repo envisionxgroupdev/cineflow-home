@@ -285,25 +285,25 @@ function AdminBadge() {
       onMouseLeave={hide}
       onTouchStart={toggle}
     >
-      <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-yellow-400/10 text-amber-400 border border-amber-400/40 shadow-[0_0_15px_rgba(251,191,36,0.35)] cursor-pointer select-none animate-pulse">
-        <Crown className="h-3 w-3 text-amber-300" />
-        <span className="bg-gradient-to-r from-amber-300 to-yellow-200 bg-clip-text text-transparent">VIP</span>
-        <Sparkles className="h-2.5 w-2.5 text-yellow-300" />
+      <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-gradient-to-r from-primary/20 to-primary/5 text-primary border border-primary/40 shadow-[0_0_15px_hsl(var(--primary)/0.35)] cursor-pointer select-none">
+        <ShieldCheck className="h-3 w-3 text-primary" />
+        <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">STAFF</span>
+        <Sparkles className="h-2.5 w-2.5 text-primary/80" />
       </span>
 
       {open && (
         <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 z-50 w-64 pointer-events-none">
-          <div className="rounded-xl border border-amber-400/30 bg-gradient-to-br from-amber-950/95 via-yellow-900/90 to-amber-950/95 backdrop-blur-md px-4 py-3 shadow-[0_8px_32px_rgba(251,191,36,0.35)]">
+          <div className="rounded-xl border border-primary/30 bg-gradient-to-br from-primary/20 via-primary/10 to-primary/20 backdrop-blur-md px-4 py-3 shadow-[0_8px_32px_hsl(var(--primary)/0.35)]">
             <div className="flex items-center gap-2 mb-1">
-              <Crown className="h-4 w-4 text-amber-300 shrink-0" />
-              <p className="text-[11px] font-extrabold uppercase tracking-wider text-amber-200">
+              <Users className="h-4 w-4 text-primary shrink-0" />
+              <p className="text-[11px] font-extrabold uppercase tracking-wider text-foreground">
                 Equipe PipocaMax
               </p>
             </div>
-            <p className="text-[11px] leading-relaxed text-amber-100/90">
+            <p className="text-[11px] leading-relaxed text-foreground/90">
               Membro exclusivo da equipe PipocaMax. Acesso administrativo completo à plataforma.
             </p>
-            <div className="absolute left-1/2 -translate-x-1/2 top-full w-2.5 h-2.5 rotate-45 bg-amber-900 border-r border-b border-amber-400/30" />
+            <div className="absolute left-1/2 -translate-x-1/2 top-full w-2.5 h-2.5 rotate-45 bg-card border-r border-b border-primary/30" />
           </div>
         </div>
       )}
