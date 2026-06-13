@@ -29,7 +29,9 @@ export function UserManagement() {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'admin' | 'banned'>('all');
   const [confirmDelete, setConfirmDelete] = useState<UserWithMeta | null>(null);
+  const [confirmBan, setConfirmBan] = useState<UserWithMeta | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [banning, setBanning] = useState(false);
 
   useEffect(() => { load(); }, []);
 
@@ -66,18 +68,33 @@ export function UserManagement() {
   };
 
   const quickToggleBan = async (u: UserWithMeta) => {
-    if (u.is_banned) {
-      const { error } = await supabase.from('user_roles').delete().eq('user_id', u.id).eq('role', 'banned');
-      if (error) { toast.error(error.message); return; }
-      await logAdminAction('user.unban', { type: 'user', id: u.id });
-      toast.success('Usuário desbanido');
-    } else {
-      const { error } = await supabase.from('user_roles').insert({ user_id: u.id, role: 'banned' as any });
-      if (error) { toast.error(error.message); return; }
-      await logAdminAction('user.ban', { type: 'user', id: u.id });
-      toast.success('Usuário banido — perderá acesso imediatamente');
+    if (!u.is_banned) {
+      // Require confirmation before banning
+      setConfirmBan(u);
+      return;
     }
+    const { error } = await supabase.from('user_roles').delete().eq('user_id', u.id).eq('role', 'banned');
+    if (error) { toast.error(error.message); return; }
+    await logAdminAction('user.unban', { type: 'user', id: u.id });
+    toast.success('Usuário desbanido');
     load();
+  };
+
+  const handleConfirmBan = async () => {
+    if (!confirmBan) return;
+    setBanning(true);
+    try {
+      const { error } = await supabase.from('user_roles').insert({ user_id: confirmBan.id, role: 'banned' as any });
+      if (error) throw error;
+      await logAdminAction('user.ban', { type: 'user', id: confirmBan.id }, { email: confirmBan.email });
+      toast.success('Usuário banido', { description: `${confirmBan.email} perderá acesso imediatamente.` });
+      setConfirmBan(null);
+      load();
+    } catch (e: any) {
+      toast.error(e.message || 'Erro ao banir');
+    } finally {
+      setBanning(false);
+    }
   };
 
   const handleDelete = async () => {
@@ -223,23 +240,23 @@ export function UserManagement() {
                     </td>
                     <td className="px-4 py-3 text-right" onClick={e => e.stopPropagation()}>
                       <div className="flex items-center gap-1.5 justify-end flex-wrap">
-                        <IconBtn title="Detalhes" onClick={() => setSelected(p)} icon={Pencil} />
-                        <IconBtn
-                          title={isAdmin ? 'Remover admin' : 'Promover a admin'}
+                        <ActionBtn label="Detalhes" onClick={() => setSelected(p)} icon={Pencil} />
+                        <ActionBtn
+                          label={isAdmin ? 'Remover admin' : 'Tornar admin'}
                           onClick={() => quickToggleAdmin(p)}
                           icon={isAdmin ? ShieldOff : Shield}
                           tone={isAdmin ? 'destructive' : 'primary'}
                           disabled={isSelf}
                         />
-                        <IconBtn
-                          title={isBanned ? 'Desbanir' : 'Banir'}
+                        <ActionBtn
+                          label={isBanned ? 'Desbanir' : 'Banir'}
                           onClick={() => quickToggleBan(p)}
                           icon={Ban}
                           tone={isBanned ? 'primary' : 'destructive'}
                           disabled={isSelf}
                         />
-                        <IconBtn
-                          title="Excluir usuário"
+                        <ActionBtn
+                          label="Excluir"
                           onClick={() => setConfirmDelete(p)}
                           icon={Trash2}
                           tone="destructive"
@@ -298,6 +315,42 @@ export function UserManagement() {
           </div>
         </div>
       )}
+
+      {confirmBan && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => !banning && setConfirmBan(null)}>
+          <div className="bg-card border border-destructive/40 rounded-xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex items-start gap-3 mb-4">
+              <div className="h-10 w-10 rounded-full bg-destructive/10 border border-destructive/40 flex items-center justify-center shrink-0">
+                <Ban className="h-5 w-5 text-destructive" />
+              </div>
+              <div>
+                <h3 className="font-display text-lg text-foreground leading-tight">Banir usuário?</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  <span className="text-foreground font-medium">{confirmBan.email}</span> será deslogado e bloqueado imediatamente em todo o site. Você pode desbanir depois.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={() => setConfirmBan(null)}
+                disabled={banning}
+                className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold bg-secondary text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleConfirmBan}
+                disabled={banning}
+                className="flex-1 flex items-center justify-center gap-2 bg-destructive text-destructive-foreground px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-destructive/90 transition-colors disabled:opacity-50"
+              >
+                {banning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Ban className="h-4 w-4" />}
+                Banir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {showAudit && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setShowAudit(false)}>
@@ -359,23 +412,24 @@ function StatCard({ label, value, tone }: { label: string; value: number; tone: 
   );
 }
 
-function IconBtn({ icon: Icon, title, onClick, tone = 'default', disabled }: {
-  icon: any; title: string; onClick: () => void;
+function ActionBtn({ icon: Icon, label, onClick, tone = 'default', disabled }: {
+  icon: any; label: string; onClick: () => void;
   tone?: 'default' | 'primary' | 'destructive'; disabled?: boolean;
 }) {
   const tones = {
-    default: 'border-border text-muted-foreground hover:text-foreground hover:border-border/80',
+    default: 'border-border text-muted-foreground hover:text-foreground hover:border-border/80 hover:bg-secondary',
     primary: 'border-primary/40 text-primary hover:bg-primary/10',
     destructive: 'border-destructive/40 text-destructive hover:bg-destructive/10',
   };
   return (
     <button
       onClick={onClick}
-      title={title}
+      title={label}
       disabled={disabled}
-      className={`p-1.5 rounded-md border transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${tones[tone]}`}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border text-[11px] font-semibold transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${tones[tone]}`}
     >
       <Icon className="h-3.5 w-3.5" />
+      <span>{label}</span>
     </button>
   );
 }
