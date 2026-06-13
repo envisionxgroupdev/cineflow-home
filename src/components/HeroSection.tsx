@@ -82,8 +82,8 @@ export function HeroSection() {
     return (
       <section className="relative h-[70vh] min-h-[400px] flex items-center overflow-hidden bg-background">
         <div className="relative container mx-auto px-4 text-center">
-          <h1 className="font-display text-4xl md:text-6xl text-foreground mb-4">PIPOCAMAX</h1>
-          <p className="text-muted-foreground">Filmes e séries online grátis em HD</p>
+          <h1 className="font-display text-4xl md:text-6xl text-foreground mb-4">PipocaMax — Filmes e Séries Online Grátis em HD</h1>
+          <p className="text-muted-foreground">Assista os melhores lançamentos do cinema dublados e legendados em português.</p>
         </div>
       </section>
     );
