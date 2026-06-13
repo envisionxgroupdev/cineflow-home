@@ -104,11 +104,7 @@ const Profile = () => {
                   <h1 className="font-display text-2xl sm:text-3xl text-foreground leading-tight truncate">
                     {displayName || 'Sem nome'}
                   </h1>
-                  {isAdmin && (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/15 text-primary border border-primary/30">
-                      <Shield className="h-3 w-3" /> Admin
-                    </span>
-                  )}
+                  {isAdmin && <AdminBadge />}
                 </div>
                 <p className="text-sm text-muted-foreground flex items-center gap-1.5 truncate">
                   <Mail className="h-3.5 w-3.5 shrink-0" /> {user.email}
