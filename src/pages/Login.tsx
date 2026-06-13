@@ -1,7 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { LogIn, UserPlus, Eye, EyeOff } from 'lucide-react';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { toast } from 'sonner';
@@ -12,12 +13,16 @@ const Login = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [website, setWebsite] = useState(''); // honeypot — must stay empty
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const { signIn } = useAuth();
   const navigate = useNavigate();
   const { executeRecaptcha } = useGoogleReCaptcha();
+  const startedAt = useRef<number>(Date.now());
+
+  useEffect(() => { startedAt.current = Date.now(); }, [mode]);
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,18 +37,35 @@ const Login = () => {
         else navigate('/');
       } else {
         if (password.length < 6) { setError('Senha precisa ter pelo menos 6 caracteres'); setLoading(false); return; }
-        const { error } = await signUp(email, password, name);
-        if (error) setError(error.message || 'Erro ao criar conta');
-        else {
-          toast.success('Conta criada! Verifique seu e-mail se necessário.');
-          navigate('/');
+        // Use edge function with IP throttling, honeypot, and timing check
+        const { data, error: fnErr } = await supabase.functions.invoke('signup-guard', {
+          body: {
+            email,
+            password,
+            displayName: name,
+            website, // honeypot
+            startedAt: startedAt.current,
+          },
+        });
+        if (fnErr || (data as any)?.error) {
+          setError((data as any)?.error || fnErr?.message || 'Erro ao criar conta');
+        } else {
+          // Auto sign-in after successful signup
+          const { error: signErr } = await signIn(email, password);
+          if (signErr) {
+            toast.success('Conta criada! Faça login.');
+            setMode('login');
+          } else {
+            toast.success('Conta criada com sucesso!');
+            navigate('/');
+          }
         }
       }
     } catch {
       setError('Erro no reCAPTCHA');
     }
     setLoading(false);
-  }, [executeRecaptcha, signIn, signUp, email, password, name, mode, navigate]);
+  }, [executeRecaptcha, signIn, email, password, name, website, mode, navigate]);
 
   const isSignup = mode === 'signup';
 
@@ -68,7 +90,6 @@ const Login = () => {
           </p>
         </div>
 
-        {/* Tabs */}
         <div className="flex bg-secondary rounded-lg p-1 mb-4 border border-border">
           <button
             type="button"
@@ -90,7 +111,21 @@ const Login = () => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-card border border-border rounded-lg p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="bg-card border border-border rounded-lg p-6 space-y-4" autoComplete="on">
+          {/* Honeypot — invisible to real users */}
+          <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', top: 'auto', width: 1, height: 1, overflow: 'hidden' }}>
+            <label>
+              Não preencher
+              <input
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
+              />
+            </label>
+          </div>
+
           {error && (
             <div className="bg-destructive/10 border border-destructive/30 text-destructive text-sm rounded-lg p-3">
               {error}
@@ -106,6 +141,7 @@ const Login = () => {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Seu nome"
                 required
+                maxLength={80}
                 className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
             </div>
@@ -153,6 +189,12 @@ const Login = () => {
             {isSignup ? <UserPlus className="h-4 w-4" /> : <LogIn className="h-4 w-4" />}
             {loading ? 'Aguarde...' : isSignup ? 'Criar conta' : 'Entrar'}
           </button>
+
+          {isSignup && (
+            <p className="text-[11px] text-muted-foreground text-center leading-relaxed">
+              Apenas uma conta por dispositivo/rede é permitida.
+            </p>
+          )}
         </form>
       </div>
     </div>
