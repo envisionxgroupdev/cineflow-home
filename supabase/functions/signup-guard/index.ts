@@ -72,10 +72,9 @@ Deno.serve(async (req) => {
         .maybeSingle();
       if (ipErr) console.warn('[signup-guard] ip check error', ipErr.message);
       if (existing) {
-        return json(
-          { error: 'Já existe uma conta cadastrada a partir deste dispositivo/rede.' },
-          429
-        );
+        return json({
+          error: 'Já existe uma conta cadastrada a partir deste dispositivo/rede.',
+        });
       }
     }
 
