@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink as RouterNavLink } from "react-router-dom";
-import { Menu, X, LogIn, UserPlus, Shield, Search } from "lucide-react";
+import { Menu, X, LogIn, UserPlus, Shield, Search, User as UserIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlobalSearch } from "./GlobalSearch";
 import { useAuth } from "@/hooks/useAuth";
@@ -104,10 +104,14 @@ export function Navbar() {
           )}
           {user ? (
             <Link
-              to="/admin"
-              className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors px-2"
+              to="/perfil"
+              className="flex items-center gap-2 text-sm font-medium text-foreground/80 hover:text-primary transition-colors px-2 py-1.5 rounded-md hover:bg-primary/10"
+              title="Meu perfil"
             >
-              {user.email?.split("@")[0]}
+              <span className="h-7 w-7 rounded-full bg-primary/15 border border-primary/40 flex items-center justify-center text-[11px] font-bold text-primary">
+                {(user.user_metadata?.display_name || user.email || '?')[0].toUpperCase()}
+              </span>
+              <span className="hidden xl:inline">{user.email?.split("@")[0]}</span>
             </Link>
           ) : (
             <div className="flex items-center gap-1.5">
@@ -179,9 +183,13 @@ export function Navbar() {
                 </Link>
               )}
               {user ? (
-                <span className="text-sm text-muted-foreground py-2 px-3">
-                  {user.email?.split("@")[0]}
-                </span>
+                <Link
+                  to="/perfil"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-foreground/90 py-2.5 px-3 rounded-md hover:bg-primary/10 hover:text-primary"
+                >
+                  <UserIcon className="h-4 w-4" /> Meu perfil
+                </Link>
               ) : (
                 <div className="flex flex-col gap-2 mt-1">
                   <Link
