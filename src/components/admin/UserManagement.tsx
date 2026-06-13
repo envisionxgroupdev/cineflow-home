@@ -68,18 +68,33 @@ export function UserManagement() {
   };
 
   const quickToggleBan = async (u: UserWithMeta) => {
-    if (u.is_banned) {
-      const { error } = await supabase.from('user_roles').delete().eq('user_id', u.id).eq('role', 'banned');
-      if (error) { toast.error(error.message); return; }
-      await logAdminAction('user.unban', { type: 'user', id: u.id });
-      toast.success('Usuário desbanido');
-    } else {
-      const { error } = await supabase.from('user_roles').insert({ user_id: u.id, role: 'banned' as any });
-      if (error) { toast.error(error.message); return; }
-      await logAdminAction('user.ban', { type: 'user', id: u.id });
-      toast.success('Usuário banido — perderá acesso imediatamente');
+    if (!u.is_banned) {
+      // Require confirmation before banning
+      setConfirmBan(u);
+      return;
     }
+    const { error } = await supabase.from('user_roles').delete().eq('user_id', u.id).eq('role', 'banned');
+    if (error) { toast.error(error.message); return; }
+    await logAdminAction('user.unban', { type: 'user', id: u.id });
+    toast.success('Usuário desbanido');
     load();
+  };
+
+  const handleConfirmBan = async () => {
+    if (!confirmBan) return;
+    setBanning(true);
+    try {
+      const { error } = await supabase.from('user_roles').insert({ user_id: confirmBan.id, role: 'banned' as any });
+      if (error) throw error;
+      await logAdminAction('user.ban', { type: 'user', id: confirmBan.id }, { email: confirmBan.email });
+      toast.success('Usuário banido', { description: `${confirmBan.email} perderá acesso imediatamente.` });
+      setConfirmBan(null);
+      load();
+    } catch (e: any) {
+      toast.error(e.message || 'Erro ao banir');
+    } finally {
+      setBanning(false);
+    }
   };
 
   const handleDelete = async () => {
