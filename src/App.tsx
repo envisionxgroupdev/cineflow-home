@@ -11,6 +11,7 @@ import { Component, lazy, Suspense, type ReactNode } from "react";
 import Index from "./pages/Index.tsx";
 import { SiteScripts } from "./components/SiteScripts.tsx";
 import { MaintenanceGate } from "./components/MaintenanceGate.tsx";
+import { BannedGate } from "./components/BannedGate.tsx";
 import { NotificationsToast } from "./components/NotificationsToast.tsx";
 import { Loader2, RefreshCw } from "lucide-react";
 
@@ -104,6 +105,7 @@ const App = () => (
           <SiteScripts>
           <BrowserRouter>
             <MaintenanceGate>
+            <BannedGate>
             <ChunkErrorBoundary>
               <Suspense fallback={<RouteFallback />}>
                 <Routes>
@@ -130,6 +132,7 @@ const App = () => (
               </Suspense>
             </ChunkErrorBoundary>
             <NotificationsToast />
+            </BannedGate>
             </MaintenanceGate>
           </BrowserRouter>
           </SiteScripts>

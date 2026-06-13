@@ -338,6 +338,30 @@ export type Database = {
         }
         Relationships: []
       }
+      signup_ips: {
+        Row: {
+          created_at: string
+          id: string
+          ip: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       site_settings: {
         Row: {
           key: string
