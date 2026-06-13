@@ -29,7 +29,9 @@ export function UserManagement() {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'admin' | 'banned'>('all');
   const [confirmDelete, setConfirmDelete] = useState<UserWithMeta | null>(null);
+  const [confirmBan, setConfirmBan] = useState<UserWithMeta | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [banning, setBanning] = useState(false);
 
   useEffect(() => { load(); }, []);
 
