@@ -25,7 +25,7 @@ const getIp = (req: Request): string => {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
-  if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
+  if (req.method !== 'POST') return json({ error: 'Method not allowed' });
 
   try {
     const body = await req.json().catch(() => ({}));
@@ -37,23 +37,21 @@ Deno.serve(async (req) => {
     const userAgent = req.headers.get('user-agent') || '';
 
     // Anti-spam: honeypot must be empty
-    if (honeypot) return json({ error: 'Spam detectado.' }, 400);
+    if (honeypot) return json({ error: 'Spam detectado.' });
 
-    // Anti-spam: form must take at least 2 seconds to fill
     const elapsed = Date.now() - startedAt;
     if (!startedAt || elapsed < 2000) {
-      return json({ error: 'Aguarde alguns segundos antes de enviar.' }, 400);
+      return json({ error: 'Aguarde alguns segundos antes de enviar.' });
     }
 
-    // Basic validation
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return json({ error: 'E-mail inválido.' }, 400);
+      return json({ error: 'E-mail inválido.' });
     }
     if (password.length < 6) {
-      return json({ error: 'Senha precisa ter pelo menos 6 caracteres.' }, 400);
+      return json({ error: 'Senha precisa ter pelo menos 6 caracteres.' });
     }
     if (displayName.length > 80) {
-      return json({ error: 'Nome muito longo.' }, 400);
+      return json({ error: 'Nome muito longo.' });
     }
 
     const ip = getIp(req);
@@ -74,10 +72,9 @@ Deno.serve(async (req) => {
         .maybeSingle();
       if (ipErr) console.warn('[signup-guard] ip check error', ipErr.message);
       if (existing) {
-        return json(
-          { error: 'Já existe uma conta cadastrada a partir deste dispositivo/rede.' },
-          429
-        );
+        return json({
+          error: 'Já existe uma conta cadastrada a partir deste dispositivo/rede.',
+        });
       }
     }
 
@@ -94,7 +91,7 @@ Deno.serve(async (req) => {
       const friendly = /registered|exists/i.test(msg)
         ? 'Este e-mail já está cadastrado.'
         : msg;
-      return json({ error: friendly }, 400);
+      return json({ error: friendly });
     }
 
     // Record IP
@@ -107,6 +104,6 @@ Deno.serve(async (req) => {
     return json({ ok: true, userId: created.user.id });
   } catch (e: any) {
     console.error('[signup-guard]', e);
-    return json({ error: e?.message || 'Erro interno.' }, 500);
+    return json({ error: e?.message || 'Erro interno.' });
   }
 });
