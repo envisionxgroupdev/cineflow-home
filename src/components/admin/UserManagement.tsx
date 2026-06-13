@@ -376,23 +376,24 @@ function StatCard({ label, value, tone }: { label: string; value: number; tone: 
   );
 }
 
-function IconBtn({ icon: Icon, title, onClick, tone = 'default', disabled }: {
-  icon: any; title: string; onClick: () => void;
+function ActionBtn({ icon: Icon, label, onClick, tone = 'default', disabled }: {
+  icon: any; label: string; onClick: () => void;
   tone?: 'default' | 'primary' | 'destructive'; disabled?: boolean;
 }) {
   const tones = {
-    default: 'border-border text-muted-foreground hover:text-foreground hover:border-border/80',
+    default: 'border-border text-muted-foreground hover:text-foreground hover:border-border/80 hover:bg-secondary',
     primary: 'border-primary/40 text-primary hover:bg-primary/10',
     destructive: 'border-destructive/40 text-destructive hover:bg-destructive/10',
   };
   return (
     <button
       onClick={onClick}
-      title={title}
+      title={label}
       disabled={disabled}
-      className={`p-1.5 rounded-md border transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${tones[tone]}`}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border text-[11px] font-semibold transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${tones[tone]}`}
     >
       <Icon className="h-3.5 w-3.5" />
+      <span>{label}</span>
     </button>
   );
 }
