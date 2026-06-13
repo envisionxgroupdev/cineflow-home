@@ -240,23 +240,23 @@ export function UserManagement() {
                     </td>
                     <td className="px-4 py-3 text-right" onClick={e => e.stopPropagation()}>
                       <div className="flex items-center gap-1.5 justify-end flex-wrap">
-                        <IconBtn title="Detalhes" onClick={() => setSelected(p)} icon={Pencil} />
-                        <IconBtn
-                          title={isAdmin ? 'Remover admin' : 'Promover a admin'}
+                        <ActionBtn label="Detalhes" onClick={() => setSelected(p)} icon={Pencil} />
+                        <ActionBtn
+                          label={isAdmin ? 'Remover admin' : 'Tornar admin'}
                           onClick={() => quickToggleAdmin(p)}
                           icon={isAdmin ? ShieldOff : Shield}
                           tone={isAdmin ? 'destructive' : 'primary'}
                           disabled={isSelf}
                         />
-                        <IconBtn
-                          title={isBanned ? 'Desbanir' : 'Banir'}
+                        <ActionBtn
+                          label={isBanned ? 'Desbanir' : 'Banir'}
                           onClick={() => quickToggleBan(p)}
                           icon={Ban}
                           tone={isBanned ? 'primary' : 'destructive'}
                           disabled={isSelf}
                         />
-                        <IconBtn
-                          title="Excluir usuário"
+                        <ActionBtn
+                          label="Excluir"
                           onClick={() => setConfirmDelete(p)}
                           icon={Trash2}
                           tone="destructive"
