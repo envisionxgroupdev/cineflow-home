@@ -33,7 +33,16 @@ const Login = () => {
       await executeRecaptcha(mode);
       if (mode === 'login') {
         const { error } = await signIn(email, password);
-        if (error) setError(error.message?.includes('banida') ? error.message : 'E-mail ou senha incorretos');
+        if (error) {
+          const banned = error.message?.toLowerCase().includes('banida') || error.message?.toLowerCase().includes('banned');
+          if (banned) {
+            const msg = 'Sua conta foi banida e não pode mais acessar o PipocaMax. Entre em contato com o suporte.';
+            setError(msg);
+            toast.error('Conta banida', { description: msg, duration: 8000 });
+          } else {
+            setError('E-mail ou senha incorretos');
+          }
+        }
         else navigate('/');
       } else {
         if (password.length < 6) { setError('Senha precisa ter pelo menos 6 caracteres'); setLoading(false); return; }
