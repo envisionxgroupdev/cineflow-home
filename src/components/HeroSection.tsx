@@ -123,6 +123,8 @@ export function HeroSection() {
 
       {/* Centered content */}
       <div className="relative z-10 container mx-auto px-4 text-center">
+        {/* Single descriptive H1 for the homepage — visually hidden since the hero displays the rotating title artwork */}
+        <h1 className="sr-only">PipocaMax — Assista Filmes e Séries Online Grátis em HD Dublado e Legendado</h1>
         <AnimatePresence mode="wait">
           <motion.div
             key={item.id + "-info"}
@@ -132,7 +134,7 @@ export function HeroSection() {
             transition={{ duration: 0.5 }}
             className="max-w-2xl mx-auto flex flex-col items-center"
           >
-            {/* Title (TMDB logo or text fallback) */}
+            {/* Title (TMDB logo or text fallback) — h2 to keep one h1 per page */}
             {logoUrl ? (
               <img
                 src={logoUrl}
@@ -141,9 +143,9 @@ export function HeroSection() {
                 loading="eager"
               />
             ) : (
-              <h1 className="font-display text-5xl md:text-7xl lg:text-8xl text-foreground leading-[0.95] mb-6 drop-shadow-[0_4px_24px_hsl(var(--primary)/0.4)]">
+              <h2 className="font-display text-5xl md:text-7xl lg:text-8xl text-foreground leading-[0.95] mb-6 drop-shadow-[0_4px_24px_hsl(var(--primary)/0.4)]">
                 {item.title}
-              </h1>
+              </h2>
             )}
 
             {/* Meta line: year • clock • runtime • stars */}
