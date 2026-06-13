@@ -25,7 +25,7 @@ const getIp = (req: Request): string => {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
-  if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
+  if (req.method !== 'POST') return json({ error: 'Method not allowed' });
 
   try {
     const body = await req.json().catch(() => ({}));
