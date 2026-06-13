@@ -10,6 +10,7 @@ import { Footer } from '@/components/Footer';
 import {
   User as UserIcon, Mail, Calendar, Shield, LogOut, Save, Loader2,
   Bookmark, Film, Tv, KeyRound, Eye, EyeOff, Crown, Sparkles,
+  ShieldCheck, Users,
 } from 'lucide-react';
 
 const Profile = () => {
