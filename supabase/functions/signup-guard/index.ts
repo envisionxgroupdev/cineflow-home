@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
       const friendly = /registered|exists/i.test(msg)
         ? 'Este e-mail já está cadastrado.'
         : msg;
-      return json({ error: friendly }, 400);
+      return json({ error: friendly });
     }
 
     // Record IP
