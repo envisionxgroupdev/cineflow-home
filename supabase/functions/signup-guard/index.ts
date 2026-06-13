@@ -37,23 +37,21 @@ Deno.serve(async (req) => {
     const userAgent = req.headers.get('user-agent') || '';
 
     // Anti-spam: honeypot must be empty
-    if (honeypot) return json({ error: 'Spam detectado.' }, 400);
+    if (honeypot) return json({ error: 'Spam detectado.' });
 
-    // Anti-spam: form must take at least 2 seconds to fill
     const elapsed = Date.now() - startedAt;
     if (!startedAt || elapsed < 2000) {
-      return json({ error: 'Aguarde alguns segundos antes de enviar.' }, 400);
+      return json({ error: 'Aguarde alguns segundos antes de enviar.' });
     }
 
-    // Basic validation
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return json({ error: 'E-mail inválido.' }, 400);
+      return json({ error: 'E-mail inválido.' });
     }
     if (password.length < 6) {
-      return json({ error: 'Senha precisa ter pelo menos 6 caracteres.' }, 400);
+      return json({ error: 'Senha precisa ter pelo menos 6 caracteres.' });
     }
     if (displayName.length > 80) {
-      return json({ error: 'Nome muito longo.' }, 400);
+      return json({ error: 'Nome muito longo.' });
     }
 
     const ip = getIp(req);
