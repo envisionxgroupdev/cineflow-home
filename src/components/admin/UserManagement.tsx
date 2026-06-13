@@ -316,6 +316,42 @@ export function UserManagement() {
         </div>
       )}
 
+      {confirmBan && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => !banning && setConfirmBan(null)}>
+          <div className="bg-card border border-destructive/40 rounded-xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex items-start gap-3 mb-4">
+              <div className="h-10 w-10 rounded-full bg-destructive/10 border border-destructive/40 flex items-center justify-center shrink-0">
+                <Ban className="h-5 w-5 text-destructive" />
+              </div>
+              <div>
+                <h3 className="font-display text-lg text-foreground leading-tight">Banir usuário?</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  <span className="text-foreground font-medium">{confirmBan.email}</span> será deslogado e bloqueado imediatamente em todo o site. Você pode desbanir depois.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={() => setConfirmBan(null)}
+                disabled={banning}
+                className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold bg-secondary text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleConfirmBan}
+                disabled={banning}
+                className="flex-1 flex items-center justify-center gap-2 bg-destructive text-destructive-foreground px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-destructive/90 transition-colors disabled:opacity-50"
+              >
+                {banning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Ban className="h-4 w-4" />}
+                Banir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
       {showAudit && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setShowAudit(false)}>
           <div className="bg-card border border-border rounded-xl w-full max-w-2xl max-h-[85vh] flex flex-col" onClick={e => e.stopPropagation()}>
