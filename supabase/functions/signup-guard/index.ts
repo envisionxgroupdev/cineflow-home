@@ -104,6 +104,6 @@ Deno.serve(async (req) => {
     return json({ ok: true, userId: created.user.id });
   } catch (e: any) {
     console.error('[signup-guard]', e);
-    return json({ error: e?.message || 'Erro interno.' }, 500);
+    return json({ error: e?.message || 'Erro interno.' });
   }
 });
