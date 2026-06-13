@@ -78,17 +78,40 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Pre-check: email already exists?
+    const { data: emailHit } = await supabase
+      .from('profiles')
+      .select('id')
+      .ilike('email', email)
+      .limit(1)
+      .maybeSingle();
+    if (emailHit) {
+      return json({ error: 'Este e-mail já está cadastrado.' });
+    }
+
+    // Pre-check: display name already taken?
+    const finalName = displayName || email.split('@')[0];
+    const { data: nameHit } = await supabase
+      .from('profiles')
+      .select('id')
+      .ilike('display_name', finalName)
+      .limit(1)
+      .maybeSingle();
+    if (nameHit) {
+      return json({ error: 'Este nome já está em uso. Escolha outro.' });
+    }
+
     // Create user
     const { data: created, error: createErr } = await supabase.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
-      user_metadata: { display_name: displayName || email.split('@')[0] },
+      user_metadata: { display_name: finalName },
     });
 
     if (createErr || !created.user) {
       const msg = createErr?.message || 'Erro ao criar conta.';
-      const friendly = /registered|exists/i.test(msg)
+      const friendly = /registered|exists|already/i.test(msg)
         ? 'Este e-mail já está cadastrado.'
         : msg;
       return json({ error: friendly });
