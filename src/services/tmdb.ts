@@ -288,10 +288,10 @@ export function getEmbedMoviesUrl(type: 'filme' | 'serie', tmdbId: number, seaso
   return `https://myembed.biz/serie/${tmdbId}`;
 }
 
-// SuperFlix player URLs — https://superflixapi.fit/doc
+// SuperFlix player URLs — https://superflixapi.cyou/doc
 export function getSuperflixUrl(type: 'filme' | 'serie', tmdbId: number, season?: number, episode?: number): string {
-  if (type === 'filme') return `https://superflixapi.fit/filme/${tmdbId}`;
-  if (season !== undefined && episode !== undefined) return `https://superflixapi.fit/serie/${tmdbId}/${season}/${episode}`;
-  if (season !== undefined) return `https://superflixapi.fit/serie/${tmdbId}/${season}`;
-  return `https://superflixapi.fit/serie/${tmdbId}`;
+  if (type === 'filme') return `https://superflixapi.cyou/filme/${tmdbId}`;
+  if (season !== undefined && episode !== undefined) return `https://superflixapi.cyou/serie/${tmdbId}/${season}/${episode}`;
+  if (season !== undefined) return `https://superflixapi.cyou/serie/${tmdbId}/${season}`;
+  return `https://superflixapi.cyou/serie/${tmdbId}`;
 }
