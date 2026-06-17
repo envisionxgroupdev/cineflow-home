@@ -44,7 +44,7 @@ export function Navbar() {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 group shrink-0">
           <img
-            src="/logo-pipocamax.png"
+            src="/logo-pipocamax.webp"
             alt="PipocaMax"
             width={36}
             height={36}

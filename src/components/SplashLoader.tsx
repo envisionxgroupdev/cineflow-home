@@ -54,7 +54,7 @@ export function SplashLoader({ done = false, tagline = "Carregando sua sessão d
           <div className="absolute inset-0 rounded-full bg-primary/30 blur-2xl animate-pulse" />
           <div className="relative h-20 w-20 rounded-full bg-card border border-primary/40 flex items-center justify-center shadow-[0_0_40px_hsl(var(--primary)/0.4)] animate-[splash-bob_2.4s_ease-in-out_infinite]">
             <img
-              src="/favicon.png"
+              src="/favicon.webp"
               alt="PipocaMax"
               width={56}
               height={56}
