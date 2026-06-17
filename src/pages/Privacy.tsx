@@ -7,10 +7,10 @@ const Privacy = () => (
     <Helmet>
       <title>Política de Privacidade — PipocaMax</title>
       <meta name="description" content="Política de privacidade do PipocaMax: saiba como coletamos, usamos, armazenamos e protegemos seus dados pessoais ao usar o site." />
-      <link rel="canonical" href="https://pipocamax.com/privacidade" />
+      <link rel="canonical" href="https://pipocamax.sbs/privacidade" />
       <meta property="og:title" content="Política de Privacidade — PipocaMax" />
       <meta property="og:description" content="Como o PipocaMax trata e protege seus dados pessoais." />
-      <meta property="og:url" content="https://pipocamax.com/privacidade" />
+      <meta property="og:url" content="https://pipocamax.sbs/privacidade" />
       <meta property="og:type" content="website" />
       <meta name="twitter:title" content="Política de Privacidade — PipocaMax" />
       <meta name="twitter:description" content="Como o PipocaMax trata e protege seus dados pessoais." />
