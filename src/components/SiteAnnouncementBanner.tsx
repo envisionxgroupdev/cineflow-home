@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { X, Info, AlertTriangle, CheckCircle2, Megaphone } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { SITE_SETTINGS_UPDATED_EVENT } from '@/lib/siteSettingsEvents';

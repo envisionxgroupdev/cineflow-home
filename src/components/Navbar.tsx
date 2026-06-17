@@ -30,7 +30,8 @@ export function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      style={{ top: 'var(--announcement-h, 0px)' }}
+      className={`fixed left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
           ? "bg-black/95 backdrop-blur-xl border-b border-primary/20 shadow-[0_4px_24px_-12px_hsl(var(--primary)/0.5)]"
           : "bg-gradient-to-b from-black via-black/80 to-transparent border-b border-transparent"
