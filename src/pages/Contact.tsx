@@ -61,10 +61,10 @@ const Contact = () => {
       <Helmet>
         <title>Contato — Fale com o PipocaMax</title>
         <meta name="description" content="Entre em contato com a PipocaMax. Envie sua mensagem informando seu Telegram para receber resposta da nossa equipe." />
-        <link rel="canonical" href="https://pipocamax.com/contato" />
+        <link rel="canonical" href="https://pipocamax.sbs/contato" />
         <meta property="og:title" content="Contato — PipocaMax" />
         <meta property="og:description" content="Fale com a equipe do PipocaMax via formulário, e-mail ou Telegram." />
-        <meta property="og:url" content="https://pipocamax.com/contato" />
+        <meta property="og:url" content="https://pipocamax.sbs/contato" />
         <meta property="og:type" content="website" />
         <meta name="twitter:title" content="Contato — PipocaMax" />
         <meta name="twitter:description" content="Fale com a equipe do PipocaMax." />

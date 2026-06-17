@@ -8,13 +8,13 @@ PipocaMax é um agregador de conteúdo audiovisual que oferece acesso a filmes e
 
 ## Páginas Principais
 
-- [Início](https://pipocamax.com/): Página principal com os últimos lançamentos e destaques.
-- [Filmes](https://pipocamax.com/filmes): Catálogo completo de filmes disponíveis com busca e filtro por gênero.
-- [Séries](https://pipocamax.com/series): Catálogo completo de séries disponíveis com busca e filtro por gênero.
-- [Sobre](https://pipocamax.com/sobre): Informações sobre a plataforma e sua missão.
-- [DMCA](https://pipocamax.com/dmca): Política de direitos autorais e procedimentos para notificação.
-- [Termos de Uso](https://pipocamax.com/termos): Termos e condições de uso do site.
-- [Privacidade](https://pipocamax.com/privacidade): Política de privacidade e tratamento de dados.
+- [Início](https://pipocamax.sbs/): Página principal com os últimos lançamentos e destaques.
+- [Filmes](https://pipocamax.sbs/filmes): Catálogo completo de filmes disponíveis com busca e filtro por gênero.
+- [Séries](https://pipocamax.sbs/series): Catálogo completo de séries disponíveis com busca e filtro por gênero.
+- [Sobre](https://pipocamax.sbs/sobre): Informações sobre a plataforma e sua missão.
+- [DMCA](https://pipocamax.sbs/dmca): Política de direitos autorais e procedimentos para notificação.
+- [Termos de Uso](https://pipocamax.sbs/termos): Termos e condições de uso do site.
+- [Privacidade](https://pipocamax.sbs/privacidade): Política de privacidade e tratamento de dados.
 
 ## Conteúdo
 
@@ -29,7 +29,7 @@ O catálogo inclui filmes e séries de diversos gêneros como Ação, Aventura, 
 
 ## Contato
 
-- DMCA: dmca@pipocamax.com
-- Geral: contato@pipocamax.com
-- Privacidade: privacidade@pipocamax.com
+- DMCA: dmca@pipocamax.sbs
+- Geral: contato@pipocamax.sbs
+- Privacidade: privacidade@pipocamax.sbs
 - Telegram: https://t.me/+ABLySKDmGy4zNDcx
