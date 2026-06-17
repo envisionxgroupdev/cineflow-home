@@ -19,7 +19,7 @@ const About = () => (
     <Navbar />
     <div className="container mx-auto px-4 pt-24 pb-16 max-w-3xl">
       <div className="flex items-center gap-3 mb-8">
-        <img src="/favicon.png" alt="PipocaMax" width={32} height={32} className="h-8 w-8 object-contain" loading="lazy" />
+        <img src="/favicon.webp" alt="PipocaMax" width={32} height={32} className="h-8 w-8 object-contain" loading="lazy" />
         <h1 className="text-3xl font-display font-bold text-foreground">
           Sobre o PIPOCA<span className="text-gradient-cinema">MAX</span>
         </h1>

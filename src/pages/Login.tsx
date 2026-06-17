@@ -89,7 +89,7 @@ const Login = () => {
       <div className="w-full max-w-sm">
         <div className="text-center mb-6">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <img src="/favicon.png" alt="PipocaMax" width={32} height={32} className="h-8 w-8 object-contain" />
+            <img src="/favicon.webp" alt="PipocaMax" width={32} height={32} className="h-8 w-8 object-contain" />
             <h1 className="font-display text-3xl text-foreground">
               PIPOCA<span className="text-gradient-cinema">MAX</span>
             </h1>
