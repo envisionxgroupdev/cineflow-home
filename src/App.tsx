@@ -10,6 +10,7 @@ import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import { Component, lazy, Suspense, type ReactNode } from "react";
 import Index from "./pages/Index.tsx";
 import { SiteScripts } from "./components/SiteScripts.tsx";
+import { SiteAnnouncementBanner } from "./components/SiteAnnouncementBanner.tsx";
 import { MaintenanceGate } from "./components/MaintenanceGate.tsx";
 import { BannedGate } from "./components/BannedGate.tsx";
 import { NotificationsToast } from "./components/NotificationsToast.tsx";
