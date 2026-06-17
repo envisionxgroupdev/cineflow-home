@@ -104,6 +104,16 @@ const App = () => (
           <Toaster />
           <Sonner />
           <SiteScripts>
+          <SiteAnnouncementBannerImport />
+          </SiteScripts>
+        </TooltipProvider>
+      </PersistQueryClientProvider>
+    </HelmetProvider>
+  </GoogleReCaptchaProvider>
+);
+
+export default App;
+
           <BrowserRouter>
             <MaintenanceGate>
             <BannedGate>
