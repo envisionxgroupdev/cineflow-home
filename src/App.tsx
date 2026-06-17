@@ -107,6 +107,7 @@ const App = () => (
           <BrowserRouter>
             <MaintenanceGate>
             <BannedGate>
+            <SiteAnnouncementBanner />
             <ChunkErrorBoundary>
               <Suspense fallback={<RouteFallback />}>
                 <Routes>
