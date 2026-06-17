@@ -17,6 +17,7 @@ import { SyncManagement } from "@/components/admin/SyncManagement";
 import { CodeManagement } from "@/components/admin/CodeManagement";
 import { AdsManagement } from "@/components/admin/AdsManagement";
 import { NotificationsManagement } from "@/components/admin/NotificationsManagement";
+import { AnnouncementManagement } from "@/components/admin/AnnouncementManagement";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,7 +33,7 @@ import {
 type Tab =
   | "dashboard" | "movies" | "series" | "animes" | "channels"
   | "users" | "reports" | "requests" | "contact"
-  | "sync" | "codes" | "ads" | "notifications" | "maintenance";
+  | "sync" | "codes" | "ads" | "notifications" | "announcement" | "maintenance";
 
 interface TabMeta {
   key: Tab;
@@ -148,6 +149,7 @@ const Admin = () => {
         { key: "codes", label: "Códigos", icon: Code2, description: "Scripts globais do site" },
         { key: "ads", label: "Anúncios", icon: Megaphone, description: "Posicionamento e gestão de anúncios" },
         { key: "notifications", label: "Notificações", icon: Bell, description: "Avisos enviados aos visitantes" },
+        { key: "announcement", label: "Banner de aviso", icon: Megaphone, description: "Mensagem em destaque no topo do site" },
         { key: "maintenance", label: "Manutenção", icon: Wrench, description: "Ativar/desativar modo manutenção do site" },
       ],
     },
@@ -236,6 +238,7 @@ const Admin = () => {
                 : activeTab === "codes" ? (isAdmin ? <CodeManagement /> : null)
                 : activeTab === "ads" ? (isAdmin ? <AdsManagement /> : null)
                 : activeTab === "notifications" ? (isAdmin ? <NotificationsManagement /> : null)
+                : activeTab === "announcement" ? (isAdmin ? <AnnouncementManagement /> : null)
                 : activeTab === "maintenance" ? (isAdmin ? <MaintenanceManagement /> : null)
                 : activeTab === "channels" ? (
                   <>
