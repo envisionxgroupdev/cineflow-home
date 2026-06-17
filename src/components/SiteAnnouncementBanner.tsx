@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { X, Info, AlertTriangle, CheckCircle2, Megaphone } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { SITE_SETTINGS_UPDATED_EVENT } from '@/lib/siteSettingsEvents';
@@ -67,6 +67,7 @@ export const SITE_ANNOUNCEMENT_KEYS = KEYS;
 export function SiteAnnouncementBanner() {
   const [data, setData] = useState<BannerData | null>(null);
   const [dismissed, setDismissed] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
   const refresh = async () => {
     const d = await loadAnnouncement();
@@ -84,7 +85,31 @@ export function SiteAnnouncementBanner() {
     return () => window.removeEventListener(SITE_SETTINGS_UPDATED_EVENT, handler);
   }, []);
 
-  if (!data || !data.enabled || !data.message.trim() || dismissed) return null;
+  const visible = !!(data && data.enabled && data.message.trim() && !dismissed);
+
+  // Measure banner height and expose as CSS variable so the fixed navbar can offset itself.
+  useEffect(() => {
+    const root = document.documentElement;
+    if (!visible || !ref.current) {
+      root.style.setProperty('--announcement-h', '0px');
+      return;
+    }
+    const el = ref.current;
+    const update = () => {
+      root.style.setProperty('--announcement-h', `${el.offsetHeight}px`);
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    window.addEventListener('resize', update);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', update);
+      root.style.setProperty('--announcement-h', '0px');
+    };
+  }, [visible, data?.message, data?.link, data?.linkLabel]);
+
+  if (!visible || !data) return null;
 
   const { wrap, icon: Icon } = TYPE_STYLES[data.type] ?? TYPE_STYLES.announcement;
 
@@ -94,17 +119,21 @@ export function SiteAnnouncementBanner() {
   };
 
   return (
-    <div className={`${wrap} relative w-full`}>
-      <div className="max-w-[1600px] mx-auto flex items-center gap-3 px-4 sm:px-6 py-2.5 pr-12">
-        <Icon className="h-4 w-4 shrink-0" />
-        <p className="text-sm font-medium leading-snug flex-1">
+    <div
+      ref={ref}
+      className={`${wrap} fixed top-0 left-0 right-0 z-[60] w-full shadow-md`}
+      role="status"
+    >
+      <div className="max-w-[1600px] mx-auto flex items-start sm:items-center gap-2 sm:gap-3 px-3 sm:px-6 py-2 sm:py-2.5 pr-10 sm:pr-12">
+        <Icon className="h-4 w-4 shrink-0 mt-0.5 sm:mt-0" />
+        <p className="text-[13px] sm:text-sm font-medium leading-snug flex-1 break-words">
           {data.message}
           {data.link && (
             <a
               href={data.link}
               target={data.link.startsWith('http') ? '_blank' : undefined}
               rel="noopener noreferrer"
-              className="ml-2 underline underline-offset-2 font-semibold hover:opacity-80"
+              className="ml-2 underline underline-offset-2 font-semibold hover:opacity-80 inline-block"
             >
               {data.linkLabel || 'Saiba mais'} →
             </a>
@@ -114,7 +143,7 @@ export function SiteAnnouncementBanner() {
       <button
         onClick={handleDismiss}
         aria-label="Fechar aviso"
-        className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md hover:bg-black/10 transition-colors"
+        className="absolute right-1.5 sm:right-2 top-1.5 sm:top-1/2 sm:-translate-y-1/2 p-1.5 rounded-md hover:bg-black/10 transition-colors"
       >
         <X className="h-4 w-4" />
       </button>
