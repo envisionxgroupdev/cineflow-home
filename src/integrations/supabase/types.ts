@@ -443,6 +443,51 @@ export type Database = {
         }
         Relationships: []
       }
+      watch_history: {
+        Row: {
+          content_id: string
+          content_type: string
+          created_at: string
+          episode: number | null
+          id: string
+          image_url: string | null
+          last_watched_at: string
+          rating: number | null
+          season: number | null
+          title: string
+          user_id: string
+          year: string | null
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          created_at?: string
+          episode?: number | null
+          id?: string
+          image_url?: string | null
+          last_watched_at?: string
+          rating?: number | null
+          season?: number | null
+          title: string
+          user_id: string
+          year?: string | null
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          created_at?: string
+          episode?: number | null
+          id?: string
+          image_url?: string | null
+          last_watched_at?: string
+          rating?: number | null
+          season?: number | null
+          title?: string
+          user_id?: string
+          year?: string | null
+        }
+        Relationships: []
+      }
       watchlist: {
         Row: {
           content_id: string
