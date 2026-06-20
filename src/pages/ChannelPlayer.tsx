@@ -4,6 +4,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, ArrowLeft, Radio, Tv, ShieldAlert } from 'lucide-react';
+import { EmbedPlayer } from '@/components/EmbedPlayer';
 import { Helmet } from 'react-helmet-async';
 import type { TvChannel } from '@/types/channel';
 
