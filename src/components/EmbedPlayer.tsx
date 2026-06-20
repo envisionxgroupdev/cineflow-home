@@ -66,8 +66,9 @@ export const EmbedPlayer = ({ src, title = 'Player', resetKey }: EmbedPlayerProp
       setIsFullscreen(fs);
       // Try lock landscape on mobile when entering fullscreen
       if (fs && screen.orientation && 'lock' in screen.orientation) {
-        // @ts-expect-error - lock is experimental
-        screen.orientation.lock?.('landscape').catch(() => {});
+        (screen.orientation as unknown as { lock?: (o: string) => Promise<void> })
+          .lock?.('landscape')
+          .catch(() => {});
       }
     };
     document.addEventListener('fullscreenchange', onFs);
