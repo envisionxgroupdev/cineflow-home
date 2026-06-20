@@ -64,6 +64,7 @@ export interface Report {
   details: string | null;
   status: 'pending' | 'resolved' | 'dismissed';
   created_at: string;
+  resolved_at: string | null;
   reporter_email: string | null;
 }
 
