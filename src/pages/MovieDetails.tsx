@@ -216,36 +216,34 @@ const MovieDetails = () => {
         </button>
 
         {showPlayer && playerSrc && (
-          <div id="player" className="mb-8 rounded-2xl border border-border/60 bg-gradient-to-b from-card/80 to-card/40 backdrop-blur-sm shadow-2xl shadow-primary/5 overflow-hidden">
-            <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-border/50 bg-background/40">
-              <div className="flex items-center gap-3 min-w-0">
-                <span className="flex h-2 w-2 rounded-full bg-primary shadow-[0_0_10px] shadow-primary animate-pulse shrink-0" />
-                <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Assistindo agora</p>
-              </div>
-              {(hasPlayer1 || hasPlayer2 || hasPlayer3) && (
-                <div className="inline-flex items-center p-1 rounded-full bg-secondary/60 border border-border/50">
-                  {hasPlayer1 && (
-                    <button onClick={() => setActivePlayer('warezcdn')}
-                      className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${activePlayer === 'warezcdn' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'text-muted-foreground hover:text-foreground'}`}>
-                      Player 1
-                    </button>
-                  )}
-                  {hasPlayer2 && (
-                    <button onClick={() => setActivePlayer('embedmovies')}
-                      className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${activePlayer === 'embedmovies' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'text-muted-foreground hover:text-foreground'}`}>
-                      Player 2
-                    </button>
-                  )}
-                  {hasPlayer3 && (
-                    <button onClick={() => setActivePlayer('superflix')}
-                      className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${activePlayer === 'superflix' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'text-muted-foreground hover:text-foreground'}`}>
-                      Player 3
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
+          <div id="player" className="mb-8 overflow-hidden rounded-xl ring-1 ring-border/40 shadow-2xl shadow-black/40">
             <EmbedPlayer src={playerSrc} title={movie.title} resetKey={activePlayer} />
+            {(hasPlayer1 || hasPlayer2 || hasPlayer3) && (
+              <div className="flex items-center gap-2 overflow-x-auto px-2 py-2 bg-card/80 backdrop-blur-sm border-t border-border/50 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                <span className="hidden sm:inline-flex items-center gap-1.5 pl-2 pr-3 text-[10px] uppercase tracking-[0.18em] text-muted-foreground shrink-0">
+                  <span className="flex h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px] shadow-primary animate-pulse" />
+                  Fontes
+                </span>
+                {hasPlayer1 && (
+                  <button onClick={() => setActivePlayer('warezcdn')}
+                    className={`shrink-0 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${activePlayer === 'warezcdn' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'bg-secondary/60 text-muted-foreground hover:text-foreground hover:bg-secondary'}`}>
+                    Player 1
+                  </button>
+                )}
+                {hasPlayer2 && (
+                  <button onClick={() => setActivePlayer('embedmovies')}
+                    className={`shrink-0 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${activePlayer === 'embedmovies' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'bg-secondary/60 text-muted-foreground hover:text-foreground hover:bg-secondary'}`}>
+                    Player 2
+                  </button>
+                )}
+                {hasPlayer3 && (
+                  <button onClick={() => setActivePlayer('superflix')}
+                    className={`shrink-0 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${activePlayer === 'superflix' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'bg-secondary/60 text-muted-foreground hover:text-foreground hover:bg-secondary'}`}>
+                    Player 3
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )}
 
