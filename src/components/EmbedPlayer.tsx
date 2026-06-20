@@ -39,7 +39,7 @@ export const EmbedPlayer = ({ src, title = 'Player', resetKey }: EmbedPlayerProp
         key={`${src}-${resetKey ?? ''}`}
         src={src}
         title={title}
-        className="absolute inset-0 w-full h-full bg-black"
+        className="absolute inset-0 w-full h-full bg-black border-0"
         allow="autoplay; encrypted-media; fullscreen; picture-in-picture; accelerometer; gyroscope; clipboard-write"
         allowFullScreen
         referrerPolicy="origin"
