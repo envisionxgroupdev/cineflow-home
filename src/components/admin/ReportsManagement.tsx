@@ -30,6 +30,13 @@ export function ReportsManagement() {
   const filtered = filter === 'all' ? reports : reports.filter(r => r.status === filter);
   const pendingCount = reports.filter(r => r.status === 'pending').length;
 
+  // Days remaining until auto-deletion (cron removes resolved/dismissed > 7d)
+  const daysUntilDeletion = (resolvedAt: string | null): number | null => {
+    if (!resolvedAt) return null;
+    const ms = new Date(resolvedAt).getTime() + 7 * 24 * 60 * 60 * 1000 - Date.now();
+    return Math.max(0, Math.ceil(ms / (24 * 60 * 60 * 1000)));
+  };
+
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 text-primary animate-spin" /></div>;
 
   return (
