@@ -99,28 +99,12 @@ export function Footer() {
           </div>
 
 
-          {/* Brand + Bottom */}
-          <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <Link to="/" className="group relative flex items-center gap-3 rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/15 via-background/40 to-transparent px-4 py-2.5 backdrop-blur-sm transition-all duration-300 hover:border-primary/60 hover:shadow-[0_0_24px_-6px_hsl(var(--primary)/0.6)]">
-              <span aria-hidden className="absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent" />
-              <div className="relative">
-                <span aria-hidden className="absolute inset-0 rounded-full bg-primary/30 blur-md group-hover:bg-primary/50 transition-colors" />
-                <img src="/logo-pipocamax.webp" alt="PipocaMax" width={36} height={36} className="relative h-9 w-9 object-contain drop-shadow-[0_0_10px_hsl(var(--primary)/0.55)] group-hover:scale-110 group-hover:rotate-[-4deg] transition-transform duration-300" loading="lazy" />
-              </div>
-              <div className="flex flex-col leading-none">
-                <span className="font-display text-xl font-bold tracking-[0.22em] text-foreground">
-                  PIPOCA<span className="text-gradient-cinema">MAX</span>
-                </span>
-                <span className="mt-1.5 flex items-center gap-1.5 text-[9px] font-semibold tracking-[0.32em] uppercase text-primary/80">
-                  <span className="h-px w-3 bg-primary/60" />
-                  Sua sessão favorita
-                  <span className="h-px w-3 bg-primary/60" />
-                </span>
-              </div>
-            </Link>
+          {/* Bottom */}
+          <div className="border-t border-border pt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <p className="text-center text-xs text-muted-foreground">
               © 2026 PipocaMax. Todos os direitos reservados.
             </p>
+            <span className="hidden sm:inline text-border">|</span>
             <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-primary transition-colors">Sitemap</a>
           </div>
         </div>
