@@ -52,6 +52,15 @@ export function ReportsManagement() {
         ))}
       </div>
 
+      <div className="mb-4 flex items-start gap-2 rounded-lg border border-border bg-secondary/40 px-3 py-2 text-xs text-muted-foreground">
+        <Trash2 className="h-3.5 w-3.5 mt-0.5 shrink-0 text-primary" />
+        <p>
+          Reportes <span className="text-foreground font-medium">resolvidos</span> ou{' '}
+          <span className="text-foreground font-medium">descartados</span> são apagados automaticamente após{' '}
+          <span className="text-foreground font-medium">7 dias</span>.
+        </p>
+      </div>
+
       <div className="bg-card border border-border rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
