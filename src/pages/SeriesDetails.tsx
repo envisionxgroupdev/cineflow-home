@@ -277,20 +277,17 @@ const SeriesDetails = () => {
 
           return (
           <div className="mt-8 mb-4">
-            <div className="rounded-2xl border border-border/60 bg-gradient-to-b from-card/80 to-card/40 backdrop-blur-sm shadow-2xl shadow-primary/5 overflow-hidden">
-              {/* Header */}
-              <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-border/50 bg-background/40">
-                <div className="flex items-center gap-3 min-w-0">
+            <div className="overflow-hidden rounded-xl ring-1 ring-border/40 shadow-2xl shadow-black/40">
+              {/* Compact header */}
+              <div className="flex items-center justify-between gap-3 px-3 sm:px-4 py-2.5 bg-card/80 backdrop-blur-sm border-b border-border/50">
+                <div className="flex items-center gap-2.5 min-w-0">
                   <span className="flex h-2 w-2 rounded-full bg-primary shadow-[0_0_10px] shadow-primary animate-pulse shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Assistindo agora</p>
-                    <h3 className="font-display text-sm sm:text-base text-foreground truncate">
-                      Temporada {playingEpisode.season} · Episódio {playingEpisode.episode}
-                    </h3>
-                  </div>
+                  <h3 className="font-display text-xs sm:text-sm text-foreground truncate">
+                    T{playingEpisode.season} · E{playingEpisode.episode}
+                  </h3>
                 </div>
                 <button onClick={() => setConfirmCloseOpen(true)}
-                  className="text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-md hover:bg-secondary/60 transition-colors shrink-0">
+                  className="text-xs font-medium text-muted-foreground hover:text-foreground px-2.5 py-1 rounded-md hover:bg-secondary/60 transition-colors shrink-0">
                   Fechar
                 </button>
               </div>
@@ -303,36 +300,37 @@ const SeriesDetails = () => {
               />
 
               {/* Controls */}
-              <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5 flex-wrap bg-background/40 border-t border-border/50">
-                {/* Player switcher */}
-                <div className="inline-flex items-center p-1 rounded-full bg-secondary/60 border border-border/50">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 px-2 sm:px-3 py-2.5 bg-card/80 backdrop-blur-sm border-t border-border/50">
+                {/* Player switcher — horizontal scroll on mobile */}
+                <div className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                   <button onClick={() => setActivePlayer('warezcdn')}
-                    className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${activePlayer === 'warezcdn' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'text-muted-foreground hover:text-foreground'}`}>
+                    className={`shrink-0 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${activePlayer === 'warezcdn' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'bg-secondary/60 text-muted-foreground hover:text-foreground hover:bg-secondary'}`}>
                     Player 1
                   </button>
                   <button onClick={() => setActivePlayer('embedmovies')}
-                    className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${activePlayer === 'embedmovies' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'text-muted-foreground hover:text-foreground'}`}>
+                    className={`shrink-0 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${activePlayer === 'embedmovies' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'bg-secondary/60 text-muted-foreground hover:text-foreground hover:bg-secondary'}`}>
                     Player 2
                   </button>
                   {tmdbId && (
                     <button onClick={() => setActivePlayer('superflix')}
-                      className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${activePlayer === 'superflix' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'text-muted-foreground hover:text-foreground'}`}>
+                      className={`shrink-0 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${activePlayer === 'superflix' ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'bg-secondary/60 text-muted-foreground hover:text-foreground hover:bg-secondary'}`}>
                       Player 3
                     </button>
                   )}
                 </div>
 
                 {/* Episode nav */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 justify-end">
                   <button onClick={goPrev} disabled={!hasPrev}
-                    className="group flex items-center gap-1.5 h-9 px-3.5 rounded-full text-xs font-semibold border border-border/60 bg-secondary/40 text-foreground hover:bg-secondary hover:border-border transition-all disabled:opacity-30 disabled:cursor-not-allowed">
-                    <SkipBack className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5 group-disabled:!translate-x-0" />
+                    className="group flex items-center gap-1.5 h-9 px-3 rounded-lg text-xs font-semibold bg-secondary/60 text-foreground hover:bg-secondary transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+                    <SkipBack className="h-3.5 w-3.5" />
                     <span className="hidden sm:inline">Anterior</span>
                   </button>
                   <button onClick={goNext} disabled={!hasNext}
-                    className="group flex items-center gap-1.5 h-9 px-4 rounded-full text-xs font-semibold bg-primary text-primary-foreground shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:brightness-110 transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none">
-                    Próximo Episódio
-                    <SkipForward className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-disabled:!translate-x-0" />
+                    className="group flex items-center gap-1.5 h-9 px-3.5 rounded-lg text-xs font-semibold bg-primary text-primary-foreground shadow-md shadow-primary/30 hover:brightness-110 transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none">
+                    <span className="hidden sm:inline">Próximo</span>
+                    <span className="sm:hidden">Próx.</span>
+                    <SkipForward className="h-3.5 w-3.5" />
                   </button>
                 </div>
               </div>
