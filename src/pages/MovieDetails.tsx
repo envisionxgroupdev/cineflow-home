@@ -21,6 +21,7 @@ import { ClosePlayerDialog } from '@/components/ClosePlayerDialog';
 import { AdBanner } from '@/components/AdBanner';
 import { VizerHero } from '@/components/vizer/VizerHero';
 import { YouMayLike } from '@/components/vizer/YouMayLike';
+import { EmbedPlayer } from '@/components/EmbedPlayer';
 import type { Movie } from '@/types/database';
 
 type PlayerSource = 'warezcdn' | 'embedmovies' | 'superflix';
