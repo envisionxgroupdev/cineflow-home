@@ -40,9 +40,6 @@ export function Footer() {
                 <Link to="/canais" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
                   <Radio className="h-3.5 w-3.5" /> Canais de TV
                 </Link>
-                <Link to="/contato" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
-                  <Mail className="h-3.5 w-3.5" /> Contato
-                </Link>
                 <Link to="/sobre" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
                   <Info className="h-3.5 w-3.5" /> Sobre
                 </Link>
