@@ -191,6 +191,23 @@ export function ReportsManagement() {
                   </span>
                 </div>
               </div>
+              {viewingReport.resolved_at && (
+                <div className="rounded-lg border border-border bg-secondary/40 p-3">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Resolvido / descartado em</p>
+                  <p className="text-sm text-foreground">{new Date(viewingReport.resolved_at).toLocaleString('pt-BR')}</p>
+                  {(() => {
+                    const d = daysUntilDeletion(viewingReport.resolved_at);
+                    if (d === null) return null;
+                    const color = d <= 1 ? 'text-destructive' : d <= 3 ? 'text-yellow-500' : 'text-muted-foreground';
+                    return (
+                      <p className={`mt-1 text-xs inline-flex items-center gap-1 ${color}`}>
+                        <Clock className="h-3 w-3" />
+                        {d === 0 ? 'Será apagado hoje' : `Será apagado automaticamente em ${d} dia${d === 1 ? '' : 's'}`}
+                      </p>
+                    );
+                  })()}
+                </div>
+              )}
             </div>
             {viewingReport.status === 'pending' && (
               <div className="p-4 border-t border-border flex gap-3">
