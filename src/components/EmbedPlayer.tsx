@@ -10,9 +10,10 @@ interface EmbedPlayerProps {
 
 /**
  * Minimal embed player wrapper.
- * - 16:9 responsive frame
+ * - Strict 16:9 frame on every screen
+ * - On desktop, the frame is capped to the viewport height so subtitles and
+ *   controls are never cropped below the fold.
  * - Loading spinner only (no overlays, no custom controls — iframe owns UX)
- * - Sandboxed for security
  */
 export const EmbedPlayer = ({ src, title = 'Player', resetKey }: EmbedPlayerProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -22,7 +23,6 @@ export const EmbedPlayer = ({ src, title = 'Player', resetKey }: EmbedPlayerProp
     setLoaded(false);
   }, [src, resetKey]);
 
-  // Auto-focus iframe so keyboard controls work when it loads
   useEffect(() => {
     if (loaded) {
       const t = window.setTimeout(() => {
@@ -33,25 +33,26 @@ export const EmbedPlayer = ({ src, title = 'Player', resetKey }: EmbedPlayerProp
   }, [loaded]);
 
   return (
-    <div className="relative w-full bg-black" style={{ aspectRatio: '16 / 9' }}>
-      <iframe
-        ref={iframeRef}
-        key={`${src}-${resetKey ?? ''}`}
-        src={src}
-        title={title}
-        className="absolute inset-0 w-full h-full bg-black border-0"
-        allow="autoplay; encrypted-media; fullscreen; picture-in-picture; accelerometer; gyroscope; clipboard-write"
-        allowFullScreen
-        referrerPolicy="origin"
-        loading="eager"
-        sandbox="allow-scripts allow-same-origin allow-presentation allow-forms allow-popups allow-popups-to-escape-sandbox"
-        onLoad={() => setLoaded(true)}
-      />
-      {!loaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black pointer-events-none">
-          <Loader2 className="h-9 w-9 text-primary animate-spin" />
-        </div>
-      )}
+    <div className="w-full bg-black mx-auto" style={{ maxWidth: 'min(100%, calc((100vh - 180px) * 16 / 9))' }}>
+      <div className="relative w-full bg-black" style={{ aspectRatio: '16 / 9' }}>
+        <iframe
+          ref={iframeRef}
+          key={`${src}-${resetKey ?? ''}`}
+          src={src}
+          title={title}
+          className="absolute inset-0 w-full h-full bg-black border-0"
+          allow="autoplay; encrypted-media; fullscreen; picture-in-picture; accelerometer; gyroscope; clipboard-write"
+          allowFullScreen
+          referrerPolicy="origin"
+          loading="eager"
+          onLoad={() => setLoaded(true)}
+        />
+        {!loaded && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black pointer-events-none">
+            <Loader2 className="h-9 w-9 text-primary animate-spin" />
+          </div>
+        )}
+      </div>
     </div>
   );
 };
