@@ -120,7 +120,11 @@ const Index = () => {
       </Helmet>
       <Navbar />
       <HeroSection />
-      <div className="cinema-gradient">
+      <div className="relative cinema-gradient overflow-hidden">
+        <span aria-hidden className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 h-[600px] w-[900px] rounded-full bg-primary/10 blur-[140px]" />
+        <span aria-hidden className="pointer-events-none absolute top-[40%] -right-40 h-[500px] w-[500px] rounded-full bg-primary/8 blur-[120px]" />
+        <span aria-hidden className="pointer-events-none absolute bottom-0 -left-40 h-[500px] w-[500px] rounded-full bg-accent/10 blur-[120px]" />
+        <div className="relative">
         <AdBanner page="home" position="top" />
 
         <ContinueWatchingSection />
