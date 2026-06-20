@@ -41,6 +41,18 @@ const MovieDetails = () => {
 
   useEffect(() => { if (slug) loadMovie(slug); }, [slug]);
 
+  // Only record "continue watching" after the user has been watching for 60s
+  useEffect(() => {
+    if (!showPlayer || !user || !movie) return;
+    const t = setTimeout(() => {
+      void recordWatchHistory(user.id, {
+        content_id: movie.id, content_type: 'movie', title: movie.title,
+        image_url: movie.image_url, year: movie.year, rating: movie.rating,
+      });
+    }, 60_000);
+    return () => clearTimeout(t);
+  }, [showPlayer, user, movie]);
+
   const loadMovie = async (urlSlug: string) => {
     setLoading(true);
     setMovie(null);
