@@ -70,6 +70,7 @@ export function ReportsManagement() {
                 <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase hidden sm:table-cell">Motivo</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase hidden md:table-cell">Data</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Status</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase hidden lg:table-cell">Resolução</th>
                 <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Ações</th>
               </tr>
             </thead>
