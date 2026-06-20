@@ -7,6 +7,7 @@ import { ReportModal } from '@/components/ReportModal';
 import { EditContentModal } from '@/components/EditContentModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { recordWatchHistory } from '@/hooks/useWatchHistory';
 import { slugify } from '@/lib/utils';
 import { findRowBySlug } from '@/lib/contentSlugLookup';
 import {
@@ -26,7 +27,7 @@ type PlayerSource = 'warezcdn' | 'embedmovies' | 'superflix';
 
 const MovieDetails = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const [movie, setMovie] = useState<Movie | null>(null);
   const [details, setDetails] = useState<TmdbMovieDetails | null>(null);
   const [cast, setCast] = useState<TmdbCastMember[]>([]);
