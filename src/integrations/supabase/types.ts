@@ -210,6 +210,7 @@ export type Database = {
           id: string
           reason: string
           reporter_email: string | null
+          resolved_at: string | null
           status: string
         }
         Insert: {
@@ -221,6 +222,7 @@ export type Database = {
           id?: string
           reason: string
           reporter_email?: string | null
+          resolved_at?: string | null
           status?: string
         }
         Update: {
@@ -232,6 +234,7 @@ export type Database = {
           id?: string
           reason?: string
           reporter_email?: string | null
+          resolved_at?: string | null
           status?: string
         }
         Relationships: []
@@ -529,6 +532,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_old_reports: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
