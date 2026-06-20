@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Loader2, AlertTriangle, Check, X, Eye } from 'lucide-react';
+import { Loader2, AlertTriangle, Check, X, Eye, Trash2, Clock } from 'lucide-react';
 import type { Report } from '@/types/database';
 
 export function ReportsManagement() {
