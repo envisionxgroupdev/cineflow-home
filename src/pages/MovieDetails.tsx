@@ -149,7 +149,14 @@ const MovieDetails = () => {
         actions={
           <>
             {(hasPlayer1 || hasPlayer2) && (
-              <button onClick={() => { setShowPlayer(true); setTimeout(() => document.getElementById('player')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); }}
+              <button onClick={() => {
+                setShowPlayer(true);
+                void recordWatchHistory(user?.id, {
+                  content_id: movie.id, content_type: 'movie', title: movie.title,
+                  image_url: movie.image_url, year: movie.year, rating: movie.rating,
+                });
+                setTimeout(() => document.getElementById('player')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+              }}
                 className="group inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-full text-sm font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:brightness-110 transition-all">
                 <Play className="h-4 w-4 fill-current transition-transform group-hover:scale-110" />
                 {showPlayer ? 'Player aberto' : 'Assistir'}
