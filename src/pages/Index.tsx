@@ -8,6 +8,7 @@ import { ReleasesSection } from "@/components/ReleasesSection";
 import { Top10Section } from "@/components/Top10Section";
 import { TopTodaySection } from "@/components/TopTodaySection";
 import { NovidadesSection } from "@/components/NovidadesSection";
+import { ContinueWatchingSection } from "@/components/ContinueWatchingSection";
 
 import { Footer } from "@/components/Footer";
 import { EditContentModal } from "@/components/EditContentModal";
@@ -122,6 +123,7 @@ const Index = () => {
       <div className="cinema-gradient">
         <AdBanner page="home" position="top" />
 
+        <ContinueWatchingSection />
         <TopTodaySection />
         <ReleasesSection />
         <NovidadesSection />

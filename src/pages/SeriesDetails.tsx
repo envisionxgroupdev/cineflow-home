@@ -7,6 +7,7 @@ import { ReportModal } from '@/components/ReportModal';
 import { EditContentModal } from '@/components/EditContentModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { recordWatchHistory } from '@/hooks/useWatchHistory';
 import { slugify } from '@/lib/utils';
 import { findRowBySlug } from '@/lib/contentSlugLookup';
 import {
@@ -29,7 +30,7 @@ type PlayerSource = 'warezcdn' | 'embedmovies' | 'superflix';
 
 const SeriesDetails = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const [series, setSeries] = useState<Series | null>(null);
   const [details, setDetails] = useState<TmdbSeriesDetails | null>(null);
   const [cast, setCast] = useState<TmdbCastMember[]>([]);
@@ -49,6 +50,21 @@ const SeriesDetails = () => {
   useEffect(() => {
     if (series?.tmdb_id && selectedSeason !== null && selectedSeason >= 0) loadEpisodes(series.tmdb_id, selectedSeason);
   }, [series?.tmdb_id, selectedSeason]);
+
+  // Record continue-watching when an episode starts playing (logged-in users only)
+  useEffect(() => {
+    if (!series || !playingEpisode || !user) return;
+    void recordWatchHistory(user.id, {
+      content_id: series.id,
+      content_type: 'series',
+      title: series.title,
+      image_url: series.image_url,
+      year: series.year,
+      rating: series.rating,
+      season: playingEpisode.season,
+      episode: playingEpisode.episode,
+    });
+  }, [playingEpisode, series, user]);
 
   const loadSeries = async (urlSlug: string) => {
     setLoading(true);
