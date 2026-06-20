@@ -35,7 +35,7 @@ export interface WatchHistoryInput {
 export async function recordWatchHistory(userId: string | undefined, input: WatchHistoryInput) {
   if (!userId) return;
   try {
-    await supabase
+    await (supabase as any)
       .from('watch_history')
       .upsert(
         {
