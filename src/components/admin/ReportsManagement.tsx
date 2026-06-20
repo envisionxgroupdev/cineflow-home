@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Loader2, AlertTriangle, Check, X, Eye } from 'lucide-react';
+import { Loader2, AlertTriangle, Check, X, Eye, Trash2, Clock } from 'lucide-react';
 import type { Report } from '@/types/database';
 
 export function ReportsManagement() {
@@ -30,6 +30,13 @@ export function ReportsManagement() {
   const filtered = filter === 'all' ? reports : reports.filter(r => r.status === filter);
   const pendingCount = reports.filter(r => r.status === 'pending').length;
 
+  // Days remaining until auto-deletion (cron removes resolved/dismissed > 7d)
+  const daysUntilDeletion = (resolvedAt: string | null): number | null => {
+    if (!resolvedAt) return null;
+    const ms = new Date(resolvedAt).getTime() + 7 * 24 * 60 * 60 * 1000 - Date.now();
+    return Math.max(0, Math.ceil(ms / (24 * 60 * 60 * 1000)));
+  };
+
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 text-primary animate-spin" /></div>;
 
   return (
@@ -45,6 +52,15 @@ export function ReportsManagement() {
         ))}
       </div>
 
+      <div className="mb-4 flex items-start gap-2 rounded-lg border border-border bg-secondary/40 px-3 py-2 text-xs text-muted-foreground">
+        <Trash2 className="h-3.5 w-3.5 mt-0.5 shrink-0 text-primary" />
+        <p>
+          Reportes <span className="text-foreground font-medium">resolvidos</span> ou{' '}
+          <span className="text-foreground font-medium">descartados</span> são apagados automaticamente após{' '}
+          <span className="text-foreground font-medium">7 dias</span>.
+        </p>
+      </div>
+
       <div className="bg-card border border-border rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -54,6 +70,7 @@ export function ReportsManagement() {
                 <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase hidden sm:table-cell">Motivo</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase hidden md:table-cell">Data</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Status</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase hidden lg:table-cell">Resolução</th>
                 <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Ações</th>
               </tr>
             </thead>
@@ -79,6 +96,26 @@ export function ReportsManagement() {
                       {r.status === 'pending' ? 'Pendente' : r.status === 'resolved' ? 'Resolvido' : 'Descartado'}
                     </span>
                   </td>
+                  <td className="px-4 py-3 text-xs hidden lg:table-cell">
+                    {r.resolved_at ? (
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-foreground">{new Date(r.resolved_at).toLocaleDateString('pt-BR')}</span>
+                        {(() => {
+                          const d = daysUntilDeletion(r.resolved_at);
+                          if (d === null) return null;
+                          const color = d <= 1 ? 'text-destructive' : d <= 3 ? 'text-yellow-500' : 'text-muted-foreground';
+                          return (
+                            <span className={`inline-flex items-center gap-1 ${color}`}>
+                              <Clock className="h-3 w-3" />
+                              {d === 0 ? 'Apaga hoje' : `apaga em ${d}d`}
+                            </span>
+                          );
+                        })()}
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center gap-1 justify-end">
                       <button onClick={() => setViewingReport(r)} title="Ver detalhes"
@@ -102,7 +139,7 @@ export function ReportsManagement() {
                 </tr>
               ))}
               {filtered.length === 0 && (
-                <tr><td colSpan={5} className="px-4 py-8 text-center text-sm text-muted-foreground">
+                <tr><td colSpan={6} className="px-4 py-8 text-center text-sm text-muted-foreground">
                   Nenhum reporte {filter !== 'all' ? 'neste filtro' : 'ainda'}
                 </td></tr>
               )}
@@ -154,6 +191,23 @@ export function ReportsManagement() {
                   </span>
                 </div>
               </div>
+              {viewingReport.resolved_at && (
+                <div className="rounded-lg border border-border bg-secondary/40 p-3">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Resolvido / descartado em</p>
+                  <p className="text-sm text-foreground">{new Date(viewingReport.resolved_at).toLocaleString('pt-BR')}</p>
+                  {(() => {
+                    const d = daysUntilDeletion(viewingReport.resolved_at);
+                    if (d === null) return null;
+                    const color = d <= 1 ? 'text-destructive' : d <= 3 ? 'text-yellow-500' : 'text-muted-foreground';
+                    return (
+                      <p className={`mt-1 text-xs inline-flex items-center gap-1 ${color}`}>
+                        <Clock className="h-3 w-3" />
+                        {d === 0 ? 'Será apagado hoje' : `Será apagado automaticamente em ${d} dia${d === 1 ? '' : 's'}`}
+                      </p>
+                    );
+                  })()}
+                </div>
+              )}
             </div>
             {viewingReport.status === 'pending' && (
               <div className="p-4 border-t border-border flex gap-3">
