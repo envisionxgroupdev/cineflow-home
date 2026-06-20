@@ -96,6 +96,26 @@ export function ReportsManagement() {
                       {r.status === 'pending' ? 'Pendente' : r.status === 'resolved' ? 'Resolvido' : 'Descartado'}
                     </span>
                   </td>
+                  <td className="px-4 py-3 text-xs hidden lg:table-cell">
+                    {r.resolved_at ? (
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-foreground">{new Date(r.resolved_at).toLocaleDateString('pt-BR')}</span>
+                        {(() => {
+                          const d = daysUntilDeletion(r.resolved_at);
+                          if (d === null) return null;
+                          const color = d <= 1 ? 'text-destructive' : d <= 3 ? 'text-yellow-500' : 'text-muted-foreground';
+                          return (
+                            <span className={`inline-flex items-center gap-1 ${color}`}>
+                              <Clock className="h-3 w-3" />
+                              {d === 0 ? 'Apaga hoje' : `apaga em ${d}d`}
+                            </span>
+                          );
+                        })()}
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center gap-1 justify-end">
                       <button onClick={() => setViewingReport(r)} title="Ver detalhes"
