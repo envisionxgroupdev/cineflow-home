@@ -41,6 +41,18 @@ const MovieDetails = () => {
 
   useEffect(() => { if (slug) loadMovie(slug); }, [slug]);
 
+  // Only record "continue watching" after the user has been watching for 60s
+  useEffect(() => {
+    if (!showPlayer || !user || !movie) return;
+    const t = setTimeout(() => {
+      void recordWatchHistory(user.id, {
+        content_id: movie.id, content_type: 'movie', title: movie.title,
+        image_url: movie.image_url, year: movie.year, rating: movie.rating,
+      });
+    }, 60_000);
+    return () => clearTimeout(t);
+  }, [showPlayer, user, movie]);
+
   const loadMovie = async (urlSlug: string) => {
     setLoading(true);
     setMovie(null);
@@ -152,10 +164,6 @@ const MovieDetails = () => {
             {(hasPlayer1 || hasPlayer2) && (
               <button onClick={() => {
                 setShowPlayer(true);
-                void recordWatchHistory(user?.id, {
-                  content_id: movie.id, content_type: 'movie', title: movie.title,
-                  image_url: movie.image_url, year: movie.year, rating: movie.rating,
-                });
                 setTimeout(() => document.getElementById('player')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
               }}
                 className="group inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-full text-sm font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:brightness-110 transition-all">

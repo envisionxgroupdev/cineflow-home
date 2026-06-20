@@ -52,19 +52,22 @@ const SeriesDetails = () => {
     if (series?.tmdb_id && selectedSeason !== null && selectedSeason >= 0) loadEpisodes(series.tmdb_id, selectedSeason);
   }, [series?.tmdb_id, selectedSeason]);
 
-  // Record continue-watching when an episode starts playing (logged-in users only)
+  // Record continue-watching only after 60s of playing the episode
   useEffect(() => {
     if (!series || !playingEpisode || !user) return;
-    void recordWatchHistory(user.id, {
-      content_id: series.id,
-      content_type: 'series',
-      title: series.title,
-      image_url: series.image_url,
-      year: series.year,
-      rating: series.rating,
-      season: playingEpisode.season,
-      episode: playingEpisode.episode,
-    });
+    const t = setTimeout(() => {
+      void recordWatchHistory(user.id, {
+        content_id: series.id,
+        content_type: 'series',
+        title: series.title,
+        image_url: series.image_url,
+        year: series.year,
+        rating: series.rating,
+        season: playingEpisode.season,
+        episode: playingEpisode.episode,
+      });
+    }, 60_000);
+    return () => clearTimeout(t);
   }, [playingEpisode, series, user]);
 
   const loadSeries = async (urlSlug: string) => {
