@@ -276,10 +276,10 @@ const SeriesDetails = () => {
           };
 
           return (
-          <div className="mt-8 mb-4">
-            <div className="overflow-hidden rounded-xl ring-1 ring-border/40 shadow-2xl shadow-black/40">
+          <div className="mt-8 mb-4 -mx-4 sm:mx-0">
+            <div className="overflow-hidden rounded-none sm:rounded-xl ring-1 ring-border/40 shadow-2xl shadow-black/40">
               {/* Compact header */}
-              <div className="flex items-center justify-between gap-3 px-3 sm:px-4 py-2.5 bg-card/80 backdrop-blur-sm border-b border-border/50">
+              <div className="flex items-center justify-between gap-3 px-4 sm:px-4 py-2.5 bg-card/80 backdrop-blur-sm border-b border-border/50">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <span className="flex h-2 w-2 rounded-full bg-primary shadow-[0_0_10px] shadow-primary animate-pulse shrink-0" />
                   <h3 className="font-display text-xs sm:text-sm text-foreground truncate">
@@ -300,7 +300,7 @@ const SeriesDetails = () => {
               />
 
               {/* Controls */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 px-2 sm:px-3 py-2.5 bg-card/80 backdrop-blur-sm border-t border-border/50">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 px-4 sm:px-3 py-2.5 bg-card/80 backdrop-blur-sm border-t border-border/50">
                 {/* Player switcher — horizontal scroll on mobile */}
                 <div className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                   <button onClick={() => setActivePlayer('warezcdn')}

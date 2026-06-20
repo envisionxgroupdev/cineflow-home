@@ -216,11 +216,11 @@ const MovieDetails = () => {
         </button>
 
         {showPlayer && playerSrc && (
-          <div id="player" className="mb-8 overflow-hidden rounded-xl ring-1 ring-border/40 shadow-2xl shadow-black/40">
+          <div id="player" className="mb-8 -mx-4 sm:mx-0 overflow-hidden rounded-none sm:rounded-xl ring-1 ring-border/40 shadow-2xl shadow-black/40">
             <EmbedPlayer src={playerSrc} title={movie.title} resetKey={activePlayer} />
             {(hasPlayer1 || hasPlayer2 || hasPlayer3) && (
-              <div className="flex items-center gap-2 overflow-x-auto px-2 py-2 bg-card/80 backdrop-blur-sm border-t border-border/50 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                <span className="hidden sm:inline-flex items-center gap-1.5 pl-2 pr-3 text-[10px] uppercase tracking-[0.18em] text-muted-foreground shrink-0">
+              <div className="flex items-center gap-2 overflow-x-auto px-4 sm:px-3 py-2.5 bg-card/80 backdrop-blur-sm border-t border-border/50 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                <span className="hidden sm:inline-flex items-center gap-1.5 pr-3 text-[10px] uppercase tracking-[0.18em] text-muted-foreground shrink-0">
                   <span className="flex h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px] shadow-primary animate-pulse" />
                   Fontes
                 </span>
