@@ -146,6 +146,7 @@ const Index = () => {
           </div>
         )}
         <AdBanner page="home" position="bottom" />
+        </div>
       </div>
       
       
