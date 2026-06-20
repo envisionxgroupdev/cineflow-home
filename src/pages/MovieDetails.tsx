@@ -21,6 +21,7 @@ import { ClosePlayerDialog } from '@/components/ClosePlayerDialog';
 import { AdBanner } from '@/components/AdBanner';
 import { VizerHero } from '@/components/vizer/VizerHero';
 import { YouMayLike } from '@/components/vizer/YouMayLike';
+import { EmbedPlayer } from '@/components/EmbedPlayer';
 import type { Movie } from '@/types/database';
 
 type PlayerSource = 'warezcdn' | 'embedmovies' | 'superflix';
@@ -236,12 +237,7 @@ const MovieDetails = () => {
                 </div>
               )}
             </div>
-            <div className="bg-black">
-              <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
-                <iframe src={playerSrc} className="absolute inset-0 w-full h-full" allowFullScreen
-                  allow="autoplay; encrypted-media" referrerPolicy="origin" />
-              </div>
-            </div>
+            <EmbedPlayer src={playerSrc} title={movie.title} resetKey={activePlayer} />
           </div>
         )}
 

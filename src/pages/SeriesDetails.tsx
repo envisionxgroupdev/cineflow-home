@@ -21,6 +21,7 @@ import { ClosePlayerDialog } from '@/components/ClosePlayerDialog';
 import { AdBanner } from '@/components/AdBanner';
 import { VizerHero } from '@/components/vizer/VizerHero';
 import { YouMayLike } from '@/components/vizer/YouMayLike';
+import { EmbedPlayer } from '@/components/EmbedPlayer';
 
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 
@@ -292,13 +293,11 @@ const SeriesDetails = () => {
               </div>
 
               {/* Player */}
-              <div className="bg-black">
-                <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
-                  <iframe src={getEpisodePlayerUrl(playingEpisode.season, playingEpisode.episode, activePlayer)}
-                    className="absolute inset-0 w-full h-full" allowFullScreen
-                    allow="autoplay; encrypted-media" referrerPolicy="origin" />
-                </div>
-              </div>
+              <EmbedPlayer
+                src={getEpisodePlayerUrl(playingEpisode.season, playingEpisode.episode, activePlayer)}
+                title={`${series.title} T${playingEpisode.season}E${playingEpisode.episode}`}
+                resetKey={`${activePlayer}-${playingEpisode.season}-${playingEpisode.episode}`}
+              />
 
               {/* Controls */}
               <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5 flex-wrap bg-background/40 border-t border-border/50">

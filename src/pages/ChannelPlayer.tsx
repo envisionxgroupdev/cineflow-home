@@ -4,6 +4,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, ArrowLeft, Radio, Tv, ShieldAlert } from 'lucide-react';
+import { EmbedPlayer } from '@/components/EmbedPlayer';
 import { Helmet } from 'react-helmet-async';
 import type { TvChannel } from '@/types/channel';
 
@@ -112,17 +113,8 @@ const ChannelPlayer = () => {
                   </div>
                 </div>
               ) : (
-                <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-border">
-                  <iframe
-                    key={channel.embed_url}
-                    src={channel.embed_url}
-                    className="absolute inset-0 w-full h-full"
-                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-                    allowFullScreen
-                    referrerPolicy="origin"
-                    loading="eager"
-                    title={channel.name}
-                  />
+                <div className="rounded-xl overflow-hidden border border-border">
+                  <EmbedPlayer src={channel.embed_url} title={channel.name} resetKey={channel.embed_url} />
                 </div>
               )}
 
