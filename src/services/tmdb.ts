@@ -1,4 +1,5 @@
-const TMDB_API_KEY = 'c3303b4812a831ae634e26763a65644e';
+// TMDB API key is NEVER stored client-side. The `warez-proxy` edge function
+// injects it server-side from the TMDB_API_KEY secret before forwarding.
 const TMDB_BASE = 'https://api.themoviedb.org/3';
 const TMDB_IMG = 'https://image.tmdb.org/t/p';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -103,7 +104,8 @@ let tvGenresCache: TmdbGenre[] = [];
 
 async function tmdbFetchJson<T>(path: string, params: Record<string, string | number | undefined> = {}): Promise<T | null> {
   const direct = new URL(`${TMDB_BASE}${path}`);
-  direct.searchParams.set('api_key', TMDB_API_KEY);
+  // NOTE: api_key is intentionally omitted here — the warez-proxy edge
+  // function injects it server-side from the TMDB_API_KEY secret.
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== '') direct.searchParams.set(key, String(value));
   });

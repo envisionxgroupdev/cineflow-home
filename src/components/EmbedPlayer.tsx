@@ -162,6 +162,10 @@ export const EmbedPlayer = ({ src, title = 'Player', resetKey }: EmbedPlayerProp
               allowFullScreen
               referrerPolicy="origin"
               loading="eager"
+              // Sandbox restricts the third-party player from reading parent-page
+              // cookies/localStorage or navigating the top window, while still
+              // allowing scripts/playback/popups required by the embed.
+              sandbox="allow-scripts allow-same-origin allow-presentation allow-forms allow-popups allow-popups-to-escape-sandbox"
               onLoad={() => setLoaded(true)}
             />
 
