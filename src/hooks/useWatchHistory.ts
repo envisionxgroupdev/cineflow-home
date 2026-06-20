@@ -65,7 +65,7 @@ export function useWatchHistory(limit = 12) {
   const load = useCallback(async () => {
     if (!user) { setItems([]); return; }
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('watch_history')
       .select('*')
       .eq('user_id', user.id)
@@ -77,7 +77,7 @@ export function useWatchHistory(limit = 12) {
 
   const remove = useCallback(async (id: string) => {
     if (!user) return;
-    await supabase.from('watch_history').delete().eq('id', id).eq('user_id', user.id);
+    await (supabase as any).from('watch_history').delete().eq('id', id).eq('user_id', user.id);
     setItems(prev => prev.filter(i => i.id !== id));
   }, [user]);
 
