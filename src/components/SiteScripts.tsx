@@ -78,11 +78,14 @@ export function SiteScripts({ children }: { children?: React.ReactNode }) {
     };
   }, []);
 
-  const headScripts = codes.head_scripts;
-  const bodyScripts = codes.body_scripts;
+  // Never inject ads/scripts inside the admin panel
+  const isAdmin = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+
+  const headScripts = isAdmin ? '' : codes.head_scripts;
+  const bodyScripts = isAdmin ? '' : codes.body_scripts;
 
   return (
-    <SiteCodesContext.Provider value={codes}>
+    <SiteCodesContext.Provider value={isAdmin ? {} : codes}>
       {headScripts && <InjectHead html={headScripts} />}
       {bodyScripts && <InjectBody html={bodyScripts} />}
       {children}
