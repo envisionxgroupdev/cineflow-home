@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useSiteCodes } from "./SiteScripts";
+import { useIsAdAllowedRoute } from "@/lib/adRoutes";
 
 interface AdBannerProps {
   position: "top" | "middle" | "bottom";
@@ -8,10 +9,11 @@ interface AdBannerProps {
 
 export function AdBanner({ position, page }: AdBannerProps) {
   const codes = useSiteCodes();
+  const adAllowed = useIsAdAllowedRoute();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [height, setHeight] = useState(0);
   const key = `ad_${page}_${position}`;
-  const html = codes[key];
+  const html = adAllowed ? codes[key] : undefined;
 
   useEffect(() => {
     if (!html || !iframeRef.current) return;

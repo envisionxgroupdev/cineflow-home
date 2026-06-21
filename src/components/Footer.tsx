@@ -1,10 +1,12 @@
 import { Home, Clapperboard, Tv, Star, Info, FileText, Shield, Lock, Send, Globe, ExternalLink, Mail, Sparkles, Radio } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useSiteCodes } from "./SiteScripts";
+import { useIsAdAllowedRoute } from "@/lib/adRoutes";
 
 export function Footer() {
   const codes = useSiteCodes();
-  const footerHtml = codes.footer_scripts;
+  const adAllowed = useIsAdAllowedRoute();
+  const footerHtml = adAllowed ? codes.footer_scripts : undefined;
 
   return (
     <footer className="border-t border-border bg-cinema-deep py-12">
