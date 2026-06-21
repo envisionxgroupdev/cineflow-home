@@ -24,7 +24,7 @@ export function MovieCard({ id, title, year, rating, imageUrl, type, isAdmin, on
         <div className="relative aspect-[2/3] rounded-md overflow-hidden bg-secondary ring-1 ring-border/40 group-hover:ring-primary/60 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_12px_30px_-10px_hsl(var(--primary)/0.55)]">
           <img
             src={imageUrl}
-            alt={title}
+            alt={`Pôster de ${title}${year ? ` (${year})` : ''} — assistir ${type === 'movie' ? 'filme' : 'série'} online`}
             loading={priority ? "eager" : "lazy"}
             decoding="async"
             // @ts-expect-error fetchpriority is valid HTML, React types lag
