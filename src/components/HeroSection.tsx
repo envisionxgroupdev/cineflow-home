@@ -106,7 +106,8 @@ export function HeroSection() {
         >
           <img
             src={item.backdrop}
-            alt={item.title}
+            alt=""
+            aria-hidden="true"
             width={1920}
             height={1080}
             fetchPriority="high"
