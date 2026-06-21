@@ -206,9 +206,10 @@ export function HeroSection() {
               </Link>
               <button
                 type="button"
+                aria-label={`Adicionar ${item.title} à minha lista`}
                 className="inline-flex items-center gap-2 bg-foreground/10 hover:bg-foreground/15 backdrop-blur-md text-foreground px-7 py-3 rounded-full font-semibold text-sm transition-all border border-foreground/15"
               >
-                <Bookmark className="h-4 w-4" />
+                <Bookmark className="h-4 w-4" aria-hidden="true" />
                 Listar
               </button>
             </div>
