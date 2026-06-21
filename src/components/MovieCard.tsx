@@ -53,8 +53,9 @@ export function MovieCard({ id, title, year, rating, imageUrl, type, isAdmin, on
       {isAdmin && onEdit && (
         <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(); }}
           className="absolute top-1.5 left-1.5 z-10 p-1.5 bg-background/80 backdrop-blur-sm border border-border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors opacity-0 group-hover:opacity-100"
-          title="Editar">
-          <Pencil className="h-3.5 w-3.5" />
+          aria-label={`Editar ${title}`}
+          title={`Editar ${title}`}>
+          <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
         </button>
       )}
     </div>
