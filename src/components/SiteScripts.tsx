@@ -1,6 +1,7 @@
 import { useEffect, useState, createContext, useContext } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { SITE_SETTINGS_UPDATED_EVENT } from '@/lib/siteSettingsEvents';
+import { useIsAdAllowedRoute } from '@/lib/adRoutes';
 
 const SiteCodesContext = createContext<Record<string, string>>({});
 export const useSiteCodes = () => useContext(SiteCodesContext);
@@ -78,14 +79,14 @@ export function SiteScripts({ children }: { children?: React.ReactNode }) {
     };
   }, []);
 
-  // Never inject ads/scripts inside the admin panel
-  const isAdmin = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+  // Whitelist: ads/scripts only render on allowed routes (admin is blocked).
+  const adAllowed = useIsAdAllowedRoute();
 
-  const headScripts = isAdmin ? '' : codes.head_scripts;
-  const bodyScripts = isAdmin ? '' : codes.body_scripts;
+  const headScripts = adAllowed ? codes.head_scripts : '';
+  const bodyScripts = adAllowed ? codes.body_scripts : '';
 
   return (
-    <SiteCodesContext.Provider value={isAdmin ? {} : codes}>
+    <SiteCodesContext.Provider value={adAllowed ? codes : {}}>
       {headScripts && <InjectHead html={headScripts} />}
       {bodyScripts && <InjectBody html={bodyScripts} />}
       {children}

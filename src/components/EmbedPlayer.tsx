@@ -3,6 +3,7 @@ import { Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { InterstitialAd } from './InterstitialAd';
 import { SITE_SETTINGS_UPDATED_EVENT } from '@/lib/siteSettingsEvents';
+import { useIsAdAllowedRoute } from '@/lib/adRoutes';
 
 interface EmbedPlayerProps {
   src: string;
@@ -24,9 +25,11 @@ export const EmbedPlayer = ({ src, title = 'Player', resetKey }: EmbedPlayerProp
   const [loaded, setLoaded] = useState(false);
   const [interstitialHtml, setInterstitialHtml] = useState<string>('');
   const [showInterstitial, setShowInterstitial] = useState(false);
+  const adAllowed = useIsAdAllowedRoute();
 
-  // Load interstitial HTML once + on settings update
+  // Load interstitial HTML once + on settings update (skip entirely on blocked routes)
   useEffect(() => {
+    if (!adAllowed) { setInterstitialHtml(''); return; }
     let cancelled = false;
     const load = async () => {
       const { data } = await supabase
@@ -43,13 +46,13 @@ export const EmbedPlayer = ({ src, title = 'Player', resetKey }: EmbedPlayerProp
       cancelled = true;
       window.removeEventListener(SITE_SETTINGS_UPDATED_EVENT, onUpdate);
     };
-  }, []);
+  }, [adAllowed]);
 
-  // Show interstitial whenever src/resetKey changes (if configured)
+  // Show interstitial whenever src/resetKey changes (if configured AND ads allowed)
   useEffect(() => {
     setLoaded(false);
-    setShowInterstitial(Boolean(interstitialHtml.trim()));
-  }, [src, resetKey, interstitialHtml]);
+    setShowInterstitial(adAllowed && Boolean(interstitialHtml.trim()));
+  }, [src, resetKey, interstitialHtml, adAllowed]);
 
   useEffect(() => {
     if (loaded) {
