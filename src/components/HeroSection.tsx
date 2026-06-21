@@ -139,7 +139,7 @@ export function HeroSection() {
             {logoUrl ? (
               <img
                 src={logoUrl}
-                alt={item.title}
+                alt={`Logotipo de ${item.title} — ${item.type === 'movie' ? 'filme' : 'série'} em destaque`}
                 className="max-h-32 md:max-h-44 lg:max-h-52 w-auto max-w-[80%] mb-6 drop-shadow-[0_6px_24px_rgba(0,0,0,0.65)] object-contain"
                 loading="eager"
               />
