@@ -106,7 +106,8 @@ export function HeroSection() {
         >
           <img
             src={item.backdrop}
-            alt={item.title}
+            alt=""
+            aria-hidden="true"
             width={1920}
             height={1080}
             fetchPriority="high"
@@ -138,7 +139,7 @@ export function HeroSection() {
             {logoUrl ? (
               <img
                 src={logoUrl}
-                alt={item.title}
+                alt={`Logotipo de ${item.title} — ${item.type === 'movie' ? 'filme' : 'série'} em destaque`}
                 className="max-h-32 md:max-h-44 lg:max-h-52 w-auto max-w-[80%] mb-6 drop-shadow-[0_6px_24px_rgba(0,0,0,0.65)] object-contain"
                 loading="eager"
               />
@@ -205,9 +206,10 @@ export function HeroSection() {
               </Link>
               <button
                 type="button"
+                aria-label={`Adicionar ${item.title} à minha lista`}
                 className="inline-flex items-center gap-2 bg-foreground/10 hover:bg-foreground/15 backdrop-blur-md text-foreground px-7 py-3 rounded-full font-semibold text-sm transition-all border border-foreground/15"
               >
-                <Bookmark className="h-4 w-4" />
+                <Bookmark className="h-4 w-4" aria-hidden="true" />
                 Listar
               </button>
             </div>
