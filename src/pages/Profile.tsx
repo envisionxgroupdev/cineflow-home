@@ -7,10 +7,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { TicketChat } from '@/components/TicketChat';
+import type { Report, TicketStatus } from '@/types/database';
 import {
   User as UserIcon, Mail, Calendar, Shield, LogOut, Save, Loader2,
   Bookmark, Film, Tv, KeyRound, Eye, EyeOff, Crown, Sparkles,
-  ShieldCheck, Users,
+  ShieldCheck, Users, Ticket, X, MessageSquare,
 } from 'lucide-react';
 
 const Profile = () => {
