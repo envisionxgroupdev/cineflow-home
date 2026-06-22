@@ -397,4 +397,22 @@ function AdminBadge() {
   );
 }
 
+function TicketStatusBadge({ status, inline }: { status: TicketStatus; inline?: boolean }) {
+  const map: Record<TicketStatus, { label: string; cls: string }> = {
+    open: { label: 'Aberto', cls: 'bg-yellow-500/15 text-yellow-500' },
+    pending: { label: 'Aberto', cls: 'bg-yellow-500/15 text-yellow-500' },
+    in_progress: { label: 'Em andamento', cls: 'bg-blue-500/15 text-blue-500' },
+    resolved: { label: 'Resolvido', cls: 'bg-green-500/15 text-green-500' },
+    closed: { label: 'Fechado', cls: 'bg-muted text-muted-foreground' },
+    dismissed: { label: 'Fechado', cls: 'bg-muted text-muted-foreground' },
+  };
+  const { label, cls } = map[status] ?? map.open;
+  return (
+    <span className={`${inline ? '' : ''} text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${cls}`}>
+      {label}
+    </span>
+  );
+}
+
 export default Profile;
+
