@@ -231,7 +231,6 @@ const Admin = () => {
                 : activeTab === "users" ? (isAdmin ? <UserManagement /> : null)
                 : activeTab === "reports" ? (isAdmin ? <ReportsManagement /> : null)
                 : activeTab === "requests" ? (isAdmin ? <RequestsManagement /> : null)
-                : activeTab === "contact" ? (isAdmin ? <ContactMessagesManagement /> : null)
                 : activeTab === "sync" ? (isAdmin ? <SyncManagement /> : null)
                 : activeTab === "codes" ? (isAdmin ? <CodeManagement /> : null)
                 : activeTab === "ads" ? (isAdmin ? <AdsManagement /> : null)
