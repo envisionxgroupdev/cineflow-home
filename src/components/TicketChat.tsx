@@ -18,6 +18,7 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
   const [loading, setLoading] = useState(true);
   const [body, setBody] = useState('');
   const [sending, setSending] = useState(false);
+  const [authorName, setAuthorName] = useState<string>('Usuário');
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const load = async () => {
@@ -31,6 +32,15 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
     else setMessages((data || []) as TicketMessage[]);
     setLoading(false);
   };
+
+  // Fetch ticket author display name (for admin viewer to know who they're talking to)
+  useEffect(() => {
+    if (!ticket.user_id) return;
+    supabase.from('profiles').select('display_name,email').eq('id', ticket.user_id).maybeSingle()
+      .then(({ data }) => {
+        if (data) setAuthorName(data.display_name || data.email?.split('@')[0] || 'Usuário');
+      });
+  }, [ticket.user_id]);
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [ticket.id]);
 
@@ -84,24 +94,49 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
           <p className="text-xs text-center text-muted-foreground py-8">Nenhuma mensagem ainda.</p>
         ) : messages.map(m => {
           const mine = m.sender_id === user?.id;
+          // Always render admin on the LEFT and user on the RIGHT, regardless
+          // of who is viewing — so the role of each side is unambiguous.
+          const sideRight = !m.is_admin;
+          const senderLabel = m.is_admin
+            ? (mine ? 'Você · Staff' : 'Equipe PipocaMax')
+            : (mine ? 'Você' : authorName);
+
+          const bubbleCls = m.is_admin
+            ? 'bg-primary/15 border border-primary/40 text-foreground rounded-bl-sm'
+            : 'bg-card border border-border text-foreground rounded-br-sm';
+
+          const avatarCls = m.is_admin
+            ? 'bg-primary/20 text-primary border border-primary/50'
+            : 'bg-secondary text-muted-foreground border border-border';
+
           return (
-            <div key={m.id} className={`flex gap-2 ${mine ? 'justify-end' : 'justify-start'}`}>
-              {!mine && (
-                <div className={`h-7 w-7 rounded-full flex items-center justify-center shrink-0 ${m.is_admin ? 'bg-primary/20 text-primary border border-primary/40' : 'bg-secondary text-muted-foreground border border-border'}`}>
-                  {m.is_admin ? <ShieldCheck className="h-3.5 w-3.5" /> : <UserIcon className="h-3.5 w-3.5" />}
+            <div key={m.id} className={`flex gap-2 ${sideRight ? 'justify-end' : 'justify-start'}`}>
+              {!sideRight && (
+                <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${avatarCls}`}>
+                  <ShieldCheck className="h-4 w-4" />
                 </div>
               )}
-              <div className={`max-w-[75%] rounded-2xl px-3.5 py-2 text-sm ${
-                mine
-                  ? 'bg-primary text-primary-foreground rounded-br-sm'
-                  : m.is_admin
-                    ? 'bg-primary/10 border border-primary/30 text-foreground rounded-bl-sm'
-                    : 'bg-card border border-border text-foreground rounded-bl-sm'
-              }`}>
-                {m.is_admin && !mine && <p className="text-[10px] font-bold uppercase text-primary mb-0.5">Staff</p>}
+              <div className={`max-w-[78%] rounded-2xl px-3.5 py-2 text-sm ${bubbleCls}`}>
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <span className={`text-[10px] font-bold uppercase tracking-wide ${m.is_admin ? 'text-primary' : 'text-muted-foreground'}`}>
+                    {senderLabel}
+                  </span>
+                  {m.is_admin && (
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-primary text-primary-foreground uppercase">
+                      Admin
+                    </span>
+                  )}
+                </div>
                 <p className="whitespace-pre-wrap break-words">{m.body}</p>
-                <p className={`text-[10px] mt-1 opacity-70`}>{new Date(m.created_at).toLocaleString('pt-BR')}</p>
+                <p className="text-[10px] mt-1 text-muted-foreground">
+                  {new Date(m.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                </p>
               </div>
+              {sideRight && (
+                <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${avatarCls}`}>
+                  <UserIcon className="h-4 w-4" />
+                </div>
+              )}
             </div>
           );
         })}
