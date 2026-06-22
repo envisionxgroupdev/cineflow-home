@@ -29,6 +29,24 @@ const Profile = () => {
   const [showPass, setShowPass] = useState(false);
   const [changingPass, setChangingPass] = useState(false);
 
+  const [tickets, setTickets] = useState<Report[]>([]);
+  const [ticketsLoading, setTicketsLoading] = useState(true);
+  const [openTicket, setOpenTicket] = useState<Report | null>(null);
+
+  const loadTickets = async () => {
+    if (!user) return;
+    setTicketsLoading(true);
+    const { data } = await supabase
+      .from('reports')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('last_message_at', { ascending: false });
+    setTickets((data || []) as Report[]);
+    setTicketsLoading(false);
+  };
+
+  useEffect(() => { if (user) loadTickets(); /* eslint-disable-next-line */ }, [user?.id]);
+
   useEffect(() => {
     if (authLoading) return;
     if (!user) { navigate('/login'); return; }
