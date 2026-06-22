@@ -6,11 +6,10 @@ import { UserManagement } from "@/components/admin/UserManagement";
 import { MaintenanceManagement } from "@/components/admin/MaintenanceManagement";
 import { ReportsManagement } from "@/components/admin/ReportsManagement";
 import { RequestsManagement } from "@/components/admin/RequestsManagement";
-import { ContactMessagesManagement } from "@/components/admin/ContactMessagesManagement";
 import {
   Film, Tv, Plus, Search, Trash2, Pencil, ArrowLeft, LogOut, Loader2, Users,
-  AlertTriangle, Sparkles, LayoutDashboard, RefreshCw, Code2, Megaphone, Inbox,
-  MessageSquare, Radio, Bell, Home, Wrench,
+  Sparkles, LayoutDashboard, RefreshCw, Code2, Megaphone, Inbox,
+  MessageSquare, Radio, Bell, Home, Wrench, Ticket,
 } from "lucide-react";
 import { Dashboard } from "@/components/admin/Dashboard";
 import { SyncManagement } from "@/components/admin/SyncManagement";
@@ -32,7 +31,7 @@ import {
 
 type Tab =
   | "dashboard" | "movies" | "series" | "animes" | "channels"
-  | "users" | "reports" | "requests" | "contact"
+  | "users" | "reports" | "requests"
   | "sync" | "codes" | "ads" | "notifications" | "announcement" | "maintenance";
 
 interface TabMeta {
@@ -136,9 +135,8 @@ const Admin = () => {
     {
       label: "Comunidade",
       items: [
-        { key: "reports", label: "Reportes", icon: AlertTriangle, description: "Conteúdos reportados pelos usuários" },
+        { key: "reports", label: "Tickets", icon: Ticket, description: "Tickets de reportes abertos pelos usuários" },
         { key: "requests", label: "Pedidos", icon: Inbox, description: "Pedidos de novos conteúdos" },
-        { key: "contact", label: "Mensagens", icon: MessageSquare, description: "Mensagens recebidas pelo contato" },
         { key: "users", label: "Usuários", icon: Users, description: "Permissões e administração de contas" },
       ],
     },
@@ -233,7 +231,6 @@ const Admin = () => {
                 : activeTab === "users" ? (isAdmin ? <UserManagement /> : null)
                 : activeTab === "reports" ? (isAdmin ? <ReportsManagement /> : null)
                 : activeTab === "requests" ? (isAdmin ? <RequestsManagement /> : null)
-                : activeTab === "contact" ? (isAdmin ? <ContactMessagesManagement /> : null)
                 : activeTab === "sync" ? (isAdmin ? <SyncManagement /> : null)
                 : activeTab === "codes" ? (isAdmin ? <CodeManagement /> : null)
                 : activeTab === "ads" ? (isAdmin ? <AdsManagement /> : null)
