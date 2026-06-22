@@ -55,17 +55,33 @@ export interface UserRole {
   role: AppRole;
 }
 
+export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed' | 'pending' | 'dismissed';
+
 export interface Report {
   id: string;
+  user_id: string | null;
   content_id: string;
   content_type: 'movie' | 'series';
   content_title: string;
   reason: string;
   details: string | null;
-  status: 'pending' | 'resolved' | 'dismissed';
+  status: TicketStatus;
   created_at: string;
+  updated_at?: string;
   resolved_at: string | null;
   reporter_email: string | null;
+  last_message_at?: string;
+  unread_for_admin?: boolean;
+  unread_for_user?: boolean;
+}
+
+export interface TicketMessage {
+  id: string;
+  ticket_id: string;
+  sender_id: string;
+  is_admin: boolean;
+  body: string;
+  created_at: string;
 }
 
 export interface ContentRequest {
