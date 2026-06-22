@@ -1,226 +1,203 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Loader2, AlertTriangle, Check, X, Eye, Trash2, Clock } from 'lucide-react';
-import type { Report } from '@/types/database';
+import { Loader2, AlertTriangle, X, Trash2, MessageSquare, CheckCircle2, Circle, Clock, Lock, Play } from 'lucide-react';
+import type { Report, TicketStatus } from '@/types/database';
+import { TicketChat } from '@/components/TicketChat';
+
+const STATUS_LABEL: Record<TicketStatus, string> = {
+  open: 'Aberto',
+  in_progress: 'Em andamento',
+  resolved: 'Resolvido',
+  closed: 'Fechado',
+  pending: 'Aberto',
+  dismissed: 'Fechado',
+};
+
+const STATUS_COLOR: Record<TicketStatus, string> = {
+  open: 'bg-yellow-500/15 text-yellow-500',
+  pending: 'bg-yellow-500/15 text-yellow-500',
+  in_progress: 'bg-blue-500/15 text-blue-500',
+  resolved: 'bg-green-500/15 text-green-500',
+  closed: 'bg-muted text-muted-foreground',
+  dismissed: 'bg-muted text-muted-foreground',
+};
+
+type Filter = 'all' | 'open' | 'in_progress' | 'resolved' | 'closed';
 
 export function ReportsManagement() {
-  const [reports, setReports] = useState<Report[]>([]);
+  const [tickets, setTickets] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'resolved' | 'dismissed'>('pending');
-  const [viewingReport, setViewingReport] = useState<Report | null>(null);
-
-  useEffect(() => { load(); }, []);
+  const [filter, setFilter] = useState<Filter>('open');
+  const [viewing, setViewing] = useState<Report | null>(null);
+  const [authors, setAuthors] = useState<Record<string, { email: string | null; display_name: string | null }>>({});
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase.from('reports').select('*').order('created_at', { ascending: false });
-    setReports((data || []) as Report[]);
+    const { data, error } = await supabase
+      .from('reports')
+      .select('*')
+      .order('last_message_at', { ascending: false });
+    if (error) { toast.error(error.message); setLoading(false); return; }
+    const list = (data || []) as Report[];
+    setTickets(list);
+
+    const ids = Array.from(new Set(list.map(t => t.user_id).filter(Boolean))) as string[];
+    if (ids.length) {
+      const { data: profs } = await supabase.from('profiles').select('id,email,display_name').in('id', ids);
+      const map: Record<string, any> = {};
+      (profs || []).forEach((p: any) => { map[p.id] = { email: p.email, display_name: p.display_name }; });
+      setAuthors(map);
+    }
     setLoading(false);
   };
 
-  const updateStatus = async (id: string, status: 'resolved' | 'dismissed') => {
-    const { error } = await supabase.from('reports').update({ status }).eq('id', id);
+  useEffect(() => { load(); }, []);
+
+  const setStatus = async (id: string, status: TicketStatus) => {
+    const patch: any = { status };
+    if (status === 'resolved' || status === 'closed') patch.resolved_at = new Date().toISOString();
+    if (status === 'open' || status === 'in_progress') patch.resolved_at = null;
+    const { error } = await supabase.from('reports').update(patch).eq('id', id);
     if (error) { toast.error(error.message); return; }
-    toast.success(status === 'resolved' ? 'Marcado como resolvido' : 'Descartado');
-    load();
-    if (viewingReport?.id === id) setViewingReport(null);
+    setTickets(ts => ts.map(t => t.id === id ? { ...t, ...patch } : t));
+    if (viewing?.id === id) setViewing({ ...viewing, ...patch });
+    toast.success('Status atualizado');
   };
 
-  const filtered = filter === 'all' ? reports : reports.filter(r => r.status === filter);
-  const pendingCount = reports.filter(r => r.status === 'pending').length;
+  const remove = async (id: string) => {
+    if (!confirm('Excluir este ticket permanentemente?')) return;
+    const { error } = await supabase.from('reports').delete().eq('id', id);
+    if (error) { toast.error(error.message); return; }
+    setTickets(ts => ts.filter(t => t.id !== id));
+    if (viewing?.id === id) setViewing(null);
+    toast.success('Ticket excluído');
+  };
 
-  // Days remaining until auto-deletion (cron removes resolved/dismissed > 7d)
-  const daysUntilDeletion = (resolvedAt: string | null): number | null => {
-    if (!resolvedAt) return null;
-    const ms = new Date(resolvedAt).getTime() + 7 * 24 * 60 * 60 * 1000 - Date.now();
-    return Math.max(0, Math.ceil(ms / (24 * 60 * 60 * 1000)));
+  // Normalize legacy statuses for filtering
+  const normalized = (s: TicketStatus): Filter => {
+    if (s === 'pending') return 'open';
+    if (s === 'dismissed') return 'closed';
+    return s as Filter;
+  };
+
+  const filtered = filter === 'all' ? tickets : tickets.filter(t => normalized(t.status) === filter);
+
+  const counts = {
+    all: tickets.length,
+    open: tickets.filter(t => normalized(t.status) === 'open').length,
+    in_progress: tickets.filter(t => normalized(t.status) === 'in_progress').length,
+    resolved: tickets.filter(t => normalized(t.status) === 'resolved').length,
+    closed: tickets.filter(t => normalized(t.status) === 'closed').length,
   };
 
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 text-primary animate-spin" /></div>;
 
   return (
-    <div>
-      <div className="flex gap-2 mb-4 flex-wrap">
-        {(['pending', 'resolved', 'dismissed', 'all'] as const).map(f => (
+    <div className="space-y-4">
+      <div className="flex gap-2 flex-wrap">
+        {(['open', 'in_progress', 'resolved', 'closed', 'all'] as Filter[]).map(f => (
           <button key={f} onClick={() => setFilter(f)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
               filter === f ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'
             }`}>
-            {f === 'pending' ? `Pendentes (${pendingCount})` : f === 'resolved' ? 'Resolvidos' : f === 'dismissed' ? 'Descartados' : 'Todos'}
+            {f === 'all' ? 'Todos' : STATUS_LABEL[f as TicketStatus]} ({counts[f]})
           </button>
         ))}
       </div>
 
-      <div className="mb-4 flex items-start gap-2 rounded-lg border border-border bg-secondary/40 px-3 py-2 text-xs text-muted-foreground">
-        <Trash2 className="h-3.5 w-3.5 mt-0.5 shrink-0 text-primary" />
-        <p>
-          Reportes <span className="text-foreground font-medium">resolvidos</span> ou{' '}
-          <span className="text-foreground font-medium">descartados</span> são apagados automaticamente após{' '}
-          <span className="text-foreground font-medium">7 dias</span>.
-        </p>
-      </div>
-
-      <div className="bg-card border border-border rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Conteúdo</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase hidden sm:table-cell">Motivo</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase hidden md:table-cell">Data</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Status</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase hidden lg:table-cell">Resolução</th>
-                <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(r => (
-                <tr key={r.id} className="border-b border-border/50 hover:bg-secondary/50 transition-colors">
-                  <td className="px-4 py-3">
-                    <p className="text-sm font-medium text-foreground">{r.content_title}</p>
-                    <p className="text-xs text-muted-foreground">{r.content_type === 'movie' ? 'Filme' : 'Série'}</p>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground hidden sm:table-cell">
-                    <span className="text-xs bg-destructive/10 text-destructive px-2 py-0.5 rounded">{r.reason}</span>
-                  </td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground hidden md:table-cell">
-                    {new Date(r.created_at).toLocaleDateString('pt-BR')}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`text-xs font-semibold px-2 py-1 rounded ${
-                      r.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500' :
-                      r.status === 'resolved' ? 'bg-green-500/10 text-green-500' :
-                      'bg-muted text-muted-foreground'
-                    }`}>
-                      {r.status === 'pending' ? 'Pendente' : r.status === 'resolved' ? 'Resolvido' : 'Descartado'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-xs hidden lg:table-cell">
-                    {r.resolved_at ? (
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-foreground">{new Date(r.resolved_at).toLocaleDateString('pt-BR')}</span>
-                        {(() => {
-                          const d = daysUntilDeletion(r.resolved_at);
-                          if (d === null) return null;
-                          const color = d <= 1 ? 'text-destructive' : d <= 3 ? 'text-yellow-500' : 'text-muted-foreground';
-                          return (
-                            <span className={`inline-flex items-center gap-1 ${color}`}>
-                              <Clock className="h-3 w-3" />
-                              {d === 0 ? 'Apaga hoje' : `apaga em ${d}d`}
-                            </span>
-                          );
-                        })()}
-                      </div>
-                    ) : (
-                      <span className="text-muted-foreground">—</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex items-center gap-1 justify-end">
-                      <button onClick={() => setViewingReport(r)} title="Ver detalhes"
-                        className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded transition-colors">
-                        <Eye className="h-4 w-4" />
-                      </button>
-                      {r.status === 'pending' && (
-                        <>
-                          <button onClick={() => updateStatus(r.id, 'resolved')} title="Marcar como resolvido"
-                            className="p-1.5 text-green-500 hover:bg-green-500/10 rounded transition-colors">
-                            <Check className="h-4 w-4" />
-                          </button>
-                          <button onClick={() => updateStatus(r.id, 'dismissed')} title="Descartar"
-                            className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded transition-colors">
-                            <X className="h-4 w-4" />
-                          </button>
-                        </>
+      {filtered.length === 0 ? (
+        <div className="bg-card border border-border rounded-lg p-12 text-center text-sm text-muted-foreground">
+          Nenhum ticket neste filtro.
+        </div>
+      ) : (
+        <div className="grid gap-2">
+          {filtered.map(t => {
+            const author = t.user_id ? authors[t.user_id] : null;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setViewing(t)}
+                className="text-left bg-card border border-border hover:border-primary/40 rounded-lg p-4 transition-colors"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <MessageSquare className="h-4 w-4 text-primary shrink-0" />
+                      <h3 className="text-sm font-semibold text-foreground truncate">{t.content_title}</h3>
+                      <span className="text-[10px] text-muted-foreground">· {t.content_type === 'movie' ? 'Filme' : 'Série'}</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${STATUS_COLOR[t.status]}`}>
+                        {STATUS_LABEL[t.status]}
+                      </span>
+                      {t.unread_for_admin && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded uppercase bg-destructive text-destructive-foreground">
+                          Novo
+                        </span>
                       )}
                     </div>
-                  </td>
-                </tr>
-              ))}
-              {filtered.length === 0 && (
-                <tr><td colSpan={6} className="px-4 py-8 text-center text-sm text-muted-foreground">
-                  Nenhum reporte {filter !== 'all' ? 'neste filtro' : 'ainda'}
-                </td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Report Detail Modal */}
-      {viewingReport && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setViewingReport(null)}>
-          <div className="bg-card border border-border rounded-xl w-full max-w-md" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-4 border-b border-border">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
-                <h3 className="font-display text-lg text-foreground">DETALHES DO REPORTE</h3>
-              </div>
-              <button onClick={() => setViewingReport(null)} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
-            </div>
-            <div className="p-4 space-y-4">
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Conteúdo</p>
-                <p className="text-sm text-foreground font-medium">{viewingReport.content_title}</p>
-                <p className="text-xs text-muted-foreground">{viewingReport.content_type === 'movie' ? 'Filme' : 'Série'}</p>
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Motivo</p>
-                <span className="text-xs bg-destructive/10 text-destructive px-2 py-1 rounded">{viewingReport.reason}</span>
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Detalhes</p>
-                <p className="text-sm text-muted-foreground bg-secondary rounded-lg p-3">
-                  {viewingReport.details || 'Nenhum detalhe adicional fornecido.'}
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Data</p>
-                  <p className="text-sm text-foreground">{new Date(viewingReport.created_at).toLocaleString('pt-BR')}</p>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Status</p>
-                  <span className={`text-xs font-semibold px-2 py-1 rounded ${
-                    viewingReport.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500' :
-                    viewingReport.status === 'resolved' ? 'bg-green-500/10 text-green-500' :
-                    'bg-muted text-muted-foreground'
-                  }`}>
-                    {viewingReport.status === 'pending' ? 'Pendente' : viewingReport.status === 'resolved' ? 'Resolvido' : 'Descartado'}
+                    <p className="text-xs text-muted-foreground truncate">
+                      <span className="text-foreground/80">{author?.display_name || author?.email || t.reporter_email || 'Usuário'}</span>
+                      {' · '}
+                      <span className="text-destructive">{t.reason}</span>
+                    </p>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
+                    {new Date(t.last_message_at || t.created_at).toLocaleString('pt-BR')}
                   </span>
                 </div>
-              </div>
-              {viewingReport.resolved_at && (
-                <div className="rounded-lg border border-border bg-secondary/40 p-3">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Resolvido / descartado em</p>
-                  <p className="text-sm text-foreground">{new Date(viewingReport.resolved_at).toLocaleString('pt-BR')}</p>
-                  {(() => {
-                    const d = daysUntilDeletion(viewingReport.resolved_at);
-                    if (d === null) return null;
-                    const color = d <= 1 ? 'text-destructive' : d <= 3 ? 'text-yellow-500' : 'text-muted-foreground';
-                    return (
-                      <p className={`mt-1 text-xs inline-flex items-center gap-1 ${color}`}>
-                        <Clock className="h-3 w-3" />
-                        {d === 0 ? 'Será apagado hoje' : `Será apagado automaticamente em ${d} dia${d === 1 ? '' : 's'}`}
-                      </p>
-                    );
-                  })()}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {viewing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => { setViewing(null); load(); }}>
+          <div className="bg-card border border-border rounded-xl w-full max-w-2xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
+              <div className="flex items-center gap-2 min-w-0">
+                <AlertTriangle className="h-5 w-5 text-destructive shrink-0" />
+                <div className="min-w-0">
+                  <h3 className="font-display text-base text-foreground truncate">{viewing.content_title}</h3>
+                  <p className="text-[11px] text-muted-foreground truncate">
+                    {viewing.content_type === 'movie' ? 'Filme' : 'Série'} · {viewing.reason} ·{' '}
+                    <span className={`px-1.5 py-0.5 rounded ${STATUS_COLOR[viewing.status]}`}>{STATUS_LABEL[viewing.status]}</span>
+                  </p>
                 </div>
-              )}
-            </div>
-            {viewingReport.status === 'pending' && (
-              <div className="p-4 border-t border-border flex gap-3">
-                <button onClick={() => updateStatus(viewingReport.id, 'dismissed')}
-                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium bg-secondary text-muted-foreground hover:text-foreground transition-colors">
-                  Descartar
-                </button>
-                <button onClick={() => updateStatus(viewingReport.id, 'resolved')}
-                  className="flex-1 flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors">
-                  <Check className="h-4 w-4" /> Resolvido
-                </button>
               </div>
-            )}
+              <button onClick={() => { setViewing(null); load(); }} className="text-muted-foreground hover:text-foreground shrink-0">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="p-4 flex-1 overflow-hidden flex flex-col">
+              <TicketChat ticket={viewing} asAdmin onSent={() => {
+                setTickets(ts => ts.map(t => t.id === viewing.id ? { ...t, unread_for_user: true, last_message_at: new Date().toISOString() } : t));
+              }} />
+            </div>
+
+            <div className="p-3 border-t border-border flex gap-2 flex-wrap shrink-0">
+              <button onClick={() => setStatus(viewing.id, 'in_progress')}
+                className="text-xs px-3 py-1.5 rounded bg-blue-500/15 text-blue-500 hover:bg-blue-500/25 transition-colors flex items-center gap-1">
+                <Play className="h-3 w-3" /> Em andamento
+              </button>
+              <button onClick={() => setStatus(viewing.id, 'resolved')}
+                className="text-xs px-3 py-1.5 rounded bg-green-500/15 text-green-500 hover:bg-green-500/25 transition-colors flex items-center gap-1">
+                <CheckCircle2 className="h-3 w-3" /> Resolvido
+              </button>
+              <button onClick={() => setStatus(viewing.id, 'closed')}
+                className="text-xs px-3 py-1.5 rounded bg-muted text-muted-foreground hover:bg-muted/80 transition-colors flex items-center gap-1">
+                <Lock className="h-3 w-3" /> Fechar
+              </button>
+              <button onClick={() => setStatus(viewing.id, 'open')}
+                className="text-xs px-3 py-1.5 rounded bg-yellow-500/15 text-yellow-500 hover:bg-yellow-500/25 transition-colors flex items-center gap-1">
+                <Circle className="h-3 w-3" /> Reabrir
+              </button>
+              <button onClick={() => remove(viewing.id)}
+                className="ml-auto text-xs px-3 py-1.5 rounded bg-destructive/15 text-destructive hover:bg-destructive/25 transition-colors flex items-center gap-1">
+                <Trash2 className="h-3 w-3" /> Excluir
+              </button>
+            </div>
           </div>
         </div>
       )}
