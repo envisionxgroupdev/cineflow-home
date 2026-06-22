@@ -135,9 +135,8 @@ const Admin = () => {
     {
       label: "Comunidade",
       items: [
-        { key: "reports", label: "Reportes", icon: AlertTriangle, description: "Conteúdos reportados pelos usuários" },
+        { key: "reports", label: "Tickets", icon: Ticket, description: "Tickets de reportes abertos pelos usuários" },
         { key: "requests", label: "Pedidos", icon: Inbox, description: "Pedidos de novos conteúdos" },
-        { key: "contact", label: "Mensagens", icon: MessageSquare, description: "Mensagens recebidas pelo contato" },
         { key: "users", label: "Usuários", icon: Users, description: "Permissões e administração de contas" },
       ],
     },
