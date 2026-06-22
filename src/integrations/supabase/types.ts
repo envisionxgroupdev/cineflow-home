@@ -208,10 +208,15 @@ export type Database = {
           created_at: string
           details: string | null
           id: string
+          last_message_at: string
           reason: string
           reporter_email: string | null
           resolved_at: string | null
           status: string
+          unread_for_admin: boolean
+          unread_for_user: boolean
+          updated_at: string
+          user_id: string | null
         }
         Insert: {
           content_id: string
@@ -220,10 +225,15 @@ export type Database = {
           created_at?: string
           details?: string | null
           id?: string
+          last_message_at?: string
           reason: string
           reporter_email?: string | null
           resolved_at?: string | null
           status?: string
+          unread_for_admin?: boolean
+          unread_for_user?: boolean
+          updated_at?: string
+          user_id?: string | null
         }
         Update: {
           content_id?: string
@@ -232,10 +242,15 @@ export type Database = {
           created_at?: string
           details?: string | null
           id?: string
+          last_message_at?: string
           reason?: string
           reporter_email?: string | null
           resolved_at?: string | null
           status?: string
+          unread_for_admin?: boolean
+          unread_for_user?: boolean
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -382,6 +397,41 @@ export type Database = {
           value?: string
         }
         Relationships: []
+      }
+      ticket_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          is_admin: boolean
+          sender_id: string
+          ticket_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          is_admin?: boolean
+          sender_id: string
+          ticket_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_admin?: boolean
+          sender_id?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tv_channels: {
         Row: {
