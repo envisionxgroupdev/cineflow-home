@@ -18,6 +18,7 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
   const [loading, setLoading] = useState(true);
   const [body, setBody] = useState('');
   const [sending, setSending] = useState(false);
+  const [authorName, setAuthorName] = useState<string>('Usuário');
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const load = async () => {
@@ -31,6 +32,15 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
     else setMessages((data || []) as TicketMessage[]);
     setLoading(false);
   };
+
+  // Fetch ticket author display name (for admin viewer to know who they're talking to)
+  useEffect(() => {
+    if (!ticket.user_id) return;
+    supabase.from('profiles').select('display_name,email').eq('id', ticket.user_id).maybeSingle()
+      .then(({ data }) => {
+        if (data) setAuthorName(data.display_name || data.email?.split('@')[0] || 'Usuário');
+      });
+  }, [ticket.user_id]);
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [ticket.id]);
 
