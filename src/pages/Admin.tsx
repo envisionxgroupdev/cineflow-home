@@ -31,7 +31,7 @@ import {
 
 type Tab =
   | "dashboard" | "movies" | "series" | "animes" | "channels"
-  | "users" | "reports" | "requests" | "contact"
+  | "users" | "reports" | "requests"
   | "sync" | "codes" | "ads" | "notifications" | "announcement" | "maintenance";
 
 interface TabMeta {
