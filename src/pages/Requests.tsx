@@ -1,13 +1,14 @@
 import { useRef, useState } from "react";
 import { checkAntiSpam, markSubmitted, honeypotInputProps } from "@/lib/antiSpam";
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Send, Film, Tv, Loader2, CheckCircle2, Sparkles, Clock, Heart } from "lucide-react";
+import { Send, Film, Tv, Loader2, CheckCircle2, Sparkles, Clock, Heart, Lock, LogIn } from "lucide-react";
 import { z } from "zod";
+import { useAuth } from "@/hooks/useAuth";
 
 const schema = z.object({
   title: z.string().trim().min(1, "Informe o título").max(200),
@@ -19,6 +20,8 @@ const schema = z.object({
 });
 
 const Requests = () => {
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [type, setType] = useState<"movie" | "series">("movie");
   const [title, setTitle] = useState("");
   const [year, setYear] = useState("");
@@ -32,6 +35,11 @@ const Requests = () => {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      toast.error("Você precisa estar logado para fazer um pedido.");
+      navigate("/login?redirect=/pedidos");
+      return;
+    }
     const guard = checkAntiSpam({ formKey: "requests", honeypotValue: hp, openedAt: openedAtRef.current });
     if (!guard.ok) { toast.error(guard.reason || "Bloqueado."); return; }
     const parsed = schema.safeParse({ title, type, year, notes, requester_name: name, requester_email: email });
@@ -45,9 +53,10 @@ const Requests = () => {
       type: parsed.data.type,
       year: parsed.data.year || null,
       notes: parsed.data.notes || null,
-      requester_name: parsed.data.requester_name || null,
-      requester_email: parsed.data.requester_email || null,
-    });
+      requester_name: parsed.data.requester_name || (user.user_metadata?.display_name ?? null),
+      requester_email: parsed.data.requester_email || user.email || null,
+      user_id: user.id,
+    } as any);
     setSubmitting(false);
     if (error) {
       toast.error("Erro ao enviar pedido: " + error.message);
@@ -115,7 +124,27 @@ const Requests = () => {
             </div>
           )}
 
-          {done ? (
+          {!authLoading && !user ? (
+            <div className="bg-card border border-border rounded-2xl p-8 md:p-10 text-center cinema-glow">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/15 text-primary mb-5">
+                <Lock className="h-8 w-8" />
+              </div>
+              <h2 className="font-display text-2xl md:text-3xl text-foreground mb-2">FAÇA LOGIN PARA PEDIR</h2>
+              <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+                Você precisa de uma conta para enviar pedidos. Assim você acompanha o status direto no seu perfil.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                <Link to="/login?redirect=/pedidos"
+                  className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors">
+                  <LogIn className="h-4 w-4" /> Entrar
+                </Link>
+                <Link to="/login?tab=signup&redirect=/pedidos"
+                  className="inline-flex items-center justify-center gap-2 bg-secondary text-foreground border border-border px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-secondary/80 transition-colors">
+                  Criar conta
+                </Link>
+              </div>
+            </div>
+          ) : done ? (
             <div className="bg-card border border-border rounded-2xl p-10 text-center cinema-glow">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/15 text-primary mb-5">
                 <CheckCircle2 className="h-9 w-9" />
