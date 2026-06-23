@@ -152,8 +152,8 @@ export function ReportsManagement() {
       )}
 
       {viewing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => { setViewing(null); load(); }}>
-          <div className="bg-card border border-border rounded-xl w-full max-w-5xl h-[92vh] flex flex-col" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-stretch sm:items-center justify-center bg-black/70 sm:p-4" onClick={() => { setViewing(null); load(); }}>
+          <div className="bg-card border border-border sm:rounded-xl w-full sm:max-w-5xl h-[100dvh] sm:h-[92vh] flex flex-col" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
               <div className="flex items-center gap-2 min-w-0">
                 <AlertTriangle className="h-5 w-5 text-destructive shrink-0" />
@@ -170,7 +170,7 @@ export function ReportsManagement() {
               </button>
             </div>
 
-            <div className="p-4 flex-1 overflow-hidden flex flex-col">
+            <div className="p-2 sm:p-4 flex-1 min-h-0 overflow-hidden flex flex-col">
               <TicketChat ticket={viewing} asAdmin onSent={() => {
                 setTickets(ts => ts.map(t => t.id === viewing.id ? { ...t, unread_for_user: true, last_message_at: new Date().toISOString() } : t));
               }} />
