@@ -99,6 +99,20 @@ export function NotificationsBell() {
     return () => clearInterval(id);
   }, [load]);
 
+  // Map raw report status -> bell notification meta
+  const statusMeta = (status: string): { title: string; icon: typeof Inbox; toastFn: typeof toast.success } | null => {
+    switch (status) {
+      case 'open': return { title: 'Ticket recebido', icon: Inbox, toastFn: toast.info ?? toast };
+      case 'in_review':
+      case 'analyzing': return { title: 'Ticket em análise', icon: Search, toastFn: toast.info ?? toast };
+      case 'replied': return { title: 'Nova resposta no seu ticket', icon: MessageCircle, toastFn: toast.info ?? toast };
+      case 'resolved': return { title: 'Ticket resolvido', icon: CheckCircle2, toastFn: toast.success };
+      case 'dismissed': return { title: 'Ticket recusado', icon: XCircle, toastFn: toast.error };
+      case 'closed': return { title: 'Ticket fechado', icon: Lock, toastFn: toast.info ?? toast };
+      default: return null;
+    }
+  };
+
   // Ticket notifications (only for logged-in users)
   const loadTickets = useCallback(async () => {
     if (!user) { setTickets([]); return; }
@@ -110,15 +124,36 @@ export function NotificationsBell() {
       .limit(15);
     if (!data) return;
     const mapped: TicketNotif[] = data
-      .filter((t: any) => t.unread_for_user || t.status === 'resolved' || t.status === 'closed')
-      .map((t: any) => ({
-        id: t.id,
-        title: t.unread_for_user ? 'Nova resposta da equipe' : `Ticket ${t.status === 'resolved' ? 'resolvido' : 'fechado'}`,
-        message: t.content_title,
-        created_at: t.last_message_at || t.updated_at,
-        unread: !!t.unread_for_user,
-      }));
+      .filter((t: any) => t.unread_for_user || ['resolved', 'closed', 'dismissed'].includes(t.status))
+      .map((t: any) => {
+        const meta = statusMeta(t.status);
+        return {
+          id: t.id,
+          title: t.unread_for_user ? 'Nova resposta da equipe' : (meta?.title ?? `Status: ${t.status}`),
+          message: t.content_title,
+          created_at: t.last_message_at || t.updated_at,
+          unread: !!t.unread_for_user,
+        };
+      });
     setTickets(mapped);
+  }, [user]);
+
+  // Tracks ticket statuses we've already seen so we don't re-toast on mount/refresh
+  const ticketStatusRef = useRef<Map<string, string>>(new Map());
+  const ticketStatusReady = useRef(false);
+
+  // Seed the status map once tickets load, so subsequent realtime changes are real transitions
+  useEffect(() => {
+    if (!user) { ticketStatusReady.current = false; ticketStatusRef.current.clear(); return; }
+    supabase
+      .from('reports')
+      .select('id,status')
+      .eq('user_id', user.id)
+      .then(({ data }) => {
+        ticketStatusRef.current.clear();
+        (data || []).forEach((r: any) => ticketStatusRef.current.set(r.id, r.status));
+        ticketStatusReady.current = true;
+      });
   }, [user]);
 
   useEffect(() => {
@@ -132,7 +167,22 @@ export function NotificationsBell() {
         () => { loadTickets(); })
       .on('postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'reports', filter: `user_id=eq.${user.id}` },
-        () => { loadTickets(); })
+        (payload) => {
+          const newRow: any = payload.new;
+          const oldRow: any = payload.old;
+          const prevStatus = ticketStatusRef.current.get(newRow.id) ?? oldRow?.status;
+          if (ticketStatusReady.current && prevStatus && prevStatus !== newRow.status) {
+            const meta = statusMeta(newRow.status);
+            if (meta) {
+              meta.toastFn(meta.title, {
+                description: newRow.content_title || 'Seu ticket foi atualizado.',
+                icon: undefined,
+              });
+            }
+          }
+          ticketStatusRef.current.set(newRow.id, newRow.status);
+          loadTickets();
+        })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [user, loadTickets]);
