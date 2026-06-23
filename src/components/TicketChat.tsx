@@ -216,6 +216,13 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
 
   return (
     <div className="flex flex-col h-full min-h-[300px]">
+      <div className="flex items-center justify-between gap-2 mb-2 px-1">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Status do ticket</span>
+        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-bold uppercase tracking-wide transition-colors ${derivedStatus.cls}`}>
+          <StatusIcon className="h-3 w-3" />
+          {derivedStatus.label}
+        </span>
+      </div>
       <div className="flex-1 overflow-y-auto px-2 py-3 space-y-3 bg-secondary/30 rounded-lg border border-border">
         {loading ? (
           <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 text-primary animate-spin" /></div>
