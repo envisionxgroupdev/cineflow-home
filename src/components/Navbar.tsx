@@ -139,6 +139,7 @@ export function Navbar() {
           <div className="text-foreground/90">
             <GlobalSearch />
           </div>
+          <NotificationsBell />
           <button
             className="text-foreground p-2 rounded-md hover:bg-primary/10 transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
