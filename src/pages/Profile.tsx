@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useAuth } from '@/hooks/useAuth';
 import { useWatchlist } from '@/hooks/useWatchlist';
@@ -7,19 +7,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
-import { TicketChat } from '@/components/TicketChat';
-import type { Report, TicketStatus } from '@/types/database';
 import {
-  User as UserIcon, Mail, Calendar, Shield, LogOut, Save, Loader2,
-  Bookmark, Film, Tv, KeyRound, Eye, EyeOff, Crown, Sparkles,
-  ShieldCheck, Users, Ticket, X, MessageSquare,
+  User as UserIcon, Mail, Calendar, LogOut, Save, Loader2,
+  Bookmark, Film, Tv, KeyRound, Eye, EyeOff, Sparkles,
+  ShieldCheck, Users,
 } from 'lucide-react';
+
 
 const Profile = () => {
   const { user, isAdmin, loading: authLoading, signOut } = useAuth();
   const { items: watchlist, loading: wlLoading } = useWatchlist();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
 
   const [displayName, setDisplayName] = useState('');
   const [originalName, setOriginalName] = useState('');
@@ -30,36 +28,6 @@ const Profile = () => {
   const [showPass, setShowPass] = useState(false);
   const [changingPass, setChangingPass] = useState(false);
 
-  const [tickets, setTickets] = useState<Report[]>([]);
-  const [ticketsLoading, setTicketsLoading] = useState(true);
-  const [openTicket, setOpenTicket] = useState<Report | null>(null);
-
-  const loadTickets = async () => {
-    if (!user) return;
-    setTicketsLoading(true);
-    const { data } = await supabase
-      .from('reports')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('last_message_at', { ascending: false });
-    setTickets((data || []) as Report[]);
-    setTicketsLoading(false);
-  };
-
-  useEffect(() => { if (user) loadTickets(); /* eslint-disable-next-line */ }, [user?.id]);
-
-  // Deep-link: ?ticket=ID opens the ticket modal automatically
-  useEffect(() => {
-    const id = searchParams.get('ticket');
-    if (!id || tickets.length === 0) return;
-    const found = tickets.find(t => t.id === id);
-    if (found) {
-      setOpenTicket(found);
-      const next = new URLSearchParams(searchParams);
-      next.delete('ticket');
-      setSearchParams(next, { replace: true });
-    }
-  }, [tickets, searchParams, setSearchParams]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -274,72 +242,10 @@ const Profile = () => {
             )}
           </section>
 
-          {/* Tickets */}
-          <section className="bg-card border border-border rounded-xl p-5 mt-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Ticket className="h-4 w-4 text-primary" />
-                <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">Meus Tickets</h2>
-              </div>
-              <span className="text-[11px] text-muted-foreground">{tickets.length} no total</span>
-            </div>
-
-            {ticketsLoading ? (
-              <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 text-primary animate-spin" /></div>
-            ) : tickets.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                Você ainda não abriu nenhum ticket. Use o botão "Reportar" em um filme ou série para abrir um.
-              </p>
-            ) : (
-              <div className="grid gap-2">
-                {tickets.map(t => (
-                  <button
-                    key={t.id}
-                    onClick={() => setOpenTicket(t)}
-                    className="text-left bg-secondary/40 border border-border hover:border-primary/40 rounded-lg p-3 transition-colors"
-                  >
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <MessageSquare className="h-3.5 w-3.5 text-primary shrink-0" />
-                      <p className="text-sm font-medium text-foreground truncate">{t.content_title}</p>
-                      <TicketStatusBadge status={t.status} />
-                      {t.unread_for_user && (
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase bg-destructive text-destructive-foreground">
-                          Resposta
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[11px] text-muted-foreground truncate">
-                      {t.reason} · atualizado em {new Date(t.last_message_at || t.created_at).toLocaleString('pt-BR')}
-                    </p>
-                  </button>
-                ))}
-              </div>
-            )}
-          </section>
         </div>
       </main>
 
-      {openTicket && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => { setOpenTicket(null); loadTickets(); }}>
-          <div className="bg-card border border-border rounded-xl w-full max-w-xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
-              <div className="flex items-center gap-2 min-w-0">
-                <Ticket className="h-4 w-4 text-primary shrink-0" />
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground truncate">{openTicket.content_title}</p>
-                  <p className="text-[11px] text-muted-foreground truncate">{openTicket.reason}</p>
-                </div>
-              </div>
-              <button onClick={() => { setOpenTicket(null); loadTickets(); }} className="text-muted-foreground hover:text-foreground shrink-0">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="p-4 flex-1 overflow-hidden flex flex-col">
-              <TicketChat ticket={openTicket} />
-            </div>
-          </div>
-        </div>
-      )}
+
 
 
       <Footer />
@@ -411,22 +317,8 @@ function AdminBadge() {
   );
 }
 
-function TicketStatusBadge({ status, inline }: { status: TicketStatus; inline?: boolean }) {
-  const map: Record<TicketStatus, { label: string; cls: string }> = {
-    open: { label: 'Aberto', cls: 'bg-yellow-500/15 text-yellow-500' },
-    pending: { label: 'Aberto', cls: 'bg-yellow-500/15 text-yellow-500' },
-    in_progress: { label: 'Em andamento', cls: 'bg-blue-500/15 text-blue-500' },
-    resolved: { label: 'Resolvido', cls: 'bg-green-500/15 text-green-500' },
-    closed: { label: 'Fechado', cls: 'bg-muted text-muted-foreground' },
-    dismissed: { label: 'Fechado', cls: 'bg-muted text-muted-foreground' },
-  };
-  const { label, cls } = map[status] ?? map.open;
-  return (
-    <span className={`${inline ? '' : ''} text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${cls}`}>
-      {label}
-    </span>
-  );
-}
+function TicketStatusBadge_REMOVED() { return null; }
+
 
 export default Profile;
 
