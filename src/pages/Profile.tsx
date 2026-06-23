@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useAuth } from '@/hooks/useAuth';
 import { useWatchlist } from '@/hooks/useWatchlist';
