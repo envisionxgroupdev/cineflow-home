@@ -3,6 +3,7 @@ import { Link, NavLink as RouterNavLink } from "react-router-dom";
 import { Menu, X, LogIn, UserPlus, Shield, Search, User as UserIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlobalSearch } from "./GlobalSearch";
+import { NotificationsBell } from "./NotificationsBell";
 import { useAuth } from "@/hooks/useAuth";
 
 const navLinks = [
@@ -95,6 +96,7 @@ export function Navbar() {
           <div className="text-foreground/80 hover:text-primary transition-colors">
             <GlobalSearch />
           </div>
+          <NotificationsBell />
           {isAdmin && (
             <Link
               to="/admin"
@@ -137,6 +139,7 @@ export function Navbar() {
           <div className="text-foreground/90">
             <GlobalSearch />
           </div>
+          <NotificationsBell />
           <button
             className="text-foreground p-2 rounded-md hover:bg-primary/10 transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
