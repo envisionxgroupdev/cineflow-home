@@ -136,6 +136,45 @@ export function NotificationsBell() {
     return () => { supabase.removeChannel(ch); };
   }, [user, loadTickets]);
 
+  // Request notifications (status changed from pending to fulfilled/rejected)
+  const loadRequests = useCallback(async () => {
+    if (!user) { setRequests([]); return; }
+    const { data } = await supabase
+      .from('requests')
+      .select('id,title,status,updated_at')
+      .eq('user_id', user.id)
+      .in('status', ['fulfilled', 'rejected'])
+      .order('updated_at', { ascending: false })
+      .limit(15);
+    if (!data) return;
+    const keys = getReqReadKeys();
+    const mapped: RequestNotif[] = (data as any[]).map((r) => {
+      const key = `${r.id}:${r.status}`;
+      return {
+        id: r.id,
+        title: r.status === 'fulfilled' ? 'Pedido adicionado ao site!' : 'Pedido recusado',
+        status: r.status,
+        content_title: r.title,
+        created_at: r.updated_at,
+        unread: !keys.has(key),
+      };
+    });
+    setRequests(mapped);
+  }, [user]);
+
+  useEffect(() => {
+    loadRequests();
+    if (!user) return;
+    const channelName = `bell-requests-${user.id}-${Math.random().toString(36).slice(2, 8)}`;
+    const ch = supabase
+      .channel(channelName)
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'requests', filter: `user_id=eq.${user.id}` },
+        () => { loadRequests(); })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user, loadRequests]);
+
   // Show toast popup once per session for the newest unread notification
   useEffect(() => {
     if (items.length === 0) return;
