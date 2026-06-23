@@ -295,13 +295,48 @@ export function NotificationsBell() {
                     </>
                   )}
 
-                  {items.length > 0 && user && tickets.length > 0 && (
+
+                  {user && requests.length > 0 && (
+                    <>
+                      <div className="px-4 py-2 bg-secondary/40 border-b border-border/50">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Seus pedidos</span>
+                      </div>
+                      {requests.map(r => {
+                        const Icon = r.status === 'fulfilled' ? CheckCircle2 : XCircle;
+                        const accent = r.status === 'fulfilled' ? 'bg-emerald-500 text-white' : 'bg-destructive text-destructive-foreground';
+                        return (
+                          <button
+                            key={`r-${r.id}-${r.status}`}
+                            onClick={() => openRequest(r)}
+                            className={`w-full text-left flex gap-3 px-4 py-3 border-b border-border/50 transition-colors hover:bg-secondary/50 ${r.unread ? 'bg-primary/5' : ''}`}
+                          >
+                            <div className={`flex-shrink-0 h-9 w-9 rounded-lg flex items-center justify-center ${r.unread ? accent : 'bg-secondary text-muted-foreground'}`}>
+                              <Icon className="h-4 w-4" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2">
+                                <p className="text-sm font-semibold text-foreground line-clamp-1">{r.title}</p>
+                                {r.unread && <span className="flex-shrink-0 h-2 w-2 rounded-full bg-primary mt-1.5" />}
+                              </div>
+                              <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{r.content_title}</p>
+                              <p className="text-[10px] text-muted-foreground/70 mt-1">
+                                {new Date(r.created_at).toLocaleString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                <span className="ml-2 inline-flex items-center gap-0.5 text-primary"><ExternalLink className="h-2.5 w-2.5" /> Ver</span>
+                              </p>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </>
+                  )}
+
+                  {items.length > 0 && (tickets.length > 0 || requests.length > 0) && (
                     <div className="px-4 py-2 bg-secondary/40 border-b border-border/50">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Novidades</span>
                     </div>
                   )}
 
-                  {items.length === 0 && tickets.length === 0 ? (
+                  {items.length === 0 && tickets.length === 0 && requests.length === 0 ? (
                     <p className="p-6 text-center text-sm text-muted-foreground">Nenhuma notificação ainda.</p>
                   ) : items.map(n => {
                     const Icon = iconFor(n.type);
