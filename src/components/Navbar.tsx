@@ -195,14 +195,24 @@ export function Navbar() {
                   <Shield className="h-4 w-4" /> Painel Admin
                 </Link>
               )}
-              {user ? (
-                <Link
-                  to="/perfil"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-foreground/90 py-2.5 px-3 rounded-md hover:bg-primary/10 hover:text-primary"
-                >
-                  <UserIcon className="h-4 w-4" /> Meu perfil
-                </Link>
+              {user && (
+                <>
+                  <Link
+                    to="/suporte"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-foreground/90 py-2.5 px-3 rounded-md hover:bg-primary/10 hover:text-primary"
+                  >
+                    <LifeBuoy className="h-4 w-4" /> Suporte
+                  </Link>
+                  <Link
+                    to="/perfil"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-foreground/90 py-2.5 px-3 rounded-md hover:bg-primary/10 hover:text-primary"
+                  >
+                    <UserIcon className="h-4 w-4" /> Meu perfil
+                  </Link>
+                </>
+              )}
               ) : (
                 <div className="flex flex-col gap-2 mt-1">
                   <Link
