@@ -254,6 +254,26 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
 
       {ticket.status !== 'closed' ? (
         <div className="mt-3 space-y-2">
+          {asAdmin && (
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                <MessageSquareQuote className="h-3 w-3" /> Respostas rápidas
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {CANNED_REPLIES.map(r => (
+                  <button
+                    key={r.label}
+                    type="button"
+                    onClick={() => setBody(prev => (prev.trim() ? prev + '\n\n' + r.text : r.text))}
+                    title={r.text}
+                    className="text-[11px] px-2.5 py-1 rounded-full bg-secondary border border-border text-foreground hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-colors"
+                  >
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           {pendingFile && (
             <div className="flex items-center gap-2 px-3 py-2 bg-secondary border border-border rounded-lg text-xs">
               {pendingFile.type.startsWith('image/')
