@@ -306,7 +306,7 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
         <div ref={bottomRef} />
       </div>
 
-      {ticket.status !== 'closed' ? (
+      {currentTicket.status !== 'closed' && currentTicket.status !== 'resolved' && currentTicket.status !== 'dismissed' ? (
         <div className="mt-3 space-y-2">
           {asAdmin && (
             <div className="space-y-1.5">
