@@ -213,7 +213,7 @@ export function Navbar() {
                   </Link>
                 </>
               )}
-              ) : (
+              {!user && (
                 <div className="flex flex-col gap-2 mt-1">
                   <Link
                     to="/login"
