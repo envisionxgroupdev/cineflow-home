@@ -198,9 +198,33 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
       <div className="flex-1 overflow-y-auto px-2 py-3 space-y-3 bg-secondary/30 rounded-lg border border-border">
         {loading ? (
           <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 text-primary animate-spin" /></div>
-        ) : messages.length === 0 ? (
-          <p className="text-xs text-center text-muted-foreground py-8">Nenhuma mensagem ainda.</p>
-        ) : messages.map(m => {
+        ) : (
+          <>
+            {/* Bot welcome message — always shown */}
+            <div className="flex gap-2 justify-start">
+              <div className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 bg-primary/20 text-primary border border-primary/50">
+                <Bot className="h-4 w-4" />
+              </div>
+              <div className="max-w-[78%] rounded-2xl px-3.5 py-2 text-sm bg-primary/10 border border-primary/30 text-foreground rounded-bl-sm">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wide text-primary">
+                    PipocaBot
+                  </span>
+                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-primary/80 text-primary-foreground uppercase">
+                    Automático
+                  </span>
+                </div>
+                <p className="whitespace-pre-wrap break-words">
+                  Olá! 👋 Seu ticket foi recebido com sucesso.{'\n\n'}
+                  Nossa equipe vai analisar e responder por aqui o mais rápido possível. Você será notificado pelo 🔔 quando houver uma resposta.{'\n\n'}
+                  Obrigado pela paciência! 🍿
+                </p>
+                <p className="text-[10px] mt-1 text-muted-foreground">
+                  {new Date(ticket.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
+            </div>
+            {messages.length === 0 ? null : messages.map(m => {
           const mine = m.sender_id === user?.id;
           const sideRight = !m.is_admin;
           const senderLabel = m.is_admin
