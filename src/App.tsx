@@ -14,7 +14,7 @@ import { SiteAnnouncementBanner } from "./components/SiteAnnouncementBanner.tsx"
 import { MaintenanceGate } from "./components/MaintenanceGate.tsx";
 import { BannedGate } from "./components/BannedGate.tsx";
 import { NotificationsToast } from "./components/NotificationsToast.tsx";
-import { TicketNotifier } from "./components/TicketNotifier.tsx";
+
 import { Loader2, RefreshCw } from "lucide-react";
 
 // Lazy-loaded routes — keeps initial bundle small
@@ -137,7 +137,7 @@ const App = () => (
               </Suspense>
             </ChunkErrorBoundary>
             <NotificationsToast />
-            <TicketNotifier />
+            
             </BannedGate>
             </MaintenanceGate>
           </BrowserRouter>

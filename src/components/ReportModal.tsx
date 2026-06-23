@@ -1,10 +1,13 @@
-import { useState, useCallback } from 'react';
-import { X, AlertTriangle, Loader2, LogIn } from 'lucide-react';
+import { useRef, useState, useCallback } from 'react';
+import { X, AlertTriangle, Loader2, LogIn, Paperclip, FileText, Image as ImageIcon, X as XIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { checkCooldown, markSubmitted } from '@/lib/antiSpam';
+
+const MAX_FILE_BYTES = 10 * 1024 * 1024;
+const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'];
 
 interface ReportModalProps {
   contentId: string;
@@ -29,6 +32,15 @@ export function ReportModal({ contentId, contentType, contentTitle, open, onClos
   const [reason, setReason] = useState('');
   const [details, setDetails] = useState('');
   const [sending, setSending] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const pickFile = (f: File | null) => {
+    if (!f) { setFile(null); return; }
+    if (!ALLOWED_MIME.includes(f.type)) { toast.error('Tipo não permitido. Use imagem ou PDF.'); return; }
+    if (f.size > MAX_FILE_BYTES) { toast.error('Arquivo muito grande (máx 10 MB).'); return; }
+    setFile(f);
+  };
 
   const handleSend = useCallback(async () => {
     if (!user) return;
@@ -54,7 +66,28 @@ export function ReportModal({ contentId, contentType, contentTitle, open, onClos
       return;
     }
 
-    // First message (motivo + detalhes)
+    let attachmentPath: string | null = null;
+    let attachmentName: string | null = null;
+    let attachmentType: string | null = null;
+    let attachmentSize: number | null = null;
+
+    if (file) {
+      const ext = file.name.split('.').pop() || 'bin';
+      const safe = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const path = `${ticket.id}/${safe}`;
+      const { error: upErr } = await supabase.storage
+        .from('ticket-attachments')
+        .upload(path, file, { contentType: file.type, upsert: false });
+      if (!upErr) {
+        attachmentPath = path;
+        attachmentName = file.name;
+        attachmentType = file.type;
+        attachmentSize = file.size;
+      } else {
+        toast.error('Anexo não enviado: ' + upErr.message);
+      }
+    }
+
     const body = details?.trim()
       ? `Motivo: ${reason}\n\n${details.trim()}`
       : `Motivo: ${reason}`;
@@ -63,15 +96,20 @@ export function ReportModal({ contentId, contentType, contentTitle, open, onClos
       sender_id: user.id,
       is_admin: false,
       body,
+      attachment_url: attachmentPath,
+      attachment_name: attachmentName,
+      attachment_type: attachmentType,
+      attachment_size: attachmentSize,
     });
 
     markSubmitted('report');
     toast.success('Ticket aberto! Acompanhe pelo seu perfil.');
     setReason('');
     setDetails('');
+    setFile(null);
     setSending(false);
     onClose();
-  }, [reason, details, user, contentId, contentType, contentTitle, onClose]);
+  }, [reason, details, user, contentId, contentType, contentTitle, file, onClose]);
 
   if (!open) return null;
 
@@ -137,6 +175,38 @@ export function ReportModal({ contentId, contentType, contentTitle, open, onClos
                   maxLength={1000}
                   placeholder="Conte mais detalhes para a equipe..."
                   className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none" />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1">Anexo (opcional)</label>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*,application/pdf"
+                  className="hidden"
+                  onChange={e => pickFile(e.target.files?.[0] ?? null)}
+                />
+                {file ? (
+                  <div className="flex items-center gap-2 px-3 py-2 bg-secondary border border-border rounded-lg text-xs">
+                    {file.type.startsWith('image/')
+                      ? <ImageIcon className="h-3.5 w-3.5 text-primary" />
+                      : <FileText className="h-3.5 w-3.5 text-primary" />}
+                    <span className="flex-1 truncate text-foreground">{file.name}</span>
+                    <span className="text-muted-foreground">{(file.size / 1024).toFixed(0)} KB</span>
+                    <button onClick={() => pickFile(null)} type="button" className="text-muted-foreground hover:text-destructive">
+                      <XIcon className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileRef.current?.click()}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-secondary border border-dashed border-border rounded-lg text-xs text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors"
+                  >
+                    <Paperclip className="h-3.5 w-3.5" />
+                    Anexar imagem ou PDF (até 10 MB)
+                  </button>
+                )}
               </div>
 
               <p className="text-[11px] text-muted-foreground">

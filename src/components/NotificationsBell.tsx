@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { Bell, X, Sparkles, Tv, Info, ExternalLink } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Bell, X, Sparkles, Tv, Info, ExternalLink, Ticket as TicketIcon } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface NotificationRow {
   id: string;
@@ -14,6 +15,14 @@ export interface NotificationRow {
   image_url: string | null;
   is_active: boolean;
   created_at: string;
+}
+
+interface TicketNotif {
+  id: string; // ticket id
+  title: string;
+  message: string;
+  created_at: string;
+  unread: boolean;
 }
 
 const READ_KEY = 'pipocamax-read-notifications';
@@ -45,7 +54,10 @@ function iconFor(type: string) {
 }
 
 export function NotificationsBell() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [items, setItems] = useState<NotificationRow[]>([]);
+  const [tickets, setTickets] = useState<TicketNotif[]>([]);
   const [readIds, setReadIds] = useState<Set<string>>(() => getReadIds());
   const [open, setOpen] = useState(false);
   const [popup, setPopup] = useState<NotificationRow | null>(null);
@@ -67,6 +79,43 @@ export function NotificationsBell() {
     return () => clearInterval(id);
   }, [load]);
 
+  // Ticket notifications (only for logged-in users)
+  const loadTickets = useCallback(async () => {
+    if (!user) { setTickets([]); return; }
+    const { data } = await supabase
+      .from('reports')
+      .select('id,content_title,status,unread_for_user,last_message_at,updated_at')
+      .eq('user_id', user.id)
+      .order('last_message_at', { ascending: false, nullsFirst: false })
+      .limit(15);
+    if (!data) return;
+    const mapped: TicketNotif[] = data
+      .filter((t: any) => t.unread_for_user || t.status === 'resolved' || t.status === 'closed')
+      .map((t: any) => ({
+        id: t.id,
+        title: t.unread_for_user ? 'Nova resposta da equipe' : `Ticket ${t.status === 'resolved' ? 'resolvido' : 'fechado'}`,
+        message: t.content_title,
+        created_at: t.last_message_at || t.updated_at,
+        unread: !!t.unread_for_user,
+      }));
+    setTickets(mapped);
+  }, [user]);
+
+  useEffect(() => {
+    loadTickets();
+    if (!user) return;
+    const ch = supabase
+      .channel(`bell-tickets-${user.id}`)
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'ticket_messages' },
+        () => { loadTickets(); })
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'reports', filter: `user_id=eq.${user.id}` },
+        () => { loadTickets(); })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user, loadTickets]);
+
   // Show toast popup once per session for the newest unread notification
   useEffect(() => {
     if (items.length === 0) return;
@@ -82,19 +131,33 @@ export function NotificationsBell() {
     return () => { if (popupTimer.current) clearTimeout(popupTimer.current); };
   }, [items, readIds]);
 
-  const unreadCount = items.filter(n => !readIds.has(n.id)).length;
+  const ticketUnreadCount = tickets.filter(t => t.unread).length;
+  const newsUnreadCount = items.filter(n => !readIds.has(n.id)).length;
+  const unreadCount = newsUnreadCount + ticketUnreadCount;
 
   const markRead = (id: string) => {
     const next = new Set(readIds); next.add(id); setReadIds(next); saveReadIds(next);
   };
-  const markAllRead = () => {
+  const markAllRead = async () => {
     const next = new Set(readIds); items.forEach(n => next.add(n.id));
     setReadIds(next); saveReadIds(next);
+    if (user && ticketUnreadCount > 0) {
+      await supabase.from('reports').update({ unread_for_user: false }).eq('user_id', user.id).eq('unread_for_user', true);
+      loadTickets();
+    }
+  };
+
+  const openTicket = async (t: TicketNotif) => {
+    setOpen(false);
+    navigate('/perfil');
+    if (t.unread) {
+      await supabase.from('reports').update({ unread_for_user: false }).eq('id', t.id);
+      loadTickets();
+    }
   };
 
   return (
     <>
-      {/* Bell trigger */}
       <div className="relative">
         <button
           onClick={() => setOpen(o => !o)}
@@ -127,7 +190,43 @@ export function NotificationsBell() {
                   )}
                 </div>
                 <div className="max-h-[60vh] overflow-y-auto">
-                  {items.length === 0 ? (
+                  {user && tickets.length > 0 && (
+                    <>
+                      <div className="px-4 py-2 bg-secondary/40 border-b border-border/50">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Seus tickets</span>
+                      </div>
+                      {tickets.map(t => (
+                        <button
+                          key={`t-${t.id}`}
+                          onClick={() => openTicket(t)}
+                          className={`w-full text-left flex gap-3 px-4 py-3 border-b border-border/50 transition-colors hover:bg-secondary/50 ${t.unread ? 'bg-primary/5' : ''}`}
+                        >
+                          <div className={`flex-shrink-0 h-9 w-9 rounded-lg flex items-center justify-center ${t.unread ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'}`}>
+                            <TicketIcon className="h-4 w-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="text-sm font-semibold text-foreground line-clamp-1">{t.title}</p>
+                              {t.unread && <span className="flex-shrink-0 h-2 w-2 rounded-full bg-primary mt-1.5" />}
+                            </div>
+                            <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{t.message}</p>
+                            <p className="text-[10px] text-muted-foreground/70 mt-1">
+                              {new Date(t.created_at).toLocaleString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                              <span className="ml-2 inline-flex items-center gap-0.5 text-primary"><ExternalLink className="h-2.5 w-2.5" /> Abrir</span>
+                            </p>
+                          </div>
+                        </button>
+                      ))}
+                    </>
+                  )}
+
+                  {items.length > 0 && user && tickets.length > 0 && (
+                    <div className="px-4 py-2 bg-secondary/40 border-b border-border/50">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Novidades</span>
+                    </div>
+                  )}
+
+                  {items.length === 0 && tickets.length === 0 ? (
                     <p className="p-6 text-center text-sm text-muted-foreground">Nenhuma notificação ainda.</p>
                   ) : items.map(n => {
                     const Icon = iconFor(n.type);
@@ -166,7 +265,6 @@ export function NotificationsBell() {
         </AnimatePresence>
       </div>
 
-      {/* Toast popup bottom-right */}
       <AnimatePresence>
         {popup && (
           <motion.div
