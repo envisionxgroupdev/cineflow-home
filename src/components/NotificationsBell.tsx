@@ -177,6 +177,11 @@ export function NotificationsBell() {
               meta.toastFn(meta.title, {
                 description: newRow.content_title || 'Seu ticket foi atualizado.',
                 icon: undefined,
+                duration: 10000,
+                action: {
+                  label: 'Abrir ticket',
+                  onClick: () => navigate(`/perfil?ticket=${newRow.id}`),
+                },
               });
             }
           }
