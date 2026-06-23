@@ -48,6 +48,19 @@ const Profile = () => {
 
   useEffect(() => { if (user) loadTickets(); /* eslint-disable-next-line */ }, [user?.id]);
 
+  // Deep-link: ?ticket=ID opens the ticket modal automatically
+  useEffect(() => {
+    const id = searchParams.get('ticket');
+    if (!id || tickets.length === 0) return;
+    const found = tickets.find(t => t.id === id);
+    if (found) {
+      setOpenTicket(found);
+      const next = new URLSearchParams(searchParams);
+      next.delete('ticket');
+      setSearchParams(next, { replace: true });
+    }
+  }, [tickets, searchParams, setSearchParams]);
+
   useEffect(() => {
     if (authLoading) return;
     if (!user) { navigate('/login'); return; }
