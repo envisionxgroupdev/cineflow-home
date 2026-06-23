@@ -1,13 +1,14 @@
 import { useRef, useState } from "react";
 import { checkAntiSpam, markSubmitted, honeypotInputProps } from "@/lib/antiSpam";
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Send, Film, Tv, Loader2, CheckCircle2, Sparkles, Clock, Heart } from "lucide-react";
+import { Send, Film, Tv, Loader2, CheckCircle2, Sparkles, Clock, Heart, Lock, LogIn } from "lucide-react";
 import { z } from "zod";
+import { useAuth } from "@/hooks/useAuth";
 
 const schema = z.object({
   title: z.string().trim().min(1, "Informe o título").max(200),
