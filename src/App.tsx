@@ -36,6 +36,7 @@ const Contact = lazy(() => import("./pages/Contact.tsx"));
 const MyList = lazy(() => import("./pages/MyList.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const Profile = lazy(() => import("./pages/Profile.tsx"));
+const Support = lazy(() => import("./pages/Support.tsx"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -132,6 +133,7 @@ const App = () => (
                   <Route path="/contato" element={<Contact />} />
                   <Route path="/minha-lista" element={<MyList />} />
                   <Route path="/perfil" element={<Profile />} />
+                  <Route path="/suporte" element={<Support />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
