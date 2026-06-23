@@ -96,10 +96,12 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
   const [body, setBody] = useState('');
   const [sending, setSending] = useState(false);
   const [authorName, setAuthorName] = useState<string>('Usuário');
+  const [adminNames, setAdminNames] = useState<Record<string, string>>({});
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [showCanned, setShowCanned] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+
 
   useEffect(() => { setCurrentTicket(ticket); }, [ticket.id, ticket.status]);
 
@@ -124,6 +126,24 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
   }, [ticket.user_id]);
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [ticket.id]);
+
+  // Resolve display names for admin senders so we show the staff member's name
+  useEffect(() => {
+    const ids = Array.from(new Set(messages.filter(m => m.is_admin).map(m => m.sender_id).filter(Boolean))) as string[];
+    const missing = ids.filter(id => !(id in adminNames));
+    if (missing.length === 0) return;
+    supabase.from('profiles').select('id,display_name,email').in('id', missing).then(({ data }) => {
+      if (!data) return;
+      setAdminNames(prev => {
+        const next = { ...prev };
+        data.forEach((p: any) => {
+          next[p.id] = p.display_name || p.email?.split('@')[0] || 'Staff';
+        });
+        return next;
+      });
+    });
+  }, [messages, adminNames]);
+
 
   useEffect(() => {
     const patch = asAdmin ? { unread_for_admin: false } : { unread_for_user: false };
@@ -267,8 +287,9 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
           messages.map((m, idx) => {
             const mine = m.sender_id === user?.id;
             const senderLabel = m.is_admin
-              ? 'Equipe PipocaMax'
+              ? (adminNames[m.sender_id] || 'Staff')
               : (mine ? 'Você' : authorName);
+
             const headerCls = m.is_admin
               ? 'bg-primary/10 border-b border-primary/30'
               : 'bg-secondary/60 border-b border-border';
