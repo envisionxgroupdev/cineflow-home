@@ -20,6 +20,8 @@ const schema = z.object({
 });
 
 const Requests = () => {
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [type, setType] = useState<"movie" | "series">("movie");
   const [title, setTitle] = useState("");
   const [year, setYear] = useState("");
@@ -33,6 +35,11 @@ const Requests = () => {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      toast.error("Você precisa estar logado para fazer um pedido.");
+      navigate("/login?redirect=/pedidos");
+      return;
+    }
     const guard = checkAntiSpam({ formKey: "requests", honeypotValue: hp, openedAt: openedAtRef.current });
     if (!guard.ok) { toast.error(guard.reason || "Bloqueado."); return; }
     const parsed = schema.safeParse({ title, type, year, notes, requester_name: name, requester_email: email });
@@ -46,9 +53,10 @@ const Requests = () => {
       type: parsed.data.type,
       year: parsed.data.year || null,
       notes: parsed.data.notes || null,
-      requester_name: parsed.data.requester_name || null,
-      requester_email: parsed.data.requester_email || null,
-    });
+      requester_name: parsed.data.requester_name || (user.user_metadata?.display_name ?? null),
+      requester_email: parsed.data.requester_email || user.email || null,
+      user_id: user.id,
+    } as any);
     setSubmitting(false);
     if (error) {
       toast.error("Erro ao enviar pedido: " + error.message);
