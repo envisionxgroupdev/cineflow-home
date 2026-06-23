@@ -273,6 +273,8 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
             </div>
           );
         })}
+          </>
+        )}
         <div ref={bottomRef} />
       </div>
 
