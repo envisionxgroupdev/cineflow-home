@@ -75,6 +75,8 @@ export function NotificationsBell() {
   const navigate = useNavigate();
   const [items, setItems] = useState<NotificationRow[]>([]);
   const [tickets, setTickets] = useState<TicketNotif[]>([]);
+  const [requests, setRequests] = useState<RequestNotif[]>([]);
+  const [reqReadKeys, setReqReadKeys] = useState<Set<string>>(() => getReqReadKeys());
   const [readIds, setReadIds] = useState<Set<string>>(() => getReadIds());
   const [open, setOpen] = useState(false);
   const [popup, setPopup] = useState<NotificationRow | null>(null);
