@@ -85,6 +85,7 @@ function AttachmentView({ path, name, type }: { path: string; name: string | nul
 
 export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
   const { user } = useAuth();
+  const [currentTicket, setCurrentTicket] = useState<Report>(ticket);
   const [messages, setMessages] = useState<TicketMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [body, setBody] = useState('');
@@ -93,6 +94,8 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => { setCurrentTicket(ticket); }, [ticket.id, ticket.status]);
 
   const load = async () => {
     setLoading(true);
