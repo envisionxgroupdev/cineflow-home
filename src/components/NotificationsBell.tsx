@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { Bell, X, Sparkles, Tv, Info, ExternalLink, Ticket as TicketIcon, CheckCircle2, XCircle } from 'lucide-react';
+import { Bell, X, Sparkles, Tv, Info, ExternalLink, Ticket as TicketIcon, CheckCircle2, XCircle, Inbox, Search, MessageCircle, Lock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
