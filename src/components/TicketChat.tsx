@@ -14,38 +14,43 @@ interface Props {
 const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10 MB
 const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'];
 
+// Use {nome} as a placeholder — substituído pelo nome do usuário ao inserir.
 const CANNED_REPLIES: { label: string; text: string }[] = [
   {
-    label: '👋 Boas-vindas',
-    text: 'Olá! Aqui é a equipe PipocaMax 👋\n\nRecebemos seu chamado e já estamos analisando. Em breve retornamos com uma resposta.',
+    label: '👋 Saudação',
+    text: 'Olá, {nome}! 👋 Aqui é a equipe PipocaMax. Como posso te ajudar hoje?',
+  },
+  {
+    label: '🤝 Atendimento iniciado',
+    text: 'Olá, {nome}! Tudo bem? Recebemos seu chamado e já estou analisando para te ajudar da melhor forma possível.',
   },
   {
     label: '🔎 Pedir mais detalhes',
-    text: 'Para conseguirmos te ajudar melhor, pode nos enviar mais detalhes?\n\n• O que acontece exatamente?\n• Em qual filme/série/episódio?\n• Qual navegador e dispositivo você está usando?\n• Se possível, anexe um print da tela.',
+    text: 'Olá, {nome}! Para conseguirmos te ajudar melhor, pode nos enviar mais alguns detalhes?\n\n• O que acontece exatamente?\n• Em qual filme/série/episódio ocorre?\n• Qual navegador e dispositivo você está usando?\n• Se possível, anexe um print da tela.',
   },
   {
     label: '🛠️ Em análise',
-    text: 'Seu chamado já foi encaminhado para a equipe técnica. Estamos verificando e voltamos a falar com você assim que tivermos novidades. Obrigado pela paciência! 🙏',
+    text: 'Oi, {nome}! Seu chamado já foi encaminhado para nossa equipe técnica. Estamos verificando e voltamos a falar com você assim que tivermos novidades. Obrigado pela paciência! 🙏',
   },
   {
     label: '🔁 Tente novamente',
-    text: 'Pode tentar o seguinte:\n\n1. Atualizar a página (Ctrl+F5)\n2. Limpar o cache do navegador\n3. Testar em uma aba anônima\n4. Trocar de player na página do conteúdo\n\nNos conte se o problema continua.',
+    text: 'Olá, {nome}! Pode tentar o seguinte enquanto investigamos:\n\n1. Atualizar a página (Ctrl+F5)\n2. Limpar o cache do navegador\n3. Testar em uma aba anônima\n4. Trocar de player na página do conteúdo\n\nMe conte se o problema continua, combinado?',
   },
   {
     label: '✅ Resolvido',
-    text: 'Boa notícia! O problema foi corrigido ✅\n\nPode testar novamente e qualquer coisa é só nos avisar. Vou marcar este ticket como resolvido.',
+    text: 'Boa notícia, {nome}! ✅ O problema foi corrigido. Pode testar novamente e qualquer coisa é só nos avisar por aqui. Vou marcar este ticket como resolvido.',
   },
   {
     label: '🎬 Conteúdo adicionado',
-    text: 'O conteúdo já foi adicionado ao catálogo! 🎬\n\nBasta atualizar a página ou pesquisar pelo título. Bom filme!',
+    text: 'Oi, {nome}! 🎬 O conteúdo já foi adicionado ao catálogo. Basta atualizar a página ou pesquisar pelo título. Bom filme!',
   },
   {
     label: '⛔ Fora do escopo',
-    text: 'Obrigado pelo contato! Infelizmente esse pedido está fora do escopo do nosso suporte. Vamos encerrar este ticket, mas estamos por aqui sempre que precisar.',
+    text: 'Olá, {nome}! Obrigado pelo contato. Infelizmente esse pedido está fora do escopo do nosso suporte, então vamos encerrar este ticket — mas seguimos por aqui sempre que precisar.',
   },
   {
-    label: '🙏 Obrigado / Encerramento',
-    text: 'Obrigado por usar o PipocaMax! 🍿\n\nQualquer outro problema, é só abrir um novo chamado. Bom filme!',
+    label: '🙏 Encerramento',
+    text: 'Obrigado por usar o PipocaMax, {nome}! 🍿 Qualquer outro problema é só abrir um novo chamado. Bom filme!',
   },
 ];
 
