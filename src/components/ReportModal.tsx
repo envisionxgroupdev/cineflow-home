@@ -1,10 +1,13 @@
-import { useState, useCallback } from 'react';
-import { X, AlertTriangle, Loader2, LogIn } from 'lucide-react';
+import { useRef, useState, useCallback } from 'react';
+import { X, AlertTriangle, Loader2, LogIn, Paperclip, FileText, Image as ImageIcon, X as XIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { checkCooldown, markSubmitted } from '@/lib/antiSpam';
+
+const MAX_FILE_BYTES = 10 * 1024 * 1024;
+const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'];
 
 interface ReportModalProps {
   contentId: string;
