@@ -105,6 +105,15 @@ export function Navbar() {
               <Shield className="h-3.5 w-3.5" /> Painel
             </Link>
           )}
+          {user && (
+            <Link
+              to="/suporte"
+              className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider border border-border text-foreground/80 px-3 py-1.5 rounded-md hover:bg-primary/10 hover:text-primary hover:border-primary/40 transition-colors"
+              title="Central de Suporte"
+            >
+              <LifeBuoy className="h-3.5 w-3.5" /> Suporte
+            </Link>
+          )}
           {user ? (
             <Link
               to="/perfil"
