@@ -25,7 +25,17 @@ interface TicketNotif {
   unread: boolean;
 }
 
+interface RequestNotif {
+  id: string;
+  title: string;
+  status: 'fulfilled' | 'rejected';
+  content_title: string;
+  created_at: string;
+  unread: boolean;
+}
+
 const READ_KEY = 'pipocamax-read-notifications';
+const REQ_READ_KEY = 'pipocamax-read-requests';
 const TOAST_SHOWN_KEY = 'pipocamax-toast-shown';
 const POLL_MS = 60_000;
 
