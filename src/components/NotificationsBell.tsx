@@ -45,11 +45,28 @@ function getReadIds(): Set<string> {
 function saveReadIds(ids: Set<string>) {
   try { localStorage.setItem(READ_KEY, JSON.stringify([...ids].slice(-200))); } catch {}
 }
+function getReqReadKeys(): Set<string> {
+  try { return new Set(JSON.parse(localStorage.getItem(REQ_READ_KEY) || '[]')); } catch { return new Set(); }
+}
+function saveReqReadKeys(ids: Set<string>) {
+  try { localStorage.setItem(REQ_READ_KEY, JSON.stringify([...ids].slice(-200))); } catch {}
+}
 function getToastShown(): Set<string> {
   try { return new Set(JSON.parse(sessionStorage.getItem(TOAST_SHOWN_KEY) || '[]')); } catch { return new Set(); }
 }
 function saveToastShown(ids: Set<string>) {
   try { sessionStorage.setItem(TOAST_SHOWN_KEY, JSON.stringify([...ids].slice(-50))); } catch {}
+}
+
+function buildHref(n: NotificationRow): string | null {
+  if (!n.content_slug || !n.content_type) return null;
+  return n.content_type === 'movie' ? `/filme/${n.content_slug}` : `/serie/${n.content_slug}`;
+}
+
+function iconFor(type: string) {
+  if (type === 'release') return Sparkles;
+  if (type === 'update') return Tv;
+  return Info;
 }
 
 function buildHref(n: NotificationRow): string | null {
