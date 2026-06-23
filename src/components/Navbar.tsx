@@ -96,6 +96,7 @@ export function Navbar() {
           <div className="text-foreground/80 hover:text-primary transition-colors">
             <GlobalSearch />
           </div>
+          <NotificationsBell />
           {isAdmin && (
             <Link
               to="/admin"
