@@ -362,7 +362,7 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
             <textarea
               value={body}
               onChange={e => setBody(e.target.value)}
-              placeholder="Escreva uma mensagem..."
+              placeholder={asAdmin ? 'Escreva uma resposta ao usuário...' : 'Escreva uma resposta...'}
               rows={2}
               maxLength={2000}
               onKeyDown={e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) send(); }}
