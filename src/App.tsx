@@ -137,7 +137,7 @@ const App = () => (
               </Suspense>
             </ChunkErrorBoundary>
             <NotificationsToast />
-            <TicketNotifier />
+            
             </BannedGate>
             </MaintenanceGate>
           </BrowserRouter>
