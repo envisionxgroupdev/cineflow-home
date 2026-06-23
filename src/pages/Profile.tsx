@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useAuth } from '@/hooks/useAuth';
 import { useWatchlist } from '@/hooks/useWatchlist';
@@ -19,6 +19,7 @@ const Profile = () => {
   const { user, isAdmin, loading: authLoading, signOut } = useAuth();
   const { items: watchlist, loading: wlLoading } = useWatchlist();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [displayName, setDisplayName] = useState('');
   const [originalName, setOriginalName] = useState('');
@@ -46,6 +47,19 @@ const Profile = () => {
   };
 
   useEffect(() => { if (user) loadTickets(); /* eslint-disable-next-line */ }, [user?.id]);
+
+  // Deep-link: ?ticket=ID opens the ticket modal automatically
+  useEffect(() => {
+    const id = searchParams.get('ticket');
+    if (!id || tickets.length === 0) return;
+    const found = tickets.find(t => t.id === id);
+    if (found) {
+      setOpenTicket(found);
+      const next = new URLSearchParams(searchParams);
+      next.delete('ticket');
+      setSearchParams(next, { replace: true });
+    }
+  }, [tickets, searchParams, setSearchParams]);
 
   useEffect(() => {
     if (authLoading) return;

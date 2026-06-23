@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import { Loader2, Send, ShieldCheck, User as UserIcon, Paperclip, X as XIcon, FileText, Image as ImageIcon, Download, MessageSquareQuote, Bot, Inbox, Search, MessageCircle, CheckCircle2, XCircle, Lock } from 'lucide-react';
+import { Loader2, Send, ShieldCheck, User as UserIcon, Paperclip, X as XIcon, FileText, Image as ImageIcon, Download, MessageSquareQuote, Inbox, Search, MessageCircle, CheckCircle2, XCircle, Lock } from 'lucide-react';
 import type { TicketMessage, Report } from '@/types/database';
 
 interface Props {
@@ -14,38 +14,43 @@ interface Props {
 const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10 MB
 const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'];
 
+// Use {nome} as a placeholder — substituído pelo nome do usuário ao inserir.
 const CANNED_REPLIES: { label: string; text: string }[] = [
   {
-    label: '👋 Boas-vindas',
-    text: 'Olá! Aqui é a equipe PipocaMax 👋\n\nRecebemos seu chamado e já estamos analisando. Em breve retornamos com uma resposta.',
+    label: '👋 Saudação',
+    text: 'Olá, {nome}! 👋 Aqui é a equipe PipocaMax. Como posso te ajudar hoje?',
+  },
+  {
+    label: '🤝 Atendimento iniciado',
+    text: 'Olá, {nome}! Tudo bem? Recebemos seu chamado e já estou analisando para te ajudar da melhor forma possível.',
   },
   {
     label: '🔎 Pedir mais detalhes',
-    text: 'Para conseguirmos te ajudar melhor, pode nos enviar mais detalhes?\n\n• O que acontece exatamente?\n• Em qual filme/série/episódio?\n• Qual navegador e dispositivo você está usando?\n• Se possível, anexe um print da tela.',
+    text: 'Olá, {nome}! Para conseguirmos te ajudar melhor, pode nos enviar mais alguns detalhes?\n\n• O que acontece exatamente?\n• Em qual filme/série/episódio ocorre?\n• Qual navegador e dispositivo você está usando?\n• Se possível, anexe um print da tela.',
   },
   {
     label: '🛠️ Em análise',
-    text: 'Seu chamado já foi encaminhado para a equipe técnica. Estamos verificando e voltamos a falar com você assim que tivermos novidades. Obrigado pela paciência! 🙏',
+    text: 'Oi, {nome}! Seu chamado já foi encaminhado para nossa equipe técnica. Estamos verificando e voltamos a falar com você assim que tivermos novidades. Obrigado pela paciência! 🙏',
   },
   {
     label: '🔁 Tente novamente',
-    text: 'Pode tentar o seguinte:\n\n1. Atualizar a página (Ctrl+F5)\n2. Limpar o cache do navegador\n3. Testar em uma aba anônima\n4. Trocar de player na página do conteúdo\n\nNos conte se o problema continua.',
+    text: 'Olá, {nome}! Pode tentar o seguinte enquanto investigamos:\n\n1. Atualizar a página (Ctrl+F5)\n2. Limpar o cache do navegador\n3. Testar em uma aba anônima\n4. Trocar de player na página do conteúdo\n\nMe conte se o problema continua, combinado?',
   },
   {
     label: '✅ Resolvido',
-    text: 'Boa notícia! O problema foi corrigido ✅\n\nPode testar novamente e qualquer coisa é só nos avisar. Vou marcar este ticket como resolvido.',
+    text: 'Boa notícia, {nome}! ✅ O problema foi corrigido. Pode testar novamente e qualquer coisa é só nos avisar por aqui. Vou marcar este ticket como resolvido.',
   },
   {
     label: '🎬 Conteúdo adicionado',
-    text: 'O conteúdo já foi adicionado ao catálogo! 🎬\n\nBasta atualizar a página ou pesquisar pelo título. Bom filme!',
+    text: 'Oi, {nome}! 🎬 O conteúdo já foi adicionado ao catálogo. Basta atualizar a página ou pesquisar pelo título. Bom filme!',
   },
   {
     label: '⛔ Fora do escopo',
-    text: 'Obrigado pelo contato! Infelizmente esse pedido está fora do escopo do nosso suporte. Vamos encerrar este ticket, mas estamos por aqui sempre que precisar.',
+    text: 'Olá, {nome}! Obrigado pelo contato. Infelizmente esse pedido está fora do escopo do nosso suporte, então vamos encerrar este ticket — mas seguimos por aqui sempre que precisar.',
   },
   {
-    label: '🙏 Obrigado / Encerramento',
-    text: 'Obrigado por usar o PipocaMax! 🍿\n\nQualquer outro problema, é só abrir um novo chamado. Bom filme!',
+    label: '🙏 Encerramento',
+    text: 'Obrigado por usar o PipocaMax, {nome}! 🍿 Qualquer outro problema é só abrir um novo chamado. Bom filme!',
   },
 ];
 
@@ -228,31 +233,11 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
           <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 text-primary animate-spin" /></div>
         ) : (
           <>
-            {/* Bot welcome message — always shown */}
-            <div className="flex gap-2 justify-start">
-              <div className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 bg-primary/20 text-primary border border-primary/50">
-                <Bot className="h-4 w-4" />
-              </div>
-              <div className="max-w-[78%] rounded-2xl px-3.5 py-2 text-sm bg-primary/10 border border-primary/30 text-foreground rounded-bl-sm">
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <span className="text-[10px] font-bold uppercase tracking-wide text-primary">
-                    PipocaBot
-                  </span>
-                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-primary/80 text-primary-foreground uppercase">
-                    Automático
-                  </span>
-                </div>
-                <p className="whitespace-pre-wrap break-words">
-                  Olá! 👋 Seu ticket foi recebido com sucesso.{'\n\n'}
-                  Nossa equipe vai analisar e responder por aqui o mais rápido possível. Você será notificado pelo 🔔 quando houver uma resposta.{'\n\n'}
-                  Obrigado pela paciência! 🍿
-                </p>
-                <p className="text-[10px] mt-1 text-muted-foreground">
-                  {new Date(ticket.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                </p>
-              </div>
-            </div>
-            {messages.length === 0 ? null : messages.map(m => {
+            {messages.length === 0 ? (
+              <p className="text-center text-xs text-muted-foreground py-8">
+                Nenhuma mensagem ainda. {asAdmin ? 'Envie a primeira resposta abaixo.' : 'Aguarde — nossa equipe responde por aqui assim que possível.'}
+              </p>
+            ) : messages.map(m => {
           const mine = m.sender_id === user?.id;
           const sideRight = !m.is_admin;
           const senderLabel = m.is_admin
@@ -318,8 +303,11 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
                   <button
                     key={r.label}
                     type="button"
-                    onClick={() => setBody(prev => (prev.trim() ? prev + '\n\n' + r.text : r.text))}
-                    title={r.text}
+                    onClick={() => {
+                      const personalized = r.text.replace(/\{nome\}/g, authorName || 'tudo bem');
+                      setBody(prev => (prev.trim() ? prev + '\n\n' + personalized : personalized));
+                    }}
+                    title={r.text.replace(/\{nome\}/g, authorName || '')}
                     className="text-[11px] px-2.5 py-1 rounded-full bg-secondary border border-border text-foreground hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-colors"
                   >
                     {r.label}
