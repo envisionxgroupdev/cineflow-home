@@ -303,8 +303,11 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
                   <button
                     key={r.label}
                     type="button"
-                    onClick={() => setBody(prev => (prev.trim() ? prev + '\n\n' + r.text : r.text))}
-                    title={r.text}
+                    onClick={() => {
+                      const personalized = r.text.replace(/\{nome\}/g, authorName || 'tudo bem');
+                      setBody(prev => (prev.trim() ? prev + '\n\n' + personalized : personalized));
+                    }}
+                    title={r.text.replace(/\{nome\}/g, authorName || '')}
                     className="text-[11px] px-2.5 py-1 rounded-full bg-secondary border border-border text-foreground hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-colors"
                   >
                     {r.label}
