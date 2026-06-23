@@ -245,27 +245,7 @@ const Profile = () => {
         </div>
       </main>
 
-      {openTicket && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => { setOpenTicket(null); loadTickets(); }}>
-          <div className="bg-card border border-border rounded-xl w-full max-w-xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
-              <div className="flex items-center gap-2 min-w-0">
-                <Ticket className="h-4 w-4 text-primary shrink-0" />
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground truncate">{openTicket.content_title}</p>
-                  <p className="text-[11px] text-muted-foreground truncate">{openTicket.reason}</p>
-                </div>
-              </div>
-              <button onClick={() => { setOpenTicket(null); loadTickets(); }} className="text-muted-foreground hover:text-foreground shrink-0">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="p-4 flex-1 overflow-hidden flex flex-col">
-              <TicketChat ticket={openTicket} />
-            </div>
-          </div>
-        </div>
-      )}
+
 
 
       <Footer />
@@ -337,22 +317,8 @@ function AdminBadge() {
   );
 }
 
-function TicketStatusBadge({ status, inline }: { status: TicketStatus; inline?: boolean }) {
-  const map: Record<TicketStatus, { label: string; cls: string }> = {
-    open: { label: 'Aberto', cls: 'bg-yellow-500/15 text-yellow-500' },
-    pending: { label: 'Aberto', cls: 'bg-yellow-500/15 text-yellow-500' },
-    in_progress: { label: 'Em andamento', cls: 'bg-blue-500/15 text-blue-500' },
-    resolved: { label: 'Resolvido', cls: 'bg-green-500/15 text-green-500' },
-    closed: { label: 'Fechado', cls: 'bg-muted text-muted-foreground' },
-    dismissed: { label: 'Fechado', cls: 'bg-muted text-muted-foreground' },
-  };
-  const { label, cls } = map[status] ?? map.open;
-  return (
-    <span className={`${inline ? '' : ''} text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${cls}`}>
-      {label}
-    </span>
-  );
-}
+function TicketStatusBadge_REMOVED() { return null; }
+
 
 export default Profile;
 
