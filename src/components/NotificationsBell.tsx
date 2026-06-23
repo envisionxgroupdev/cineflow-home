@@ -192,14 +192,24 @@ export function NotificationsBell() {
 
   const ticketUnreadCount = tickets.filter(t => t.unread).length;
   const newsUnreadCount = items.filter(n => !readIds.has(n.id)).length;
-  const unreadCount = newsUnreadCount + ticketUnreadCount;
+  const requestUnreadCount = requests.filter(r => r.unread).length;
+  const unreadCount = newsUnreadCount + ticketUnreadCount + requestUnreadCount;
 
   const markRead = (id: string) => {
     const next = new Set(readIds); next.add(id); setReadIds(next); saveReadIds(next);
   };
+  const markRequestRead = (r: RequestNotif) => {
+    const next = new Set(reqReadKeys); next.add(`${r.id}:${r.status}`);
+    setReqReadKeys(next); saveReqReadKeys(next);
+  };
   const markAllRead = async () => {
     const next = new Set(readIds); items.forEach(n => next.add(n.id));
     setReadIds(next); saveReadIds(next);
+    if (requestUnreadCount > 0) {
+      const nextReq = new Set(reqReadKeys);
+      requests.forEach(r => nextReq.add(`${r.id}:${r.status}`));
+      setReqReadKeys(nextReq); saveReqReadKeys(nextReq);
+    }
     if (user && ticketUnreadCount > 0) {
       await supabase.from('reports').update({ unread_for_user: false }).eq('user_id', user.id).eq('unread_for_user', true);
       loadTickets();
@@ -213,6 +223,12 @@ export function NotificationsBell() {
       await supabase.from('reports').update({ unread_for_user: false }).eq('id', t.id);
       loadTickets();
     }
+  };
+
+  const openRequest = (r: RequestNotif) => {
+    setOpen(false);
+    if (r.unread) markRequestRead(r);
+    navigate('/perfil');
   };
 
   return (
