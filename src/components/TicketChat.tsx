@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import { Loader2, Send, ShieldCheck, User as UserIcon, Paperclip, X as XIcon, FileText, Image as ImageIcon, Download, MessageSquareQuote, Bot } from 'lucide-react';
+import { Loader2, Send, ShieldCheck, User as UserIcon, Paperclip, X as XIcon, FileText, Image as ImageIcon, Download, MessageSquareQuote, Bot, Inbox, Search, MessageCircle, CheckCircle2, XCircle, Lock } from 'lucide-react';
 import type { TicketMessage, Report } from '@/types/database';
 
 interface Props {
@@ -85,6 +85,7 @@ function AttachmentView({ path, name, type }: { path: string; name: string | nul
 
 export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
   const { user } = useAuth();
+  const [currentTicket, setCurrentTicket] = useState<Report>(ticket);
   const [messages, setMessages] = useState<TicketMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [body, setBody] = useState('');
@@ -93,6 +94,8 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => { setCurrentTicket(ticket); }, [ticket.id, ticket.status]);
 
   const load = async () => {
     setLoading(true);
@@ -134,9 +137,27 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
         (payload) => {
           setMessages(prev => prev.some(m => m.id === (payload.new as any).id) ? prev : [...prev, payload.new as TicketMessage]);
         })
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'reports', filter: `id=eq.${ticket.id}` },
+        (payload) => {
+          setCurrentTicket(prev => ({ ...prev, ...(payload.new as Report) }));
+        })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [ticket.id]);
+
+  // Derived status: Recebido | Em análise | Respondido | Resolvido | Recusado | Fechado
+  const derivedStatus = (() => {
+    const s = currentTicket.status;
+    if (s === 'resolved') return { key: 'resolved', label: 'Resolvido', Icon: CheckCircle2, cls: 'bg-green-500/15 text-green-400 border-green-500/40' };
+    if (s === 'dismissed') return { key: 'dismissed', label: 'Recusado', Icon: XCircle, cls: 'bg-destructive/15 text-destructive border-destructive/40' };
+    if (s === 'closed') return { key: 'closed', label: 'Fechado', Icon: Lock, cls: 'bg-muted text-muted-foreground border-border' };
+    const hasAdminReply = messages.some(m => m.is_admin);
+    if (hasAdminReply) return { key: 'replied', label: 'Respondido', Icon: MessageCircle, cls: 'bg-primary/15 text-primary border-primary/40' };
+    if (currentTicket.unread_for_admin === false) return { key: 'analyzing', label: 'Em análise', Icon: Search, cls: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/40' };
+    return { key: 'received', label: 'Recebido', Icon: Inbox, cls: 'bg-blue-500/15 text-blue-400 border-blue-500/40' };
+  })();
+  const StatusIcon = derivedStatus.Icon;
 
   const pickFile = (f: File | null) => {
     if (!f) { setPendingFile(null); return; }
@@ -195,6 +216,13 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
 
   return (
     <div className="flex flex-col h-full min-h-[300px]">
+      <div className="flex items-center justify-between gap-2 mb-2 px-1">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Status do ticket</span>
+        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-bold uppercase tracking-wide transition-colors ${derivedStatus.cls}`}>
+          <StatusIcon className="h-3 w-3" />
+          {derivedStatus.label}
+        </span>
+      </div>
       <div className="flex-1 overflow-y-auto px-2 py-3 space-y-3 bg-secondary/30 rounded-lg border border-border">
         {loading ? (
           <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 text-primary animate-spin" /></div>
@@ -278,7 +306,7 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
         <div ref={bottomRef} />
       </div>
 
-      {ticket.status !== 'closed' ? (
+      {currentTicket.status !== 'closed' && currentTicket.status !== 'resolved' && currentTicket.status !== 'dismissed' ? (
         <div className="mt-3 space-y-2">
           {asAdmin && (
             <div className="space-y-1.5">
