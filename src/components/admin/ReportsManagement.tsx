@@ -170,7 +170,7 @@ export function ReportsManagement() {
               </button>
             </div>
 
-            <div className="p-4 flex-1 overflow-hidden flex flex-col">
+            <div className="p-2 sm:p-4 flex-1 min-h-0 overflow-hidden flex flex-col">
               <TicketChat ticket={viewing} asAdmin onSent={() => {
                 setTickets(ts => ts.map(t => t.id === viewing.id ? { ...t, unread_for_user: true, last_message_at: new Date().toISOString() } : t));
               }} />
