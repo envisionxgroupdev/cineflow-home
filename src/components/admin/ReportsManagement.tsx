@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Loader2, AlertTriangle, X, Trash2, MessageSquare, CheckCircle2, Circle, Clock, Lock, Play } from 'lucide-react';
+import { Loader2, AlertTriangle, X, Trash2, MessageSquare, CheckCircle2, Circle, Lock, Play, Search, Inbox, ChevronRight, Mail } from 'lucide-react';
 import type { Report, TicketStatus } from '@/types/database';
 import { TicketChat } from '@/components/TicketChat';
+
 
 const STATUS_LABEL: Record<TicketStatus, string> = {
   open: 'Aberto',
