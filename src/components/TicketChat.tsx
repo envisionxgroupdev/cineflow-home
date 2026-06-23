@@ -97,6 +97,7 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
   const [sending, setSending] = useState(false);
   const [authorName, setAuthorName] = useState<string>('Usuário');
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [showCanned, setShowCanned] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
