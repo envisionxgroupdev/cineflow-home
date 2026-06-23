@@ -104,8 +104,9 @@ export function NotificationsBell() {
   useEffect(() => {
     loadTickets();
     if (!user) return;
+    const channelName = `bell-tickets-${user.id}-${Math.random().toString(36).slice(2, 8)}`;
     const ch = supabase
-      .channel(`bell-tickets-${user.id}`)
+      .channel(channelName)
       .on('postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'ticket_messages' },
         () => { loadTickets(); })
