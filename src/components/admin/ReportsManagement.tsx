@@ -32,6 +32,9 @@ export function ReportsManagement() {
   const [filter, setFilter] = useState<Filter>('open');
   const [viewing, setViewing] = useState<Report | null>(null);
   const [authors, setAuthors] = useState<Record<string, { email: string | null; display_name: string | null }>>({});
+  const [query, setQuery] = useState('');
+
+
 
   const load = async () => {
     setLoading(true);
@@ -82,7 +85,20 @@ export function ReportsManagement() {
     return s as Filter;
   };
 
-  const filtered = filter === 'all' ? tickets : tickets.filter(t => normalized(t.status) === filter);
+  const baseFiltered = filter === 'all' ? tickets : tickets.filter(t => normalized(t.status) === filter);
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? baseFiltered.filter(t => {
+        const a = t.user_id ? authors[t.user_id] : null;
+        return (
+          t.content_title?.toLowerCase().includes(q) ||
+          t.reason?.toLowerCase().includes(q) ||
+          a?.display_name?.toLowerCase().includes(q) ||
+          a?.email?.toLowerCase().includes(q) ||
+          t.reporter_email?.toLowerCase().includes(q)
+        );
+      })
+    : baseFiltered;
 
   const counts = {
     all: tickets.length,
@@ -91,66 +107,132 @@ export function ReportsManagement() {
     resolved: tickets.filter(t => normalized(t.status) === 'resolved').length,
     closed: tickets.filter(t => normalized(t.status) === 'closed').length,
   };
+  const unread = tickets.filter(t => t.unread_for_admin).length;
 
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 text-primary animate-spin" /></div>;
 
+  const FILTER_META: Record<Filter, { label: string; cls: string; dot: string }> = {
+    all:         { label: 'Todos',        cls: 'border-border',           dot: 'bg-foreground/40' },
+    open:        { label: 'Abertos',      cls: 'border-yellow-500/40',    dot: 'bg-yellow-500' },
+    in_progress: { label: 'Em andamento', cls: 'border-blue-500/40',      dot: 'bg-blue-500' },
+    resolved:    { label: 'Resolvidos',   cls: 'border-green-500/40',     dot: 'bg-green-500' },
+    closed:      { label: 'Fechados',     cls: 'border-border',           dot: 'bg-muted-foreground' },
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="flex gap-2 flex-wrap">
-        {(['open', 'in_progress', 'resolved', 'closed', 'all'] as Filter[]).map(f => (
-          <button key={f} onClick={() => setFilter(f)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-              filter === f ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'
-            }`}>
-            {f === 'all' ? 'Todos' : STATUS_LABEL[f as TicketStatus]} ({counts[f]})
-          </button>
-        ))}
+    <div className="space-y-5">
+      {/* Stats header */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+        {(['open', 'in_progress', 'resolved', 'closed', 'all'] as Filter[]).map(f => {
+          const meta = FILTER_META[f];
+          const active = filter === f;
+          return (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`text-left rounded-xl border p-3 transition-all ${
+                active
+                  ? `bg-primary/10 ${meta.cls} ring-2 ring-primary/30 shadow-[0_4px_20px_-8px_hsl(var(--primary)/0.5)]`
+                  : `bg-card ${meta.cls} hover:bg-secondary/40`
+              }`}
+            >
+              <div className="flex items-center gap-1.5">
+                <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{meta.label}</span>
+              </div>
+              <p className="font-display text-2xl text-foreground mt-1 leading-none">{counts[f]}</p>
+              {f === 'open' && unread > 0 && (
+                <p className="text-[10px] font-bold text-destructive mt-1">{unread} sem leitura</p>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Toolbar */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Buscar por título, motivo, e-mail ou usuário..."
+            className="w-full pl-9 pr-3 py-2 bg-card border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+          />
+        </div>
+        <button onClick={load} className="px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-lg border border-border bg-card hover:bg-secondary/60 text-muted-foreground hover:text-foreground transition-colors">
+          Atualizar
+        </button>
       </div>
 
       {filtered.length === 0 ? (
-        <div className="bg-card border border-border rounded-lg p-12 text-center text-sm text-muted-foreground">
-          Nenhum ticket neste filtro.
+        <div className="bg-card border border-dashed border-border rounded-xl p-12 text-center">
+          <Inbox className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
+          <p className="text-sm text-muted-foreground">Nenhum ticket neste filtro.</p>
         </div>
       ) : (
-        <div className="grid gap-2">
+        <ul className="grid gap-2">
           {filtered.map(t => {
             const author = t.user_id ? authors[t.user_id] : null;
+            const name = author?.display_name || author?.email?.split('@')[0] || t.reporter_email || 'Usuário';
+            const initial = (name || '?')[0].toUpperCase();
+            const isOpen = normalized(t.status) === 'open';
             return (
-              <button
-                key={t.id}
-                onClick={() => setViewing(t)}
-                className="text-left bg-card border border-border hover:border-primary/40 rounded-lg p-4 transition-colors"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <MessageSquare className="h-4 w-4 text-primary shrink-0" />
-                      <h3 className="text-sm font-semibold text-foreground truncate">{t.content_title}</h3>
-                      <span className="text-[10px] text-muted-foreground">· {t.content_type === 'movie' ? 'Filme' : 'Série'}</span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${STATUS_COLOR[t.status]}`}>
-                        {STATUS_LABEL[t.status]}
-                      </span>
-                      {t.unread_for_admin && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded uppercase bg-destructive text-destructive-foreground">
-                          Novo
-                        </span>
-                      )}
+              <li key={t.id}>
+                <button
+                  onClick={() => setViewing(t)}
+                  className={`w-full text-left bg-card border rounded-xl p-3 sm:p-4 transition-all hover:border-primary/50 hover:bg-secondary/30 group ${
+                    t.unread_for_admin ? 'border-destructive/40 shadow-[0_0_0_1px_hsl(var(--destructive)/0.2)]' : 'border-border'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    {/* Avatar */}
+                    <div className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0 border ${
+                      isOpen ? 'bg-yellow-500/15 text-yellow-500 border-yellow-500/30' : 'bg-secondary text-muted-foreground border-border'
+                    }`}>
+                      {initial}
                     </div>
-                    <p className="text-xs text-muted-foreground truncate">
-                      <span className="text-foreground/80">{author?.display_name || author?.email || t.reporter_email || 'Usuário'}</span>
-                      {' · '}
-                      <span className="text-destructive">{t.reason}</span>
-                    </p>
+
+                    {/* Body */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="text-sm font-semibold text-foreground truncate">{t.content_title}</h3>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${STATUS_COLOR[t.status]}`}>
+                          {STATUS_LABEL[t.status]}
+                        </span>
+                        {t.unread_for_admin && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase bg-destructive text-destructive-foreground animate-pulse">
+                            Novo
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1 flex-wrap">
+                        <span className="inline-flex items-center gap-1 text-foreground/80">
+                          <Mail className="h-3 w-3" /> {name}
+                        </span>
+                        <span className="text-border">•</span>
+                        <span className="text-destructive font-medium">{t.reason}</span>
+                        <span className="text-border">•</span>
+                        <span>{t.content_type === 'movie' ? 'Filme' : 'Série'}</span>
+                      </div>
+                    </div>
+
+                    {/* Time + chevron */}
+                    <div className="hidden sm:flex flex-col items-end gap-1 shrink-0">
+                      <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                        {new Date(t.last_message_at || t.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                    </div>
                   </div>
-                  <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
-                    {new Date(t.last_message_at || t.created_at).toLocaleString('pt-BR')}
-                  </span>
-                </div>
-              </button>
+                </button>
+              </li>
             );
           })}
-        </div>
+        </ul>
       )}
+
+
 
       {viewing && (
         <div className="fixed inset-0 z-50 flex items-stretch sm:items-center justify-center bg-black/70 sm:p-4" onClick={() => { setViewing(null); load(); }}>
