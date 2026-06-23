@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { Bell, X, Sparkles, Tv, Info, ExternalLink, Ticket as TicketIcon } from 'lucide-react';
+import { Bell, X, Sparkles, Tv, Info, ExternalLink, Ticket as TicketIcon, CheckCircle2, XCircle } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,7 +25,17 @@ interface TicketNotif {
   unread: boolean;
 }
 
+interface RequestNotif {
+  id: string;
+  title: string;
+  status: 'fulfilled' | 'rejected';
+  content_title: string;
+  created_at: string;
+  unread: boolean;
+}
+
 const READ_KEY = 'pipocamax-read-notifications';
+const REQ_READ_KEY = 'pipocamax-read-requests';
 const TOAST_SHOWN_KEY = 'pipocamax-toast-shown';
 const POLL_MS = 60_000;
 
@@ -34,6 +44,12 @@ function getReadIds(): Set<string> {
 }
 function saveReadIds(ids: Set<string>) {
   try { localStorage.setItem(READ_KEY, JSON.stringify([...ids].slice(-200))); } catch {}
+}
+function getReqReadKeys(): Set<string> {
+  try { return new Set(JSON.parse(localStorage.getItem(REQ_READ_KEY) || '[]')); } catch { return new Set(); }
+}
+function saveReqReadKeys(ids: Set<string>) {
+  try { localStorage.setItem(REQ_READ_KEY, JSON.stringify([...ids].slice(-200))); } catch {}
 }
 function getToastShown(): Set<string> {
   try { return new Set(JSON.parse(sessionStorage.getItem(TOAST_SHOWN_KEY) || '[]')); } catch { return new Set(); }
@@ -53,11 +69,14 @@ function iconFor(type: string) {
   return Info;
 }
 
+
 export function NotificationsBell() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [items, setItems] = useState<NotificationRow[]>([]);
   const [tickets, setTickets] = useState<TicketNotif[]>([]);
+  const [requests, setRequests] = useState<RequestNotif[]>([]);
+  const [reqReadKeys, setReqReadKeys] = useState<Set<string>>(() => getReqReadKeys());
   const [readIds, setReadIds] = useState<Set<string>>(() => getReadIds());
   const [open, setOpen] = useState(false);
   const [popup, setPopup] = useState<NotificationRow | null>(null);
@@ -117,6 +136,45 @@ export function NotificationsBell() {
     return () => { supabase.removeChannel(ch); };
   }, [user, loadTickets]);
 
+  // Request notifications (status changed from pending to fulfilled/rejected)
+  const loadRequests = useCallback(async () => {
+    if (!user) { setRequests([]); return; }
+    const { data } = await supabase
+      .from('requests')
+      .select('id,title,status,updated_at')
+      .eq('user_id', user.id)
+      .in('status', ['fulfilled', 'rejected'])
+      .order('updated_at', { ascending: false })
+      .limit(15);
+    if (!data) return;
+    const keys = getReqReadKeys();
+    const mapped: RequestNotif[] = (data as any[]).map((r) => {
+      const key = `${r.id}:${r.status}`;
+      return {
+        id: r.id,
+        title: r.status === 'fulfilled' ? 'Pedido adicionado ao site!' : 'Pedido recusado',
+        status: r.status,
+        content_title: r.title,
+        created_at: r.updated_at,
+        unread: !keys.has(key),
+      };
+    });
+    setRequests(mapped);
+  }, [user]);
+
+  useEffect(() => {
+    loadRequests();
+    if (!user) return;
+    const channelName = `bell-requests-${user.id}-${Math.random().toString(36).slice(2, 8)}`;
+    const ch = supabase
+      .channel(channelName)
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'requests', filter: `user_id=eq.${user.id}` },
+        () => { loadRequests(); })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user, loadRequests]);
+
   // Show toast popup once per session for the newest unread notification
   useEffect(() => {
     if (items.length === 0) return;
@@ -134,14 +192,24 @@ export function NotificationsBell() {
 
   const ticketUnreadCount = tickets.filter(t => t.unread).length;
   const newsUnreadCount = items.filter(n => !readIds.has(n.id)).length;
-  const unreadCount = newsUnreadCount + ticketUnreadCount;
+  const requestUnreadCount = requests.filter(r => r.unread).length;
+  const unreadCount = newsUnreadCount + ticketUnreadCount + requestUnreadCount;
 
   const markRead = (id: string) => {
     const next = new Set(readIds); next.add(id); setReadIds(next); saveReadIds(next);
   };
+  const markRequestRead = (r: RequestNotif) => {
+    const next = new Set(reqReadKeys); next.add(`${r.id}:${r.status}`);
+    setReqReadKeys(next); saveReqReadKeys(next);
+  };
   const markAllRead = async () => {
     const next = new Set(readIds); items.forEach(n => next.add(n.id));
     setReadIds(next); saveReadIds(next);
+    if (requestUnreadCount > 0) {
+      const nextReq = new Set(reqReadKeys);
+      requests.forEach(r => nextReq.add(`${r.id}:${r.status}`));
+      setReqReadKeys(nextReq); saveReqReadKeys(nextReq);
+    }
     if (user && ticketUnreadCount > 0) {
       await supabase.from('reports').update({ unread_for_user: false }).eq('user_id', user.id).eq('unread_for_user', true);
       loadTickets();
@@ -155,6 +223,12 @@ export function NotificationsBell() {
       await supabase.from('reports').update({ unread_for_user: false }).eq('id', t.id);
       loadTickets();
     }
+  };
+
+  const openRequest = (r: RequestNotif) => {
+    setOpen(false);
+    if (r.unread) markRequestRead(r);
+    navigate('/perfil');
   };
 
   return (
@@ -221,13 +295,48 @@ export function NotificationsBell() {
                     </>
                   )}
 
-                  {items.length > 0 && user && tickets.length > 0 && (
+
+                  {user && requests.length > 0 && (
+                    <>
+                      <div className="px-4 py-2 bg-secondary/40 border-b border-border/50">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Seus pedidos</span>
+                      </div>
+                      {requests.map(r => {
+                        const Icon = r.status === 'fulfilled' ? CheckCircle2 : XCircle;
+                        const accent = r.status === 'fulfilled' ? 'bg-emerald-500 text-white' : 'bg-destructive text-destructive-foreground';
+                        return (
+                          <button
+                            key={`r-${r.id}-${r.status}`}
+                            onClick={() => openRequest(r)}
+                            className={`w-full text-left flex gap-3 px-4 py-3 border-b border-border/50 transition-colors hover:bg-secondary/50 ${r.unread ? 'bg-primary/5' : ''}`}
+                          >
+                            <div className={`flex-shrink-0 h-9 w-9 rounded-lg flex items-center justify-center ${r.unread ? accent : 'bg-secondary text-muted-foreground'}`}>
+                              <Icon className="h-4 w-4" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2">
+                                <p className="text-sm font-semibold text-foreground line-clamp-1">{r.title}</p>
+                                {r.unread && <span className="flex-shrink-0 h-2 w-2 rounded-full bg-primary mt-1.5" />}
+                              </div>
+                              <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{r.content_title}</p>
+                              <p className="text-[10px] text-muted-foreground/70 mt-1">
+                                {new Date(r.created_at).toLocaleString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                <span className="ml-2 inline-flex items-center gap-0.5 text-primary"><ExternalLink className="h-2.5 w-2.5" /> Ver</span>
+                              </p>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </>
+                  )}
+
+                  {items.length > 0 && (tickets.length > 0 || requests.length > 0) && (
                     <div className="px-4 py-2 bg-secondary/40 border-b border-border/50">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Novidades</span>
                     </div>
                   )}
 
-                  {items.length === 0 && tickets.length === 0 ? (
+                  {items.length === 0 && tickets.length === 0 && requests.length === 0 ? (
                     <p className="p-6 text-center text-sm text-muted-foreground">Nenhuma notificação ainda.</p>
                   ) : items.map(n => {
                     const Icon = iconFor(n.type);
