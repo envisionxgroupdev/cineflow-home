@@ -137,9 +137,27 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
         (payload) => {
           setMessages(prev => prev.some(m => m.id === (payload.new as any).id) ? prev : [...prev, payload.new as TicketMessage]);
         })
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'reports', filter: `id=eq.${ticket.id}` },
+        (payload) => {
+          setCurrentTicket(prev => ({ ...prev, ...(payload.new as Report) }));
+        })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [ticket.id]);
+
+  // Derived status: Recebido | Em análise | Respondido | Resolvido | Recusado | Fechado
+  const derivedStatus = (() => {
+    const s = currentTicket.status;
+    if (s === 'resolved') return { key: 'resolved', label: 'Resolvido', Icon: CheckCircle2, cls: 'bg-green-500/15 text-green-400 border-green-500/40' };
+    if (s === 'dismissed') return { key: 'dismissed', label: 'Recusado', Icon: XCircle, cls: 'bg-destructive/15 text-destructive border-destructive/40' };
+    if (s === 'closed') return { key: 'closed', label: 'Fechado', Icon: Lock, cls: 'bg-muted text-muted-foreground border-border' };
+    const hasAdminReply = messages.some(m => m.is_admin);
+    if (hasAdminReply) return { key: 'replied', label: 'Respondido', Icon: MessageCircle, cls: 'bg-primary/15 text-primary border-primary/40' };
+    if (currentTicket.unread_for_admin === false) return { key: 'analyzing', label: 'Em análise', Icon: Search, cls: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/40' };
+    return { key: 'received', label: 'Recebido', Icon: Inbox, cls: 'bg-blue-500/15 text-blue-400 border-blue-500/40' };
+  })();
+  const StatusIcon = derivedStatus.Icon;
 
   const pickFile = (f: File | null) => {
     if (!f) { setPendingFile(null); return; }
