@@ -69,16 +69,6 @@ function iconFor(type: string) {
   return Info;
 }
 
-function buildHref(n: NotificationRow): string | null {
-  if (!n.content_slug || !n.content_type) return null;
-  return n.content_type === 'movie' ? `/filme/${n.content_slug}` : `/serie/${n.content_slug}`;
-}
-
-function iconFor(type: string) {
-  if (type === 'release') return Sparkles;
-  if (type === 'update') return Tv;
-  return Info;
-}
 
 export function NotificationsBell() {
   const { user } = useAuth();
