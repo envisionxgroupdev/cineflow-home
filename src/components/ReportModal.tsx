@@ -32,6 +32,15 @@ export function ReportModal({ contentId, contentType, contentTitle, open, onClos
   const [reason, setReason] = useState('');
   const [details, setDetails] = useState('');
   const [sending, setSending] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const pickFile = (f: File | null) => {
+    if (!f) { setFile(null); return; }
+    if (!ALLOWED_MIME.includes(f.type)) { toast.error('Tipo não permitido. Use imagem ou PDF.'); return; }
+    if (f.size > MAX_FILE_BYTES) { toast.error('Arquivo muito grande (máx 10 MB).'); return; }
+    setFile(f);
+  };
 
   const handleSend = useCallback(async () => {
     if (!user) return;
@@ -57,7 +66,28 @@ export function ReportModal({ contentId, contentType, contentTitle, open, onClos
       return;
     }
 
-    // First message (motivo + detalhes)
+    let attachmentPath: string | null = null;
+    let attachmentName: string | null = null;
+    let attachmentType: string | null = null;
+    let attachmentSize: number | null = null;
+
+    if (file) {
+      const ext = file.name.split('.').pop() || 'bin';
+      const safe = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const path = `${ticket.id}/${safe}`;
+      const { error: upErr } = await supabase.storage
+        .from('ticket-attachments')
+        .upload(path, file, { contentType: file.type, upsert: false });
+      if (!upErr) {
+        attachmentPath = path;
+        attachmentName = file.name;
+        attachmentType = file.type;
+        attachmentSize = file.size;
+      } else {
+        toast.error('Anexo não enviado: ' + upErr.message);
+      }
+    }
+
     const body = details?.trim()
       ? `Motivo: ${reason}\n\n${details.trim()}`
       : `Motivo: ${reason}`;
@@ -66,15 +96,20 @@ export function ReportModal({ contentId, contentType, contentTitle, open, onClos
       sender_id: user.id,
       is_admin: false,
       body,
+      attachment_url: attachmentPath,
+      attachment_name: attachmentName,
+      attachment_type: attachmentType,
+      attachment_size: attachmentSize,
     });
 
     markSubmitted('report');
     toast.success('Ticket aberto! Acompanhe pelo seu perfil.');
     setReason('');
     setDetails('');
+    setFile(null);
     setSending(false);
     onClose();
-  }, [reason, details, user, contentId, contentType, contentTitle, onClose]);
+  }, [reason, details, user, contentId, contentType, contentTitle, file, onClose]);
 
   if (!open) return null;
 
