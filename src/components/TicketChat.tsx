@@ -228,68 +228,83 @@ export function TicketChat({ ticket, asAdmin = false, onSent }: Props) {
           {derivedStatus.label}
         </span>
       </div>
-      <div className="flex-1 overflow-y-auto px-2 py-3 space-y-3 bg-secondary/30 rounded-lg border border-border">
+      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3 bg-secondary/30 rounded-lg border border-border">
+        {/* Original ticket opening — shown like the first entry of the thread */}
+        <article className="rounded-lg border border-border bg-card/60 overflow-hidden">
+          <header className="flex items-center justify-between gap-2 px-3 py-2 bg-secondary/60 border-b border-border">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="h-7 w-7 rounded-full flex items-center justify-center bg-secondary text-muted-foreground border border-border shrink-0">
+                <UserIcon className="h-3.5 w-3.5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-foreground truncate">{authorName}</p>
+                <p className="text-[10px] text-muted-foreground">Abertura do ticket</p>
+              </div>
+            </div>
+            <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+              {new Date(currentTicket.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </header>
+          <div className="px-3 py-2.5 text-sm text-foreground space-y-1">
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+              <span className="text-destructive font-semibold">{currentTicket.reason}</span>
+              {' · '}{currentTicket.content_type === 'movie' ? 'Filme' : 'Série'}: <span className="text-foreground">{currentTicket.content_title}</span>
+            </p>
+            {currentTicket.details && (
+              <p className="whitespace-pre-wrap break-words pt-1">{currentTicket.details}</p>
+            )}
+          </div>
+        </article>
+
         {loading ? (
           <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 text-primary animate-spin" /></div>
+        ) : messages.length === 0 ? (
+          <p className="text-center text-xs text-muted-foreground py-6 border border-dashed border-border rounded-lg">
+            {asAdmin ? 'Nenhuma resposta ainda. Envie a primeira resposta abaixo.' : 'Aguardando resposta da equipe. Você será notificado quando houver novidades.'}
+          </p>
         ) : (
-          <>
-            {messages.length === 0 ? (
-              <p className="text-center text-xs text-muted-foreground py-8">
-                Nenhuma mensagem ainda. {asAdmin ? 'Envie a primeira resposta abaixo.' : 'Aguarde — nossa equipe responde por aqui assim que possível.'}
-              </p>
-            ) : messages.map(m => {
-          const mine = m.sender_id === user?.id;
-          const sideRight = !m.is_admin;
-          const senderLabel = m.is_admin
-            ? (mine ? 'Você · Staff' : 'Equipe PipocaMax')
-            : (mine ? 'Você' : authorName);
+          messages.map((m, idx) => {
+            const mine = m.sender_id === user?.id;
+            const senderLabel = m.is_admin
+              ? 'Equipe PipocaMax'
+              : (mine ? 'Você' : authorName);
+            const headerCls = m.is_admin
+              ? 'bg-primary/10 border-b border-primary/30'
+              : 'bg-secondary/60 border-b border-border';
+            const borderCls = m.is_admin ? 'border-primary/40' : 'border-border';
 
-          const bubbleCls = m.is_admin
-            ? 'bg-primary/15 border border-primary/40 text-foreground rounded-bl-sm'
-            : 'bg-card border border-border text-foreground rounded-br-sm';
-
-          const avatarCls = m.is_admin
-            ? 'bg-primary/20 text-primary border border-primary/50'
-            : 'bg-secondary text-muted-foreground border border-border';
-
-          return (
-            <div key={m.id} className={`flex gap-2 ${sideRight ? 'justify-end' : 'justify-start'}`}>
-              {!sideRight && (
-                <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${avatarCls}`}>
-                  <ShieldCheck className="h-4 w-4" />
-                </div>
-              )}
-              <div className={`max-w-[78%] rounded-2xl px-3.5 py-2 text-sm ${bubbleCls}`}>
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <span className={`text-[10px] font-bold uppercase tracking-wide ${m.is_admin ? 'text-primary' : 'text-muted-foreground'}`}>
-                    {senderLabel}
+            return (
+              <article key={m.id} className={`rounded-lg border ${borderCls} bg-card/60 overflow-hidden`}>
+                <header className={`flex items-center justify-between gap-2 px-3 py-2 ${headerCls}`}>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className={`h-7 w-7 rounded-full flex items-center justify-center shrink-0 ${m.is_admin ? 'bg-primary/20 text-primary border border-primary/50' : 'bg-secondary text-muted-foreground border border-border'}`}>
+                      {m.is_admin ? <ShieldCheck className="h-3.5 w-3.5" /> : <UserIcon className="h-3.5 w-3.5" />}
+                    </div>
+                    <div className="min-w-0 flex items-center gap-1.5 flex-wrap">
+                      <span className={`text-xs font-semibold ${m.is_admin ? 'text-primary' : 'text-foreground'}`}>{senderLabel}</span>
+                      {m.is_admin && (
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-primary text-primary-foreground uppercase">Staff</span>
+                      )}
+                      <span className="text-[10px] text-muted-foreground">· Resposta #{idx + 1}</span>
+                    </div>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
+                    {new Date(m.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })}
                   </span>
-                  {m.is_admin && (
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-primary text-primary-foreground uppercase">
-                      Admin
-                    </span>
+                </header>
+                <div className="px-3 py-2.5 text-sm text-foreground">
+                  {m.body && <p className="whitespace-pre-wrap break-words">{m.body}</p>}
+                  {m.attachment_url && (
+                    <AttachmentView path={m.attachment_url} name={m.attachment_name} type={m.attachment_type} />
                   )}
                 </div>
-                {m.body && <p className="whitespace-pre-wrap break-words">{m.body}</p>}
-                {m.attachment_url && (
-                  <AttachmentView path={m.attachment_url} name={m.attachment_name} type={m.attachment_type} />
-                )}
-                <p className="text-[10px] mt-1 text-muted-foreground">
-                  {new Date(m.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                </p>
-              </div>
-              {sideRight && (
-                <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${avatarCls}`}>
-                  <UserIcon className="h-4 w-4" />
-                </div>
-              )}
-            </div>
-          );
-        })}
-          </>
+              </article>
+            );
+          })
         )}
         <div ref={bottomRef} />
       </div>
+
 
       {currentTicket.status !== 'closed' && currentTicket.status !== 'resolved' && currentTicket.status !== 'dismissed' ? (
         <div className="mt-3 space-y-2">
