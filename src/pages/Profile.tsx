@@ -19,6 +19,7 @@ const Profile = () => {
   const { user, isAdmin, loading: authLoading, signOut } = useAuth();
   const { items: watchlist, loading: wlLoading } = useWatchlist();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [displayName, setDisplayName] = useState('');
   const [originalName, setOriginalName] = useState('');
