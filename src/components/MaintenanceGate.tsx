@@ -53,7 +53,7 @@ export function MaintenanceGate({ children }: { children: React.ReactNode }) {
             Sua conta foi banida e não pode acessar a plataforma. Se você acredita que isso é um engano, entre em contato com o suporte.
           </p>
           <Link
-            to="/contato"
+            to="/suporte"
             className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
           >
             Falar com suporte

@@ -277,8 +277,6 @@ const Support = () => {
 
         <p className="text-[11px] text-muted-foreground text-center mt-6">
           Também pode usar o botão <span className="text-primary font-semibold">Reportar</span> nas páginas de filmes e séries para abrir um ticket com o conteúdo já preenchido.
-          <br />
-          Veja também nossa <Link to="/contato" className="text-primary hover:underline">página de contato</Link>.
         </p>
       </main>
 
