@@ -32,7 +32,7 @@ const Terms = lazy(() => import("./pages/Terms.tsx"));
 const Privacy = lazy(() => import("./pages/Privacy.tsx"));
 const About = lazy(() => import("./pages/About.tsx"));
 const Requests = lazy(() => import("./pages/Requests.tsx"));
-const Contact = lazy(() => import("./pages/Contact.tsx"));
+
 const MyList = lazy(() => import("./pages/MyList.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const Profile = lazy(() => import("./pages/Profile.tsx"));
@@ -130,7 +130,7 @@ const App = () => (
                   <Route path="/privacidade" element={<Privacy />} />
                   <Route path="/sobre" element={<About />} />
                   <Route path="/pedidos" element={<Requests />} />
-                  <Route path="/contato" element={<Contact />} />
+                  <Route path="/contato" element={<Navigate to="/suporte" replace />} />
                   <Route path="/minha-lista" element={<MyList />} />
                   <Route path="/perfil" element={<Profile />} />
                   <Route path="/suporte" element={<Support />} />
