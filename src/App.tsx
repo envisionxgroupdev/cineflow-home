@@ -14,6 +14,7 @@ import { SiteAnnouncementBanner } from "./components/SiteAnnouncementBanner.tsx"
 import { MaintenanceGate } from "./components/MaintenanceGate.tsx";
 import { BannedGate } from "./components/BannedGate.tsx";
 import { NotificationsToast } from "./components/NotificationsToast.tsx";
+import { AdPopup } from "./components/AdPopup.tsx";
 
 import { Loader2, RefreshCw } from "lucide-react";
 
@@ -139,6 +140,8 @@ const App = () => (
               </Suspense>
             </ChunkErrorBoundary>
             <NotificationsToast />
+            <AdPopup />
+            
             
             </BannedGate>
             </MaintenanceGate>
