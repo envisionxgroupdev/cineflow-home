@@ -163,7 +163,7 @@ export function AdPopup() {
           >
             Ver oferta e continuar
           </button>
-          <p className="mt-3 text-[11px] text-muted-foreground/80">Aparece novamente a cada 5 minutos.</p>
+          <p className="mt-3 text-[11px] text-muted-foreground/80">Aparece novamente a cada 1 minuto.</p>
         </div>
       </div>
     </>
