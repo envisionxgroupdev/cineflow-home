@@ -5,7 +5,7 @@ import { useIsAdAllowedRoute } from "@/lib/adRoutes";
 import { SITE_SETTINGS_UPDATED_EVENT } from "@/lib/siteSettingsEvents";
 
 const STORAGE_KEY = "pmx-adpopup-next";
-const INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+const INTERVAL_MS = 1 * 60 * 1000; // 1 minute
 const FIRST_DELAY_MS = 3 * 1000; // first appearance after 3s
 const HIDDEN_COUNT = 4; // extra hidden impressions per click
 
@@ -163,7 +163,7 @@ export function AdPopup() {
           >
             Ver oferta e continuar
           </button>
-          <p className="mt-3 text-[11px] text-muted-foreground/80">Aparece novamente a cada 5 minutos.</p>
+          <p className="mt-3 text-[11px] text-muted-foreground/80">Aparece novamente a cada 1 minuto.</p>
         </div>
       </div>
     </>
