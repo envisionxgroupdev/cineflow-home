@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, Save, Eye, EyeOff, Monitor, Film, Tv, PlayCircle } from "lucide-react";
+import { Loader2, Save, Eye, EyeOff, Monitor, Film, Tv, PlayCircle, MousePointerClick } from "lucide-react";
 import { SITE_SETTINGS_UPDATED_EVENT } from "@/lib/siteSettingsEvents";
+
 
 interface AdField {
   key: string;
@@ -28,9 +29,11 @@ const AD_FIELDS: AdField[] = [
   { key: "ad_series_detail_middle", label: "Meio", page: "Detalhe Série", position: "Entre episódios e elenco" },
   { key: "ad_series_detail_bottom", label: "Rodapé", page: "Detalhe Série", position: "Antes do footer" },
   { key: "ad_interstitial_player", label: "Interstitial", page: "Player", position: "Anúncio de 5s antes do player carregar (filmes, séries e canais)" },
+  { key: "ad_popup", label: "Popup CTA", page: "Popup", position: "Card flutuante com botão — abre em nova janela ao clicar; reaparece a cada 5min" },
 ];
 
 const PAGE_GROUPS = [
+  { name: "Popup CTA", icon: MousePointerClick, fields: AD_FIELDS.filter(f => f.page === "Popup") },
   { name: "Player", icon: PlayCircle, fields: AD_FIELDS.filter(f => f.page === "Player") },
   { name: "Home", icon: Monitor, fields: AD_FIELDS.filter(f => f.page === "Home") },
   { name: "Filmes", icon: Film, fields: AD_FIELDS.filter(f => f.page === "Filmes") },
