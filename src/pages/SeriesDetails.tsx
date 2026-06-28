@@ -127,7 +127,7 @@ const SeriesDetails = () => {
     return '';
   };
 
-  const canonicalUrl = `https://pipocamax.sbs/serie/assistir-${slugify(series.title)}-online-gratis`;
+  const canonicalUrl = `https://pipocamax.cc/serie/assistir-${slugify(series.title)}-online-gratis`;
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'TVSeries',
@@ -145,8 +145,8 @@ const SeriesDetails = () => {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Início', item: 'https://pipocamax.sbs/' },
-      { '@type': 'ListItem', position: 2, name: 'Séries', item: 'https://pipocamax.sbs/series' },
+      { '@type': 'ListItem', position: 1, name: 'Início', item: 'https://pipocamax.cc/' },
+      { '@type': 'ListItem', position: 2, name: 'Séries', item: 'https://pipocamax.cc/series' },
       { '@type': 'ListItem', position: 3, name: series.title, item: canonicalUrl },
     ],
   };

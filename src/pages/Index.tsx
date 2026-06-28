@@ -109,11 +109,11 @@ const Index = () => {
         <html lang="pt-BR" />
         <title>PipocaMax — Filmes e Séries Online Grátis em HD Dublado</title>
         <meta name="description" content="Assista filmes e séries online grátis em HD dublado e legendado em português. Lançamentos do cinema atualizados diariamente no PipocaMax." />
-        <link rel="canonical" href="https://pipocamax.sbs/" />
-        <link rel="alternate" hrefLang="pt-BR" href="https://pipocamax.sbs/" />
+        <link rel="canonical" href="https://pipocamax.cc/" />
+        <link rel="alternate" hrefLang="pt-BR" href="https://pipocamax.cc/" />
         <meta property="og:title" content="PipocaMax — Filmes e Séries Online Grátis em HD Dublado" />
         <meta property="og:description" content="Assista filmes e séries online grátis em HD dublado e legendado em português. Lançamentos do cinema atualizados diariamente." />
-        <meta property="og:url" content="https://pipocamax.sbs/" />
+        <meta property="og:url" content="https://pipocamax.cc/" />
         <meta property="og:locale" content="pt_BR" />
         <meta name="twitter:title" content="PipocaMax — Filmes e Séries Online Grátis em HD Dublado" />
         <meta name="twitter:description" content="Assista filmes e séries online grátis em HD dublado e legendado em português." />

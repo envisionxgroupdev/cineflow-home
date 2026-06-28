@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://pipocamax.sbs/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
-  <url><loc>https://pipocamax.sbs/filmes</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
-  <url><loc>https://pipocamax.sbs/series</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
-  <url><loc>https://pipocamax.sbs/animes</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
-  <url><loc>https://pipocamax.sbs/canais</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://pipocamax.sbs/pedidos</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://pipocamax.sbs/contato</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
-  <url><loc>https://pipocamax.sbs/sobre</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
-  <url><loc>https://pipocamax.sbs/dmca</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://pipocamax.sbs/termos</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://pipocamax.sbs/privacidade</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://pipocamax.cc/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://pipocamax.cc/filmes</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://pipocamax.cc/series</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://pipocamax.cc/animes</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://pipocamax.cc/canais</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://pipocamax.cc/pedidos</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://pipocamax.cc/contato</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://pipocamax.cc/sobre</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://pipocamax.cc/dmca</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://pipocamax.cc/termos</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://pipocamax.cc/privacidade</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
 </urlset>

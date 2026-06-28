@@ -8,10 +8,10 @@ const About = () => (
     <Helmet>
       <title>Sobre o PipocaMax — Quem Somos e Nossa Missão</title>
       <meta name="description" content="Conheça o PipocaMax: nossa missão é conectar você ao melhor entretenimento com filmes e séries online em HD, atualizados diariamente." />
-      <link rel="canonical" href="https://pipocamax.sbs/sobre" />
+      <link rel="canonical" href="https://pipocamax.cc/sobre" />
       <meta property="og:title" content="Sobre o PipocaMax — Quem Somos" />
       <meta property="og:description" content="Conheça a missão do PipocaMax e o que oferecemos: catálogo extenso, busca inteligente e interface moderna." />
-      <meta property="og:url" content="https://pipocamax.sbs/sobre" />
+      <meta property="og:url" content="https://pipocamax.cc/sobre" />
       <meta property="og:type" content="website" />
       <meta name="twitter:title" content="Sobre o PipocaMax" />
       <meta name="twitter:description" content="Conheça a missão do PipocaMax e o que oferecemos." />

@@ -73,7 +73,7 @@ const Requests = () => {
       <Helmet>
         <title>Pedidos de Filmes e Séries | PipocaMax</title>
         <meta name="description" content="Não encontrou o filme ou série que queria? Faça um pedido para o PipocaMax e adicionamos para você." />
-        <link rel="canonical" href="https://pipocamax.sbs/pedidos" />
+        <link rel="canonical" href="https://pipocamax.cc/pedidos" />
       </Helmet>
       <Navbar />
 

@@ -7,10 +7,10 @@ const DMCA = () => (
     <Helmet>
       <title>Política DMCA — PipocaMax</title>
       <meta name="description" content="Política DMCA do PipocaMax. Saiba como reportar violações de direitos autorais e solicitar a remoção de conteúdo." />
-      <link rel="canonical" href="https://pipocamax.sbs/dmca" />
+      <link rel="canonical" href="https://pipocamax.cc/dmca" />
       <meta property="og:title" content="Política DMCA — PipocaMax" />
       <meta property="og:description" content="Como reportar violações de direitos autorais no PipocaMax." />
-      <meta property="og:url" content="https://pipocamax.sbs/dmca" />
+      <meta property="og:url" content="https://pipocamax.cc/dmca" />
       <meta property="og:type" content="website" />
       <meta name="twitter:title" content="Política DMCA — PipocaMax" />
       <meta name="twitter:description" content="Como reportar violações de direitos autorais no PipocaMax." />

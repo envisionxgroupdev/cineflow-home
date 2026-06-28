@@ -57,10 +57,10 @@ const AllMovies = () => {
       <Helmet>
         <title>Filmes Online Grátis em HD — PipocaMax</title>
         <meta name="description" content="Assista filmes online grátis em HD. Catálogo completo com lançamentos, ação, comédia, drama e muito mais." />
-        <link rel="canonical" href="https://pipocamax.sbs/filmes" />
+        <link rel="canonical" href="https://pipocamax.cc/filmes" />
         <meta property="og:title" content="Filmes Online Grátis em HD — PipocaMax" />
         <meta property="og:description" content="Catálogo completo de filmes online grátis em HD com lançamentos atualizados diariamente." />
-        <meta property="og:url" content="https://pipocamax.sbs/filmes" />
+        <meta property="og:url" content="https://pipocamax.cc/filmes" />
         <meta property="og:type" content="website" />
         <meta name="twitter:title" content="Filmes Online Grátis em HD — PipocaMax" />
         <meta name="twitter:description" content="Catálogo completo de filmes online grátis em HD." />
