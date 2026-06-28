@@ -1,11 +1,39 @@
-# PipocaMax — SPA + performance + segurança (cPanel/Apache)
+# PipocaMax — SPA fallback + performance (cPanel/Apache)
+Options -MultiViews +FollowSymLinks
+DirectoryIndex index.html
+
+# ----- SPA fallback (React Router) -----
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # www -> root (pipocamax.cc)
+  RewriteCond %{HTTP_HOST} ^www\.pipocamax\.cc$ [NC]
+  RewriteRule ^(.*)$ https://pipocamax.cc/$1 [L,R=301]
+
+  # Força HTTPS (apenas se já estiver com SSL ativo no cPanel)
+  RewriteCond %{HTTPS} off
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # Não reescrever arquivos/pastas reais
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Tudo o resto cai no index.html (SPA)
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# 404 também cai no SPA
+ErrorDocument 404 /index.html
 
 # ----- Compressão -----
 <IfModule mod_deflate.c>
   AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json application/xml image/svg+xml
 </IfModule>
 
-# ----- Cache de assets -----
+# ----- Cache -----
 <IfModule mod_expires.c>
   ExpiresActive On
   ExpiresByType text/html "access plus 0 seconds"
@@ -29,31 +57,10 @@
   Header set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
 
-# ----- HTTPS + www→root (opcional) -----
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-
-  # Força HTTPS
-  RewriteCond %{HTTPS} off
-  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
-  # www → root
-  RewriteCond %{HTTP_HOST} ^www\.pipocamax\.cc$ [NC]
-  RewriteRule ^ https://pipocamax.cc%{REQUEST_URI} [L,R=301]
-
-  # SPA fallback — React Router
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule . /index.html [L]
-</IfModule>
-
-# ----- MIME extras -----
+# ----- MIME -----
 <IfModule mod_mime.c>
   AddType application/javascript .js
   AddType application/manifest+json .webmanifest
   AddType image/webp .webp
   AddType font/woff2 .woff2
 </IfModule>
-
-# ----- 404 cai no SPA -----
-ErrorDocument 404 /index.html
