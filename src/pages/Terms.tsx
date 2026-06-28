@@ -7,10 +7,10 @@ const Terms = () => (
     <Helmet>
       <title>Termos de Uso — PipocaMax</title>
       <meta name="description" content="Termos de uso do PipocaMax: leia as condições e responsabilidades para utilização do site, conteúdo e serviços oferecidos." />
-      <link rel="canonical" href="https://pipocamax.sbs/termos" />
+      <link rel="canonical" href="https://pipocamax.cc/termos" />
       <meta property="og:title" content="Termos de Uso — PipocaMax" />
       <meta property="og:description" content="Condições e responsabilidades para utilização do PipocaMax." />
-      <meta property="og:url" content="https://pipocamax.sbs/termos" />
+      <meta property="og:url" content="https://pipocamax.cc/termos" />
       <meta property="og:type" content="website" />
       <meta name="twitter:title" content="Termos de Uso — PipocaMax" />
       <meta name="twitter:description" content="Condições para utilização do PipocaMax." />

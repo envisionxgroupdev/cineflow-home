@@ -102,7 +102,7 @@ const MovieDetails = () => {
   const hasPlayer2 = !!(movie.player_url_2 || tmdbId);
   const hasPlayer3 = !!tmdbId;
 
-  const canonicalUrl = `https://pipocamax.sbs/filme/assistir-${slugify(movie.title)}-online-gratis`;
+  const canonicalUrl = `https://pipocamax.cc/filme/assistir-${slugify(movie.title)}-online-gratis`;
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Movie',
@@ -120,8 +120,8 @@ const MovieDetails = () => {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Início', item: 'https://pipocamax.sbs/' },
-      { '@type': 'ListItem', position: 2, name: 'Filmes', item: 'https://pipocamax.sbs/filmes' },
+      { '@type': 'ListItem', position: 1, name: 'Início', item: 'https://pipocamax.cc/' },
+      { '@type': 'ListItem', position: 2, name: 'Filmes', item: 'https://pipocamax.cc/filmes' },
       { '@type': 'ListItem', position: 3, name: movie.title, item: canonicalUrl },
     ],
   };

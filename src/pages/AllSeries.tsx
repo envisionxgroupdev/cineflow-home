@@ -56,10 +56,10 @@ const AllSeries = () => {
       <Helmet>
         <title>Séries Online Grátis em HD — PipocaMax</title>
         <meta name="description" content="Assista séries online grátis em HD. Catálogo completo com lançamentos, drama, comédia, ficção e muito mais." />
-        <link rel="canonical" href="https://pipocamax.sbs/series" />
+        <link rel="canonical" href="https://pipocamax.cc/series" />
         <meta property="og:title" content="Séries Online Grátis em HD — PipocaMax" />
         <meta property="og:description" content="Catálogo completo de séries online grátis em HD dublado e legendado." />
-        <meta property="og:url" content="https://pipocamax.sbs/series" />
+        <meta property="og:url" content="https://pipocamax.cc/series" />
         <meta property="og:type" content="website" />
         <meta name="twitter:title" content="Séries Online Grátis em HD — PipocaMax" />
         <meta name="twitter:description" content="Catálogo completo de séries online grátis em HD." />

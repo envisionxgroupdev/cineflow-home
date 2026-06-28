@@ -84,7 +84,7 @@ const Login = () => {
         <title>{isSignup ? 'Cadastro' : 'Login'} — PipocaMax</title>
         <meta name="description" content="Acesse ou crie sua conta no PipocaMax." />
         <meta name="robots" content="noindex, nofollow" />
-        <link rel="canonical" href="https://pipocamax.sbs/login" />
+        <link rel="canonical" href="https://pipocamax.cc/login" />
       </Helmet>
       <div className="w-full max-w-sm">
         <div className="text-center mb-6">
