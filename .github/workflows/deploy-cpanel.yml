@@ -30,6 +30,8 @@ jobs:
       - name: Ensure .htaccess is in dist
         run: |
           if [ -f public/.htaccess ]; then cp public/.htaccess dist/.htaccess; fi
+          if [ -f .cpanel.yml ]; then cp .cpanel.yml dist/.cpanel.yml; fi
+          touch dist/.nojekyll
 
       - name: Publish dist to "deploy" branch
         env:
