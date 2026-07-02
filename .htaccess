@@ -1,0 +1,66 @@
+# PipocaMax — SPA fallback + performance (cPanel/Apache)
+Options -MultiViews +FollowSymLinks
+DirectoryIndex index.html
+
+# ----- SPA fallback (React Router) -----
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # www -> root (pipocamax.cc)
+  RewriteCond %{HTTP_HOST} ^www\.pipocamax\.cc$ [NC]
+  RewriteRule ^(.*)$ https://pipocamax.cc/$1 [L,R=301]
+
+  # Força HTTPS (apenas se já estiver com SSL ativo no cPanel)
+  RewriteCond %{HTTPS} off
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # Não reescrever arquivos/pastas reais
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Tudo o resto cai no index.html (SPA)
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# 404 também cai no SPA
+ErrorDocument 404 /index.html
+
+# ----- Compressão -----
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json application/xml image/svg+xml
+</IfModule>
+
+# ----- Cache -----
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(js|css|woff2|png|jpe?g|webp|svg|ico)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+  </FilesMatch>
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# ----- MIME -----
+<IfModule mod_mime.c>
+  AddType application/javascript .js
+  AddType application/manifest+json .webmanifest
+  AddType image/webp .webp
+  AddType font/woff2 .woff2
+</IfModule>
