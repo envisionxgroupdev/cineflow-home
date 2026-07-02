@@ -3,13 +3,4 @@ deployment:
   tasks:
     - export DEPLOYPATH=$HOME/public_html/
     - /bin/mkdir -p $DEPLOYPATH
-    - /bin/rm -rf $DEPLOYPATH/assets
-    - /bin/cp -R ./assets $DEPLOYPATH
-    - /bin/cp ./index.html $DEPLOYPATH
-    - /bin/cp ./.htaccess $DEPLOYPATH
-    - /bin/cp ./sw.js $DEPLOYPATH 2>/dev/null || true
-    - /bin/cp ./robots.txt $DEPLOYPATH 2>/dev/null || true
-    - /bin/cp ./sitemap.xml $DEPLOYPATH 2>/dev/null || true
-    - /bin/cp ./llms.txt $DEPLOYPATH 2>/dev/null || true
-    - /bin/cp ./placeholder.svg $DEPLOYPATH 2>/dev/null || true
-    - /bin/cp ./logo-pipocamax.png $DEPLOYPATH 2>/dev/null || true
+    - /bin/cp -R ./. $DEPLOYPATH
